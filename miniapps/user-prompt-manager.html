@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2b2b2b;
+            color: #d4d4d4;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        #app-container {
+            flex-grow: 1;
+            padding: 15px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        h2 {
+            color: #1d7efd;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+        }
+        .controls button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+        /* New style for the composition textarea within the manager */
+        #prompt-composition-textarea-in-manager {
+            width: calc(100% - 20px); /* Full width minus padding */
+            min-height: 120px; /* Default height */
+            height: auto;
+            resize: vertical; /* Allow vertical resizing by user */
+            padding: 10px;
+            margin: 0 auto 15px auto; /* Centered, spacing below */
+            border-radius: 8px;
+            border: 1px solid #555;
+            background-color: #3b4148; /* Darker background for composition */
+            color: #d4d4d4;
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box; /* Include padding and border in width/height */
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+        }
+        .table-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #333;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+            word-wrap: break-word; /* Ensure long text wraps */
+        }
+        th {
+            background-color: #444;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        tr:hover {
+            background-color: #4a4a4a;
+        }
+        tr.selected {
+            background-color: #0056b3; /* Highlight color for selected rows */
+        }
+        /* Style for standard checkboxes */
+        td.standard-checkbox-cell input[type="checkbox"] {
+            pointer-events: none; /* Make checkbox non-interactive */
+        }
+        /* General input and select styles for potential future CRUD */
+        input[type="text"], textarea, select {
+            background-color: #444;
+            color: #d4d4d4;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .editable-cell {
+            background-color: #444;
+            border: 1px solid #666;
+            border-radius: 3px;
+        }
+        /* New style for editable cells */
+        td[contenteditable="true"] {
+            background-color: #555;
+            border: 1px dashed #1d7efd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <h2>Prompt Manager</h2>
+
+        <div class="controls">
+            <button id="import-csv-btn">CSV Import</button>
+            <button id="export-csv-btn">CSV Export</button>
+            <button id="add-row-btn">Neu</button>
+            <button id="edit-row-btn">Bearbeiten</button>
+            <button id="delete-row-btn">Löschen</button>
+            <button id="markdown-generator-btn">Markdown Generator</button>
+        </div>
+
+        <!-- NEW: Prompt composition textarea -->
+        <textarea id="prompt-composition-textarea-in-manager" placeholder="Stelle deinen KI-Prompt hier zusammen..."></textarea>
+
+        <div class="table-container">
+            <table id="prompt-table">
+                <thead>
+                    <tr>
+                        <th>Auswahl</th>
+                        <th>Standard</th>
+                        <th>Prompt Name</th>
+                        <th>Prompt Gruppe</th>
+                        <th>Kurzbeschreibung</th>
+                        <!-- Hidden column for Befehl-Text-Block in header -->
+                        <th style="display:none;">Befehl-Text-Block</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Prompt-Daten werden hier dynamisch eingefügt -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer-controls">
+            <button id="done-btn">Fertig</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const PROMPT_CSV_URL = './prompt-presets.csv';
+            // Determine localStorageKey based on parent window's URL if available, else fallback
+            const localStorageKey = (window.parent && window.parent.location.search.includes('lsuser')) 
+                                ? `${new URLSearchParams(window.parent.location.search).get('lsuser')}-promptPresets`
+                                : 'mg3-promptPresets'; // Default for testing/fallback
+
+            const promptTableBody = document.querySelector('#prompt-table tbody');
+            const promptCompositionTextarea = document.getElementById('prompt-composition-textarea-in-manager');
+            
+            let currentPrompts = []; // Array to store all prompts data
+            let selectedPromptIds = new Set(); // Stores PromID of selected prompts for composition
+
+            // --- Utility Functions ---
+
+            function correctUmlauts(text) {
+                if (typeof text !== 'string') return text;
+                return text
+                    .replace(/ä/g, 'ä') // ensure literal "ä" isn't double-replaced
+                    .replace(/ö/g, 'ö')
+                    .replace(/ü/g, 'ü')
+                    .replace(/ß/g, 'ß')
+                    .replace(/Ä/g, 'Ä')
+                    .replace(/Ö/g, 'Ö')
+                    .replace(/Ü/g, 'Ü')
+                    .replace(/�/g, 'ä')
+                    .replace(/�/g, 'ö')
+                    .replace(/�/g, 'ü')
+                    .replace(/�/g, 'Ä')
+                    .replace(/�/g, 'Ö')
+                    .replace(/�/g, 'Ü')
+                    .replace(/�/g, 'ß');
+            }
+
+            function parseCSVData(csvText) {
+                const lines = csvText.trim().split('\n');
+                if (lines.length === 0) return [];
+
+                // Correct umlauts in header line before splitting
+                const headersRaw = correctUmlauts(lines[0]).split(';');
+                const headersCleaned = headersRaw.map(h => h.trim());
+                if (headersCleaned.length === 0 || headersCleaned[0] === '') { // Check if headers are valid
+                    console.error('CSV parsing: No valid headers found after cleaning. Raw headers:', lines[0]);
+                    return [];
+                }
+
+                let delimiter = ';';
+                let parsedRows = [];
+
+                const parseLine = (line, del) => {
+                    const values = line.split(del);
+                    return headersCleaned.reduce((obj, header, index) => {
+                        obj[header] = correctUmlauts(values[index] || '').trim();
+                        return obj;
+                    }, {});
+                };
+
+                // Try semicolon first
+                if (lines.length > 1) {
+                    const firstDataRowValuesSemi = lines[1].split(';');
+                    // Heuristic: if first row has fewer columns than headers or only one column but contains comma, assume bad semicolon.
+                    if (firstDataRowValuesSemi.length < headersCleaned.length || (firstDataRowValuesSemi.length === 1 && lines[1].includes(','))) {
+                        delimiter = ',';
+                        parsedRows = lines.slice(1).map(line => parseLine(line, ','));
+                        console.warn('CSV parsing: Semicolon delimiter resulted in insufficient columns or ambiguity, retrying with comma.');
+                    } else {
+                        parsedRows = lines.slice(1).map(line => parseLine(line, ';'));
+                        console.log('CSV parsing: Successfully parsed with semicolon delimiter.');
+                    }
+                }
+                
+                return parsedRows.filter(row => Object.values(row).some(value => value !== ''));
+            }
+
+            function renderTable(data) {
+                promptTableBody.innerHTML = ''; // Clear existing rows
+                currentPrompts = data; // Store the current data globally for CRUD operations
+
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.promid = row['PromID'];
+                    
+                    // Selection Checkbox
+                    const selectTd = document.createElement('td');
+                    const selectCheckbox = document.createElement('input');
+                    selectCheckbox.type = 'checkbox';
+                    selectCheckbox.classList.add('prompt-select-checkbox');
+                    if (selectedPromptIds.has(row['PromID'])) {
+                        selectCheckbox.checked = true;
+                        tr.classList.add('selected');
+                    }
+                    selectTd.appendChild(selectCheckbox);
+                    tr.appendChild(selectTd);
+
+                    // Standard Checkbox (non-interactive)
+                    const standardTd = document.createElement('td');
+                    standardTd.classList.add('standard-checkbox-cell');
+                    const standardCheckbox = document.createElement('input');
+                    standardCheckbox.type = 'checkbox';
+                    standardCheckbox.checked = row['standard'] === 'true';
+                    standardTd.appendChild(standardCheckbox);
+                    tr.appendChild(standardTd);
+                    
+                    // Display Prompt-Befehl-Name, Prompt-Gruppe, Kurzbeschreibung
+                    // These cells will be editable in Task 3.3
+                    const nameTd = document.createElement('td');
+                    nameTd.textContent = row['Prompt-Befehl-Name'];
+                    nameTd.dataset.field = 'Prompt-Befehl-Name';
+                    tr.appendChild(nameTd);
+
+                    const groupTd = document.createElement('td');
+                    groupTd.textContent = row['Prompt-Gruppe'];
+                    groupTd.dataset.field = 'Prompt-Gruppe';
+                    tr.appendChild(groupTd);
+
+                    const descTd = document.createElement('td');
+                    descTd.textContent = row['Kurzbeschreibung'];
+                    descTd.dataset.field = 'Kurzbeschreibung';
+                    tr.appendChild(descTd);
+
+                    // Hidden cell for Befehl-Text-Block
+                    const textBlockTd = document.createElement('td');
+                    textBlockTd.textContent = row['Befehl-Text-Block'];
+                    textBlockTd.dataset.field = 'Befehl-Text-Block';
+                    textBlockTd.style.display = 'none'; // Keep it hidden
+                    tr.appendChild(textBlockTd);
+
+                    promptTableBody.appendChild(tr);
+                });
+                updateCompositionTextarea(); // Update textarea after rendering table
+            }
+
+            async function loadAndParseCSV() {
+                try {
+                    const response = await fetch(PROMPT_CSV_URL);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const csvText = await response.text();
+                    const parsedData = parseCSVData(csvText);
+                    loadPromptsFromLocalStorage(parsedData); // Load/merge with local storage
+                } catch (error) {
+                    console.error('Error loading or parsing CSV:', error);
+                    promptTableBody.innerHTML = `<tr><td colspan="6">Fehler beim Laden der Prompts: ${error.message}</td></tr>`; // Correct colspan
+                }
+            }
+
+            function savePromptsToLocalStorage() {
+                localStorage.setItem(localStorageKey, JSON.stringify(currentPrompts));
+                console.log('Prompts saved to local storage:', localStorageKey);
+            }
+
+            function loadPromptsFromLocalStorage(initialCSVData) {
+                const storedPrompts = localStorage.getItem(localStorageKey);
+                if (storedPrompts) {
+                    try {
+                        const parsedStoredPrompts = JSON.parse(storedPrompts);
+                        // Merge logic: prefer stored prompts if PromID matches, otherwise add new ones
+                        const mergedPrompts = new Map(initialCSVData.map(p => [p['PromID'], p]));
+                        parsedStoredPrompts.forEach(p => mergedPrompts.set(p['PromID'], p));
+                        currentPrompts = Array.from(mergedPrompts.values());
+                        console.log('Prompts loaded/merged from local storage.');
+                    } catch (e) {
+                        console.error('Error parsing stored prompts from local storage, using CSV data.', e);
+                        currentPrompts = initialCSVData;
+                    }
+                } else {
+                    currentPrompts = initialCSVData;
+                    console.log('No prompts in local storage, using CSV data.');
+                }
+                renderTable(currentPrompts);
+            }
+            
+            // --- Task 3.2: Dynamic Textarea Interaction ---
+            const PROMPT_DELIMITER_START = '<!-- PROMPT_BLOCK_ID_';
+            const PROMPT_DELIMITER_END = ' -->';
+
+            function updateCompositionTextarea() {
+                let currentText = promptCompositionTextarea.value;
+                let composedBlocks = [];
+
+                // 1. Collect selected prompts in their original table order
+                const selectedPromptsInOrder = Array.from(promptTableBody.querySelectorAll('tr.selected'))
+                                                    .map(row => currentPrompts.find(p => p['PromID'] === row.dataset.promid));
+                
+                selectedPromptsInOrder.forEach(prompt => {
+                    if (prompt) { // Ensure prompt exists
+                        const promptText = prompt['Befehl-Text-Block'];
+                        const delimiterId = prompt['PromID'];
+                        composedBlocks.push(`${PROMPT_DELIMITER_START}${delimiterId}${PROMPT_DELIMITER_END}\n${promptText}\n${PROMPT_DELIMITER_START}/${delimiterId}${PROMPT_DELIMITER_END}\n`);
+                    }
+                });
+
+                // 2. Extract any manual text that is not part of a delimited block
+                let manualText = '';
+                const lines = currentText.split('\n');
+                lines.forEach(line => {
+                    if (!line.startsWith(PROMPT_DELIMITER_START) && !line.startsWith(`${PROMPT_DELIMITER_START}/`) && line.trim() !== '') {
+                        manualText += line + '\n';
+                    }
+                });
+                manualText = manualText.trim(); // Clean up potential extra newlines
+
+                // 3. Assemble new textarea content
+                let newContent = composedBlocks.join('');
+                if (manualText) {
+                    // Add a clear indicator for manual text if it exists
+                    newContent += `\n<!-- MANUELLER TEXT -->\n${manualText}\n`;
+                }
+                
+                promptCompositionTextarea.value = newContent.trim(); // Set the new content
+            }
+
+            promptTableBody.addEventListener('change', (event) => {
+                if (event.target.classList.contains('prompt-select-checkbox')) {
+                    const row = event.target.closest('tr');
+                    const promId = row.dataset.promid;
+                    
+                    if (event.target.checked) {
+                        row.classList.add('selected');
+                        selectedPromptIds.add(promId);
+                    } else {
+                        row.classList.remove('selected');
+                        selectedPromptIds.delete(promId);
+                    }
+                    updateCompositionTextarea(); // Update textarea content
+                }
+            });
+
+            // --- Task 3.3: CRUD Operations (Initial placeholders, full implementation later) ---
+            document.getElementById('add-row-btn').addEventListener('click', () => {
+                const newPromID = String(Math.max(...currentPrompts.map(p => parseInt(p['PromID'] || 0)), 0) + 1);
+                const newPrompt = {
+                    'PromID': newPromID,
+                    'Prompt-Befehl-Name': 'Neuer Prompt',
+                    'Prompt-Gruppe': 'Standard',
+                    'standard': 'false',
+                    'Kurzbeschreibung': 'Eine neue Kurzbeschreibung.',
+                    'Befehl-Text-Block': 'Hier kommt der neue Prompt-Text hinein.'
+                };
+                currentPrompts.push(newPrompt);
+                savePromptsToLocalStorage();
+                renderTable(currentPrompts);
+            });
+
+            let isEditing = false; // State variable for edit mode
+
+            document.getElementById('edit-row-btn').addEventListener('click', () => {
+                const selectedRows = promptTableBody.querySelectorAll('tr.selected');
+                if (selectedRows.length === 0) {
+                    alert('Bitte wählen Sie mindestens eine Zeile zum Bearbeiten aus.');
+                    return;
+                }
+
+                if (!isEditing) {
+                    // Enter Edit Mode
+                    selectedRows.forEach(row => {
+                        const promId = row.dataset.promid;
+                        const prompt = currentPrompts.find(p => p['PromID'] === promId);
+                        if (prompt) {
+                            // Make name, group, description editable
+                            row.querySelector('td[data-field="Prompt-Befehl-Name"]').contentEditable = true;
+                            row.querySelector('td[data-field="Prompt-Gruppe"]').contentEditable = true;
+                            row.querySelector('td[data-field="Kurzbeschreibung"]').contentEditable = true;
+                            row.classList.add('editing'); // Add class for visual feedback
+                            
+                            // For "Befehl-Text-Block", since it's hidden and potentially long,
+                            // we'll make the composition textarea itself editable for the *first* selected item's text block.
+                            // This simplifies the UI by not needing a separate modal for each.
+                            if (selectedRows.length === 1 && promId === selectedRows[0].dataset.promid) {
+                                promptCompositionTextarea.value = prompt['Befehl-Text-Block'];
+                                promptCompositionTextarea.dataset.editingPromID = promId; // Store which prompt is being edited
+                                promptCompositionTextarea.classList.add('editing-textblock'); // Visual cue
+                                alert('Bearbeiten Sie die Zellen direkt in der Tabelle und den Textblock unten. Klicken Sie erneut auf "Bearbeiten" (jetzt "Speichern") zum Speichern der Änderungen.');
+                            }
+                        }
+                    });
+                    document.getElementById('edit-row-btn').textContent = 'Speichern';
+                    isEditing = true;
+                } else {
+                    // Exit Edit Mode and Save
+                    const editingRows = promptTableBody.querySelectorAll('.editing');
+                    editingRows.forEach(row => {
+                        const promId = row.dataset.promid;
+                        const promptIndex = currentPrompts.findIndex(p => p['PromID'] === promId);
+                        if (promptIndex > -1) {
+                            currentPrompts[promptIndex]['Prompt-Befehl-Name'] = row.querySelector('td[data-field="Prompt-Befehl-Name"]').textContent.trim();
+                            currentPrompts[promptIndex]['Prompt-Gruppe'] = row.querySelector('td[data-field="Prompt-Gruppe"]').textContent.trim();
+                            currentPrompts[promptIndex]['Kurzbeschreibung'] = row.querySelector('td[data-field="Kurzbeschreibung"]').textContent.trim();
+                            
+                            // If this was the prompt whose text block was edited
+                            if (promptCompositionTextarea.dataset.editingPromID === promId) {
+                                currentPrompts[promptIndex]['Befehl-Text-Block'] = promptCompositionTextarea.value;
+                                promptCompositionTextarea.value = ''; // Clear after saving
+                                delete promptCompositionTextarea.dataset.editingPromID;
+                                promptCompositionTextarea.classList.remove('editing-textblock');
+                            }
+
+                            // Make cells non-editable again
+                            row.querySelector('td[data-field="Prompt-Befehl-Name"]').contentEditable = false;
+                            row.querySelector('td[data-field="Prompt-Gruppe"]').contentEditable = false;
+                            row.querySelector('td[data-field="Kurzbeschreibung"]').contentEditable = false;
+                            row.classList.remove('editing');
+                            row.classList.remove('selected'); // Also deselect after editing
+                            row.querySelector('.prompt-select-checkbox').checked = false; // Deselect checkbox
+                        }
+                    });
+                    selectedPromptIds.clear(); // Clear all selections after saving
+                    savePromptsToLocalStorage();
+                    renderTable(currentPrompts); // Re-render to update UI consistency
+                    document.getElementById('edit-row-btn').textContent = 'Bearbeiten';
+                    isEditing = false;
+                }
+            });
+
+            document.getElementById('delete-row-btn').addEventListener('click', () => {
+                const selectedRows = promptTableBody.querySelectorAll('tr.selected');
+                if (selectedRows.length === 0) {
+                    alert('Bitte wählen Sie mindestens eine Zeile zum Löschen aus.');
+                    return;
+                }
+                if (!confirm(`Sollen ${selectedRows.length} ausgewählte Prompts wirklich gelöscht werden?`)) {
+                    return;
+                }
+                const promIdsToDelete = Array.from(selectedRows).map(row => row.dataset.promid);
+                currentPrompts = currentPrompts.filter(p => !promIdsToDelete.includes(p['PromID']));
+                selectedPromptIds = new Set(Array.from(selectedPromptIds).filter(id => !promIdsToDelete.includes(id))); // Also update selected set
+                savePromptsToLocalStorage();
+                renderTable(currentPrompts);
+            });
+
+            // --- Task 3.4: CSV Import/Export Funktionalität ---
+            document.getElementById('import-csv-btn').addEventListener('click', () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.csv';
+                input.onchange = (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const newCSVData = parseCSVData(e.target.result);
+                            if (newCSVData.length === 0) {
+                                alert('Keine gültigen Prompts in der importierten Datei gefunden.');
+                                return;
+                            }
+                            const overwrite = confirm('Möchten Sie die bestehenden Prompts überschreiben (OK) oder mit den neuen zusammenführen (Abbrechen)?');
+                            if (overwrite) {
+                                currentPrompts = newCSVData; // Overwrite
+                                alert('Prompts erfolgreich importiert (Überschrieben)!');
+                            } else {
+                                // Merge: Add new unique prompts, update existing ones by PromID
+                                const mergedPromptsMap = new Map(currentPrompts.map(p => [p['PromID'], p]));
+                                newCSVData.forEach(p => mergedPromptsMap.set(p['PromID'], p));
+                                currentPrompts = Array.from(mergedPromptsMap.values());
+                                alert('Prompts erfolgreich importiert (Zusammengeführt)!');
+                            }
+                            savePromptsToLocalStorage();
+                            renderTable(currentPrompts);
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                input.click();
+            });
+
+            document.getElementById('export-csv-btn').addEventListener('click', () => {
+                if (currentPrompts.length === 0) {
+                    alert('Keine Prompts zum Exportieren vorhanden.');
+                    return;
+                }
+                // Get all possible headers from all prompts to ensure no data loss
+                const allHeaders = new Set();
+                currentPrompts.forEach(p => Object.keys(p).forEach(key => allHeaders.add(key)));
+                const headers = Array.from(allHeaders); // Convert set to array for consistent order
+
+                let csvContent = headers.map(h => {
+                    let headerValue = h.replace(/"/g, '""');
+                    if (headerValue.includes(';') || headerValue.includes(',') || headerValue.includes('\n') || headerValue.includes('"')) {
+                        headerValue = `"${headerValue}"`;
+                    }
+                    return headerValue;
+                }).join(';') + '\n';
+
+                currentPrompts.forEach(row => {
+                    const values = headers.map(header => {
+                        let value = row[header] || '';
+                        // Escape quotes and quote entire field if it contains delimiter, newline, or quotes
+                        value = value.replace(/"/g, '""'); // Escape double quotes
+                        if (value.includes(';') || value.includes(',') || value.includes('\n') || value.includes('"')) {
+                            value = `"${value}"`; // Quote if it contains delimiter, newline, or quotes
+                        }
+                        return value;
+                    });
+                    csvContent += values.join(';') + '\n';
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'prompt-presets_export.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                alert('Prompts als CSV exportiert!');
+            });
+
+            // --- Task 4.2: External Link to Markdown Generator ---
+            document.getElementById('markdown-generator-btn').addEventListener('click', () => {
+                window.open('../markdown-aus-files-generator.html', '_blank');
+            });
+
+
+            // --- Task 4.1: "Fertig" Button & Prompt-Übergabe ---
+            document.getElementById('done-btn').addEventListener('click', () => {
+                const finalPromptText = promptCompositionTextarea.value;
+                
+                if (window.parent) {
+                    // Send the final prompt text back to the parent frame (shrimp-ai.html)
+                    window.parent.postMessage({ 
+                        type: 'set-final-prompt-input', 
+                        finalPromptText: finalPromptText,
+                        source: 'user-prompt-manager.html',
+                        submitOnDone: true // Indicates that the prompt should be submitted after setting
+                    }, '*');
+                    
+                    // The shrimp-ai.html code will handle closing its own modal
+                }
+            });
+
+            // Initial load of data
+            loadAndParseCSV();
+        });
+    </script>
+</body>
+</html>

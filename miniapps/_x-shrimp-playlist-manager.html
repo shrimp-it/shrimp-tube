@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playlist Manager & Viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Allgemeine Styles */
+:root {
+--primary-color: #EF4444; /* Rot, passend zum Download-Button */
+--secondary-color: #10B981; /* Grün */
+--text-color-dark: #2D3436;
+--text-color-light: #4A5568;
+--bg-light: #F8F8F8;
+--bg-dark: #E2E8F0;
+--border-color: #CBD5E0;
+--card-bg: #FFFFFF;
+
+/* Toast Colors */
+--toast-info-bg: #E0F2F7; /* Light Blue */
+--toast-info-text: #0288D1;
+--toast-success-bg: #E8F5E9; /* Light Green */
+--toast-success-text: #2E7D32;
+--toast-warning-bg: #FFF3E0; /* Light Orange */
+--toast-warning-text: #F57C00;
+--toast-error-bg: #FFEBEE; /* Light Red */
+--toast-error-text: #D32F2F;
+--toast-message-bg: #E3F2FD; /* General Light Blue */
+--toast-message-text: #2196F3;
+}
+
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+}
+
+body {
+font-family: 'Inter', sans-serif;
+background-color: var(--bg-light);
+color: var(--text-color-dark);
+line-height: 1.4;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 10px;
+}
+
+.container {
+max-width: 1200px;
+width: 100%;
+margin: 0 auto;
+padding: 0 10px;
+}
+
+h1, h2 {
+text-align: center;
+margin-bottom: 15px;
+color: var(--primary-color);
+}
+
+h1 {
+font-size: 2.5em;
+margin-top: 10px;
+margin-bottom: 20px;
+font-weight: 700;
+}
+
+h2.playlist-title-header {
+font-size: 2em;
+margin-top: 40px;
+margin-bottom: 25px;
+color: var(--text-color-dark);
+font-weight: 600;
+}
+
+/* Original player-control.html styles */
+.info-text {
+color: #555;
+margin-bottom: 10px;
+line-height: 1.6;
+font-size: 0.95em;
+background-color: #f8f9fa;
+border-left: 4px solid #007bff;
+padding: 15px;
+text-align: left;
+border-radius: 6px;
+}
+
+.warning {
+color: #dc3545;
+font-weight: bold;
+}
+
+.input-section {
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+justify-content: center;
+gap: 15px;
+margin-bottom: 25px;
+padding: 15px;
+background-color: #f0f4f7;
+border-radius: 8px;
+box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.input-section label {
+font-weight: bold;
+color: #4a69bd;
+min-width: 150px;
+text-align: right;
+}
+
+input[type="file"], input[type="text"] {
+flex-grow: 1;
+padding: 12px 15px;
+border: 1px solid #ced4da;
+border-radius: 6px;
+font-size: 1em;
+min-width: 250px;
+}
+
+input[type="file"] {
+cursor: pointer;
+}
+
+button {
+background-color: #007bff;
+color: white;
+padding: 12px 25px;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+font-size: 1em;
+transition: background-color 0.3s ease, transform 0.2s ease;
+flex-shrink: 0;
+}
+
+button:hover {
+background-color: #0056b3;
+transform: translateY(-1px);
+}
+
+button:active {
+transform: translateY(0);
+}
+
+.danger-btn {
+background-color: #dc3545;
+margin-top: 20px;
+}
+
+.danger-btn:hover {
+background-color: #c82333;
+}
+
+hr {
+border: none;
+border-top: 1px solid #eee;
+margin: 40px 0;
+}
+
+#playlistTableContainer {
+margin-top: 20px;
+text-align: left;
+}
+
+#noDataMessage {
+color: #6c757d;
+font-style: italic;
+font-size: 1.1em;
+text-align: center;
+padding: 20px;
+border: 1px dashed #ced4da;
+border-radius: 8px;
+background-color: #fdfdfd;
+}
+
+.playlist-table {
+width: 100%;
+border-collapse: separate;
+border-spacing: 0;
+margin-top: 20px;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+border-radius: 10px;
+overflow: hidden;
+}
+
+.playlist-table th, .playlist-table td {
+padding: 15px 20px;
+text-align: left;
+border-bottom: 1px solid #e9ecef;
+}
+
+.playlist-table th {
+background-color: #4a69bd;
+color: white;
+font-weight: 600;
+text-transform: uppercase;
+font-size: 0.9em;
+}
+
+.playlist-table th:first-child {
+border-top-left-radius: 10px;
+}
+.playlist-table th:last-child {
+border-top-right-radius: 10px;
+}
+
+.playlist-table tbody tr {
+background-color: #fefefe;
+transition: background-color 0.2s ease, transform 0.1s ease;
+cursor: pointer;
+}
+
+/* Highlight active playlist row */
+.playlist-table tbody tr.active-playlist-row {
+background-color: #e6f7ff; /* Lighter blue */
+transform: none; /* No transform for active */
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+border-bottom: 1px solid #a8d9ff; /* Blueish border */
+}
+
+.playlist-table tbody tr:hover {
+background-color: #e6f7ff;
+transform: translateX(3px);
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.playlist-table tbody tr:last-child td:first-child {
+border-bottom-left-radius: 10px;
+}
+.playlist-table tbody tr:last-child td:last-child {
+border-bottom-right-radius: 10px;
+}
+
+.playlist-table td {
+color: #495057;
+}
+
+/* --- Start: Styles for inserted video tiles (from _x-playlist-to-ids.html) --- */
+.playlist-details-row td {
+background-color: #f0f4f7; /* Light background for the details section */
+padding: 10px;
+border-bottom: none; /* No border-bottom for the details row itself */
+border-radius: 0 0 10px 10px; /* Rounded corners for the bottom */
+}
+
+/* Adjust if the details row is the last one */
+.playlist-table tbody tr:last-of-type.playlist-details-row td:first-child {
+border-bottom-left-radius: 10px;
+}
+.playlist-table tbody tr:last-of-type.playlist-details-row td:last-child {
+border-bottom-right-radius: 10px;
+}
+
+.playlist-video-list {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+gap: 25px;
+margin-top: 20px;
+margin-bottom: 20px; /* Add margin below the list */
+}
+
+.video-item {
+background-color: var(--card-bg);
+border-radius: 10px;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+overflow: hidden;
+display: flex;
+flex-direction: column;
+transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.video-item:hover {
+transform: translateY(-5px);
+box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.video-item-thumbnail {
+width: 100%;
+height: 180px;
+object-fit: cover;
+display: block;
+}
+
+.video-item-content {
+padding: 15px;
+flex-grow: 1;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+}
+
+.video-item-title { /* Kept for reference but video-title-button handles it */
+font-size: 1.1em;
+font-weight: 600;
+color: var(--text-color-dark);
+margin-bottom: 10px;
+line-height: 1.4;
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+text-overflow: ellipsis;
+min-height: 3em;
+}
+.video-title-button { /* Style for the video title button */
+background: none;
+color: var(--text-color-dark);
+border: none;
+padding: 0;
+border-radius: 0;
+font-size: 1.1em;
+font-weight: 600;
+cursor: pointer;
+text-align: left;
+transition: color 0.2s ease;
+width: 100%;
+margin-bottom: 10px;
+line-height: 1.4;
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+text-overflow: ellipsis;
+min-height: 3em;
+}
+.video-title-button:hover {
+color: var(--primary-color);
+text-decoration: underline;
+}
+
+/* NEW: Container for action buttons */
+.video-item-actions {
+display: flex;
+flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+gap: 10px; /* Spacing between buttons */
+margin-top: 15px; /* Add some space above the buttons */
+justify-content: center; /* Center buttons horizontally */
+}
+
+.video-item-link { /* Generic style for video action buttons */
+display: block;
+flex: 1 1 auto; /* Allow buttons to grow and shrink, but prefer content size */
+min-width: 120px; /* Minimum width for buttons */
+max-width: 100%; /* Ensure it doesn't exceed parent width */
+text-align: center;
+margin-top: 0;
+padding: 8px 15px;
+background-color: var(--primary-color);
+color: white;
+text-decoration: none;
+border: none;
+border-radius: 5px;
+font-size: 0.9em;
+font-weight: 500;
+transition: background-color 0.2s ease;
+cursor: pointer;
+}
+
+.video-item-link:hover {
+background-color: #DC2626;
+}
+
+/* Specific button styling adjustments using new naming convention */
+.video-item-link.pl-manager-btn-1,
+.video-item-link.pl-manager-btn-2:not(.selected), /* Not selected state */
+.video-item-link.pl-manager-btn-3 {
+background: transparent;
+border: 2px solid #007bff;
+color: #007bff;
+}
+
+/* pl-manager-btn-4 (originally btn_hideVid) should be hidden by default */
+.video-item-link.pl-manager-btn-4 {
+display: none; /* Hide this button by default as requested */
+border-color: var(--primary-color); /* Still define colors for potential visibility */
+color: var(--primary-color);
+}
+
+.video-item-link.pl-manager-btn-1:hover,
+.video-item-link.pl-manager-btn-2:not(.selected):hover,
+.video-item-link.pl-manager-btn-3:hover {
+background-color: #e6f7ff; /* Light blue hover */
+color: #0056b3;
+border-color: #0056b3;
+}
+.video-item-link.pl-manager-btn-4:hover {
+background-color: #ffe6e6; /* Light red hover */
+color: #DC2626;
+border-color: #DC2626;
+}
+
+/* Style for "Add to Selection" button when selected (pl-manager-btn-2) */
+.video-item-link.pl-manager-btn-2.selected {
+background-color: var(--secondary-color); /* Green background */
+border-color: var(--secondary-color);
+color: white;
+}
+.video-item-link.pl-manager-btn-2.selected:hover {
+background-color: #0E9F6E; /* Darker green on hover */
+border-color: #0E9F6E;
+}
+
+.details-message {
+font-size: 0.95em;
+color: var(--text-color-light);
+text-align: center;
+margin-top: 20px;
+padding: 0 10px;
+}
+.details-message.error {
+color: var(--primary-color);
+font-weight: 500;
+}
+.details-message.loading {
+color: var(--secondary-color);
+font-weight: 500;
+}
+
+.show-more-button {
+background-color: #5cb85c; /* Green color */
+color: white;
+padding: 10px 20px;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+font-size: 1em;
+transition: background-color 0.3s ease;
+margin-top: 20px;
+display: block; /* Make it a block element */
+margin-left: auto;
+margin-right: auto;
+width: fit-content;
+}
+
+.show-more-button:hover {
+background-color: #4cae4c;
+}
+/* --- End: Styles for inserted video tiles --- */
+
+/* Styles for Selected Videos Manager */
+#selectedVideosManager {
+margin-top: 40px;
+padding: 20px;
+background-color: #fdfdfd;
+border: 1px solid var(--border-color);
+border-radius: 10px;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+text-align: left;
+}
+#selectedVideosManager h2 {
+margin-top: 0;
+color: #4a69bd;
+border-bottom: 1px solid var(--border-color);
+padding-bottom: 10px;
+margin-bottom: 20px;
+text-align: left;
+}
+#selectedVideosControls {
+display: flex;
+flex-wrap: wrap; /* Allow wrapping */
+gap: 15px; /* Spacing between buttons */
+justify-content: flex-start; /* Align buttons to the left */
+margin-bottom: 15px;
+margin-top: 15px; /* Add some space above */
+}
+#selectedVideosControls button {
+flex-grow: 0; /* Don't grow to fill space */
+width: auto; /* Fit content */
+min-width: unset; /* Override general button width */
+padding: 10px 20px; /* Adjust padding for control buttons */
+font-size: 0.9em;
+}
+#selectedVideosList {
+list-style-type: none;
+padding: 0;
+}
+#selectedVideosList li {
+margin-bottom: 5px;
+padding: 8px 12px;
+background-color: #f0f4f7;
+border-radius: 5px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.remove-selected-video-btn {
+background-color: #dc3545;
+color: white;
+border: none;
+border-radius: 4px;
+padding: 4px 8px;
+cursor: pointer;
+font-size: 0.8em;
+transition: background-color 0.2s ease;
+margin-left: 10px;
+}
+.remove-selected-video-btn:hover {
+background-color: #c82333;
+}
+
+/* NEW: Styles for URL Parameter Manager */
+#urlParamsManager {
+margin-top: 40px;
+padding: 20px;
+background-color: #fdfdfd;
+border: 1px solid var(--border-color);
+border-radius: 10px;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+text-align: left;
+}
+#urlParamsManager h2 {
+margin-top: 0;
+color: #4a69bd;
+border-bottom: 1px solid var(--border-color);
+padding-bottom: 10px;
+margin-bottom: 20px;
+text-align: left;
+}
+
+.url-params-table {
+width: 100%;
+border-collapse: separate;
+border-spacing: 0;
+margin-top: 15px;
+margin-bottom: 15px;
+border-radius: 10px;
+overflow: hidden;
+box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.url-params-table th, .url-params-table td {
+padding: 10px 15px;
+border-bottom: 1px solid #e9ecef;
+text-align: left;
+vertical-align: middle;
+}
+
+.url-params-table th {
+background-color: #f0f4f7;
+color: var(--text-color-dark);
+font-weight: 600;
+font-size: 0.9em;
+}
+
+.url-params-table tr:last-child td {
+border-bottom: none;
+}
+
+.url-params-table td:first-child {
+width: 60px; /* For toggle button */
+}
+
+.url-params-table input[type="text"] {
+width: 100%;
+padding: 8px 10px;
+border: 1px solid #ced4da;
+border-radius: 4px;
+font-size: 0.9em;
+background-color: white; /* Ensure consistent background */
+}
+
+.url-params-table input[type="text"][readonly] {
+background-color: #e2e8f0; /* Grey out readonly fields */
+cursor: not-allowed;
+}
+
+.param-controls {
+display: flex;
+gap: 8px;
+justify-content: flex-end;
+}
+
+.toggle-button {
+width: 30px;
+height: 30px;
+border-radius: 50%;
+border: 1px solid var(--border-color);
+background-color: #f0f4f7;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: background-color 0.2s ease, border-color 0.2s ease;
+flex-shrink: 0;
+}
+
+.toggle-button.active {
+background-color: var(--secondary-color);
+border-color: var(--secondary-color);
+}
+
+.toggle-button.active::before {
+content: '✓'; /* Checkmark icon */
+color: white;
+font-size: 1.1em;
+font-weight: bold;
+}
+
+.toggle-button:not(.active)::before {
+content: '✗'; /* Cross icon */
+color: var(--text-color-light);
+font-size: 1.1em;
+font-weight: bold;
+}
+
+.toggle-button:hover {
+filter: brightness(0.95);
+}
+
+.remove-param-btn {
+background-color: #dc3545;
+color: white;
+border: none;
+border-radius: 4px;
+padding: 5px 10px;
+cursor: pointer;
+font-size: 0.8em;
+transition: background-color 0.2s ease;
+}
+.remove-param-btn:hover {
+background-color: #c82333;
+}
+
+#urlParamButtons {
+display: flex;
+gap: 15px;
+margin-top: 20px;
+justify-content: flex-start;
+}
+
+#urlParamButtons button {
+padding: 10px 20px;
+font-size: 0.9em;
+}
+
+/* Toast Notification Styles */
+#toast-container {
+position: fixed;
+top: 20px;
+right: 20px;
+z-index: 1000;
+display: flex;
+flex-direction: column;
+gap: 10px;
+pointer-events: none; /* Allow clicks to pass through container */
+}
+
+.toast {
+background-color: #fff;
+color: var(--text-color-dark);
+padding: 12px 20px;
+border-radius: 8px;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+font-size: 0.95em;
+font-weight: 500;
+min-width: 250px;
+max-width: 350px;
+opacity: 0;
+transform: translateX(100%);
+transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+pointer-events: auto; /* Re-enable clicks for individual toasts */
+border-left: 5px solid; /* For type specific color */
+}
+
+.toast.show {
+opacity: 1;
+transform: translateX(0);
+}
+
+.toast.hide {
+opacity: 0;
+transform: translateX(100%);
+}
+
+.toast-close-btn {
+font-size: 1.2em;
+cursor: pointer;
+color: var(--text-color-light);
+transition: color 0.2s ease;
+line-height: 1; /* Align 'x' correctly */
+}
+
+.toast-close-btn:hover {
+color: var(--text-color-dark);
+}
+
+/* Toast Types */
+.toast-info {
+background-color: var(--toast-info-bg);
+color: var(--toast-info-text);
+border-left-color: var(--toast-info-text);
+}
+.toast-success {
+background-color: var(--toast-success-bg);
+color: var(--toast-success-text);
+border-left-color: var(--toast-success-text);
+}
+.toast-warning {
+background-color: var(--toast-warning-bg);
+color: var(--toast-warning-text);
+border-left-color: var(--toast-warning-text);
+}
+.toast-error {
+background-color: var(--toast-error-bg);
+color: var(--toast-error-text);
+border-left-color: var(--toast-error-text);
+}
+.toast-message { /* General message */
+background-color: var(--toast-message-bg);
+color: var(--toast-message-text);
+border-left-color: var(--toast-message-text);
+}
+
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+.container {
+padding: 25px;
+}
+.input-section {
+flex-direction: column;
+align-items: stretch;
+}
+.input-section label {
+text-align: left;
+min-width: auto;
+}
+input[type="file"], input[type="text"] {
+min-width: unset;
+width: 100%;
+}
+button {
+width: 100%;
+}
+.playlist-video-list {
+grid-template-columns: 1fr; /* Eine Spalte auf kleinen Bildschirmen */
+}
+.video-item-thumbnail {
+height: 200px;
+}
+#selectedVideosControls {
+flex-direction: column;
+align-items: stretch;
+}
+#selectedVideosControls button {
+width: 100%;
+}
+.video-item-actions {
+/* Make video item buttons stack */
+flex-direction: column;
+align-items: stretch;
+}
+.video-item-link {
+min-width: unset; /* Override min-width for stacking */
+}
+/* New URL param table responsive adjustments */
+.url-params-table td {
+display: block;
+width: 100% !important; /* Override fixed width for toggle button */
+padding: 5px 15px;
+text-align: left;
+border-bottom: none;
+}
+.url-params-table tr {
+display: block;
+margin-bottom: 15px;
+border: 1px solid #e9ecef;
+border-radius: 8px;
+padding-top: 10px;
+padding-bottom: 10px;
+}
+.url-params-table tr:last-child {
+border-bottom: 1px solid #e9ecef;
+}
+.url-params-table thead {
+display: none; /* Hide table headers on small screens */
+}
+.url-params-table .param-controls {
+justify-content: flex-start;
+padding-left: 15px;
+padding-bottom: 10px;
+}
+.toggle-button {
+margin-right: 10px;
+}
+#urlParamButtons {
+flex-direction: column;
+}
+
+#toast-container {
+width: 90%;
+left: 5%;
+right: 5%;
+top: 10px;
+}
+.toast {
+max-width: 100%;
+min-width: unset;
+}
+}
+</style>
+<!-- ACHTUNG: {API_KEY} hier muss durch einen echten iframe.ly API-Schlüssel ersetzt werden, falls Sie ihn nutzen wollen -->
+<script async src="//cdn.iframe.ly/embed.js?api_key={API_KEY}"></script>
+</head>
+<body>
+<div id="toast-container"></div> <!-- Container for toast notifications -->
+<div class="container">
+<div id="playlistTableContainer">
+<p id="noDataMessage">Keine Playlists im lokalen Speicher gefunden.</p>
+<!-- Playlists werden hier dynamisch eingefügt -->
+</div>
+<p><br></p>
+
+<!-- NEW: API Keys & URL Parameters Section -->
+<details><summary><b>Einstellungen & API Keys</b></summary>
+<div style="margin-top: 20px; padding: 15px; background-color: #f0f4f7; border-radius: 8px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);">
+<p style="margin-bottom: 10px;">
+<b>Loader.to API Key:</b> <span id="loaderApiKeyDisplay" style="font-family: monospace; background-color: #e2e8f0; padding: 5px 8px; border-radius: 4px;"></span>
+</p>
+<p class="info-text" style="border-left-color: #4a69bd;">
+Dies ist der API-Schlüssel für "Loader", der direkt in dieser Mini-App verwendet wird. Dieser Parameter wird <span class="warning">nie</span> als URL-Parameter geliefert. Der Standardwert wird aus dem Code generiert.
+</p>
+</div>
+
+<div id="urlParamsManager">
+<h2>URL Parameter Management</h2>
+<p class="info-text">
+Fügen Sie hier URL-Parameter und deren Werte hinzu. Aktivierte Parameter werden beim Öffnen einer neuen Seite in die URL aufgenommen.
+</p>
+<div id="urlParamsTableContainer">
+<!-- URL Parameters Table will be rendered here -->
+</div>
+<div id="urlParamButtons">
+<button id="addUrlParamBtn" style="background-color: var(--secondary-color);">Neuen Parameter hinzufügen</button>
+<button id="openNewPageBtn">Neue Seite mit Parametern öffnen</button>
+</div>
+</div>
+</details>
+<p><br></p>
+
+<details><summary><b>Playlist Manager</b></summary>
+<p class="info-text">
+Hier können Sie CSV-Dateien mit YouTube-Playlists und Video-IDs laden und verwalten.
+<span class="warning"> Klicken Sie auf eine Zeile in der Tabelle, um die ersten Videos der Playlist direkt unterhalb der Zeile anzuzeigen. Beim Klick auf eine Playlist-Zeile wird die zugehörige ID ins Clipboard kopiert. </span>
+</p>
+<button id="clearStorageBtn" class="danger-btn">Lokalen Speicher leeren</button>
+</details>
+<p><br></p>
+
+<details><summary><b>Lade Playlist von CSV-Datei</b></summary>
+<div class="input-section">
+<label for="fileInput">Lokale CSV-Datei:</label>
+<input type="file" id="fileInput" accept=".csv">
+<button id="loadFileBtn">in Tabelle anzeigen</button>
+</div>
+
+<div class="input-section">
+<label for="urlInput">CSV-Datei von URL:</label>
+<input type="text" id="urlInput" placeholder="z.B. ./lib/playlistsV3.csv">
+<button id="loadUrlBtn">in Tabelle anzeigen</button>
+</div>
+</details>
+
+<!-- Neuer Bereich für ausgewählte Videos -->
+<div id="selectedVideosManager">
+<details><summary><b>Ausgewählte Videos</b></summary>
+<p id="noSelectedVideosMessage" class="info-text">Noch keine Videos ausgewählt.</p>
+<div id="selectedVideosControls" style="display:inline;">
+<button id="copySelectedIdsBtn" style="max-height:34px;background-color: var(--secondary-color);">Ausgewählte IDs kopieren</button>
+<button id="clearSelectedIdsBtn" style="max-height:34px;background-color: red;" >Ausgewählte IDs löschen</button>
+</div>
+<ul id="selectedVideosList"></ul>
+</details>
+</div>
+</div>
+
+<!-- Einbindung der JS-Dateien -->
+<script src="./js/toast-notification.js"></script>
+<!-- Update: Dateiname für die Haupt-App-Logik -->
+<script src="./js/offline-yt-playlists-urlparas.js"></script>
+</body>
+</html>

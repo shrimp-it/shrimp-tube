@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sequenzielle simulateClick Test (.then())</title>
+<style>
+body {
+font-family: Arial, sans-serif;
+margin: 20px;
+background-color: #f4f7fa;
+color: #333;
+line-height: 1.6;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+.container {
+max-width: 800px;
+width: 100%;
+background-color: #ffffff;
+padding: 30px;
+border-radius: 8px;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+}
+h1, h2 {
+color: #0056b3;
+border-bottom: 2px solid #e0e0e0;
+padding-bottom: 10px;
+margin-top: 20px;
+}
+.button-group {
+margin-bottom: 25px;
+display: flex;
+flex-direction: column;
+gap: 15px;
+align-items: flex-start;
+}
+button {
+background-color: #007bff;
+color: white;
+padding: 12px 20px;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+font-size: 1em;
+transition: background-color 0.2s ease, transform 0.1s ease;
+width: fit-content;
+}
+button:hover {
+background-color: #0056b3;
+transform: translateY(-2px);
+}
+button:active {
+background-color: #004085;
+transform: translateY(0);
+}
+button:disabled {
+background-color: #cccccc;
+cursor: not-allowed;
+}
+.target-button {
+background-color: #28a745;
+font-weight: bold;
+margin-top: 10px;
+width: auto;
+}
+.target-button:hover {
+background-color: #218838;
+}
+#startButtonAsync, #startButtonThen {
+background-color: #ffc107;
+color: #333;
+font-weight: bold;
+margin-bottom: 20px;
+width: fit-content;
+margin-right: 15px; /* Abstand zwischen den Start-Buttons */
+}
+#startButtonAsync:hover, #startButtonThen:hover {
+background-color: #e0a800;
+}
+#output {
+margin-top: 30px;
+padding: 15px;
+border: 1px solid #dcdcdc;
+border-radius: 6px;
+background-color: #e9f5ff;
+width: 100%;
+}
+#output p {
+margin: 8px 0;
+}
+#statusMessage {
+font-weight: bold;
+color: #007bff;
+}
+.error {
+color: red;
+}
+.success {
+color: green;
+}
+.clicked-status {
+font-style: italic;
+color: #666;
+margin-left: 10px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+
+
+
+<div>
+<button id="startButtonAsync">Start Sequenz (async/await)</button>
+<button id="startButtonThen">Start Sequenz (.then())</button>
+</div>
+
+<h2>Ziel-Buttons</h2>
+<div class="button-group">
+<button id="button1" class="target-button">Button 1 (Geklickt: <span id="clickCounter1">0</span>) <span class="clicked-status" id="status1"></span></button>
+<button id="button2" class="target-button">Button 2 (Geklickt: <span id="clickCounter2">0</span>) <span class="clicked-status" id="status2"></span></button>
+<button id="button3" class="target-button">Button 3 (Geklickt: <span id="clickCounter3">0</span>) <span class="clicked-status" id="status3"></span></button>
+</div>
+
+<div id="output">
+<h2>Ausgabe und Status</h2>
+<p>Aktueller Status: <span id="statusMessage">Bereit...</span></p>
+<p>Letzter Klick ausgelöst von: <span id="lastTrigger">Niemand</span></p>
+</div>
+<p>
+Beobachten Sie die Konsolenausgabe (F12) und die Statusmeldungen hier.</p>
+</div>
+<script src="../simulate-btn-click.js"></script>
+<script>
+// --- Test-Anwendungslogik ---
+document.addEventListener('DOMContentLoaded', () => {
+const statusMessage = document.getElementById('statusMessage');
+const lastTrigger = document.getElementById('lastTrigger');
+const startButtonAsync = document.getElementById('startButtonAsync');
+const startButtonThen = document.getElementById('startButtonThen');
+
+const clickCounter1 = document.getElementById('clickCounter1');
+const clickCounter2 = document.getElementById('clickCounter2');
+const clickCounter3 = document.getElementById('clickCounter3');
+
+const status1 = document.getElementById('status1');
+const status2 = document.getElementById('status2');
+const status3 = document.getElementById('status3');
+
+let counter1 = 0;
+let counter2 = 0;
+let counter3 = 0;
+
+function updateGlobalStatus(message, isError = false, trigger = 'Niemand') {
+statusMessage.textContent = message;
+statusMessage.className = isError ? 'error' : 'success';
+lastTrigger.textContent = trigger;
+}
+
+function updateButtonStatus(buttonNumber, message, isError = false) {
+const element = document.getElementById(`status${buttonNumber}`);
+if (element) {
+element.textContent = message;
+element.className = isError ? 'clicked-status error' : 'clicked-status success';
+}
+}
+
+function resetCountersAndStatus() {
+counter1 = 0;
+counter2 = 0;
+counter3 = 0;
+clickCounter1.textContent = 0;
+clickCounter2.textContent = 0;
+clickCounter3.textContent = 0;
+updateButtonStatus(1, '');
+updateButtonStatus(2, '');
+updateButtonStatus(3, '');
+updateGlobalStatus('Bereit...', false, 'Niemand');
+}
+
+// Event Listener for target buttons
+document.getElementById('button1').addEventListener('click', () => {
+counter1++;
+clickCounter1.textContent = counter1;
+updateButtonStatus(1, 'Geklickt!');
+console.log('Button 1 Klick Event ausgelöst.');
+});
+document.getElementById('button2').addEventListener('click', () => {
+counter2++;
+clickCounter2.textContent = counter2;
+updateButtonStatus(2, 'Geklickt!');
+console.log('Button 2 Klick Event ausgelöst.');
+});
+document.getElementById('button3').addEventListener('click', () => {
+counter3++;
+clickCounter3.textContent = counter3;
+updateButtonStatus(3, 'Geklickt!');
+console.log('Button 3 Klick Event ausgelöst.');
+});
+
+
+// --- SEQUENZ MIT ASYNC/AWAIT ---
+async function clickThreeButtonsSequentiallyAsync() {
+startButtonAsync.disabled = true;
+startButtonThen.disabled = true;
+resetCountersAndStatus();
+updateGlobalStatus("Starte sequenzielle Klick-Aktion (async/await)...", false, "Sequenz-Starter (async/await)");
+
+try {
+updateGlobalStatus("Verarbeite Button 1 (async/await)...", false, "Sequenz-Starter (async/await)");
+await simulateClick('#button1', 500, 1000);
+updateButtonStatus(1, '✅ Fertig');
+
+updateGlobalStatus("Verarbeite Button 2 (async/await)...", false, "Sequenz-Starter (async/await)");
+await simulateClick('#button2', 0, 2000);
+updateButtonStatus(2, '✅ Fertig');
+
+updateGlobalStatus("Verarbeite Button 3 (async/await)...", false, "Sequenz-Starter (async/await)");
+await simulateClick('#button3', 1000, 500);
+updateButtonStatus(3, '✅ Fertig');
+
+updateGlobalStatus("Sequenz (async/await) erfolgreich abgeschlossen!", false, "Sequenz-Starter (async/await)");
+
+} catch (error) {
+console.error("Ein Fehler ist während der async/await-Sequenz aufgetreten:", error);
+updateGlobalStatus(`Fehler in Sequenz (async/await): ${error.message}`, true, "Sequenz-Starter (async/await)");
+// Hier könnte man detaillierter prüfen, welcher Button den Fehler verursacht hat
+if (error.message.includes('Button 1')) updateButtonStatus(1, '❌ Fehler', true);
+else if (error.message.includes('Button 2')) updateButtonStatus(2, '❌ Fehler', true);
+else if (error.message.includes('Button 3')) updateButtonStatus(3, '❌ Fehler', true);
+} finally {
+startButtonAsync.disabled = false;
+startButtonThen.disabled = false;
+}
+}
+
+// --- SEQUENZ MIT .THEN() ---
+function clickThreeButtonsSequentiallyThen() {
+startButtonAsync.disabled = true;
+startButtonThen.disabled = true;
+resetCountersAndStatus();
+updateGlobalStatus("Starte sequenzielle Klick-Aktion (.then())...", false, "Sequenz-Starter (.then())");
+
+simulateClick('#button1', 500, 1000)
+.then(() => {
+updateButtonStatus(1, '✅ Fertig');
+updateGlobalStatus("Verarbeite Button 2 (.then())...", false, "Sequenz-Starter (.then())");
+return simulateClick('#button2', 0, 2000); // Wichtig: Return the next Promise
+})
+.then(() => {
+updateButtonStatus(2, '✅ Fertig');
+updateGlobalStatus("Verarbeite Button 3 (.then())...", false, "Sequenz-Starter (.then())");
+return simulateClick('#button3', 1000, 500); // Wichtig: Return the next Promise
+})
+.then(() => {
+updateButtonStatus(3, '✅ Fertig');
+updateGlobalStatus("Sequenz (.then()) erfolgreich abgeschlossen!", false, "Sequenz-Starter (.then())");
+})
+.catch(error => {
+console.error("Ein Fehler ist während der .then()-Sequenz aufgetreten:", error);
+updateGlobalStatus(`Fehler in Sequenz (.then()): ${error.message}`, true, "Sequenz-Starter (.then())");
+// Hier könnte man detaillierter prüfen, welcher Button den Fehler verursacht hat
+if (error.message.includes('Button 1')) updateButtonStatus(1, '❌ Fehler', true);
+else if (error.message.includes('Button 2')) updateButtonStatus(2, '❌ Fehler', true);
+else if (error.message.includes('Button 3')) updateButtonStatus(3, '❌ Fehler', true);
+})
+.finally(() => {
+startButtonAsync.disabled = false;
+startButtonThen.disabled = false;
+});
+}
+
+startButtonAsync.addEventListener('click', clickThreeButtonsSequentiallyAsync);
+startButtonThen.addEventListener('click', clickThreeButtonsSequentiallyThen);
+});
+</script>
+
+</body>
+</html>

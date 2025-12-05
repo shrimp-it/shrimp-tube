@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <meta name='mobile-web-app-capable' content='yes'>
+    <meta name="robots" content="noindex">
+
+    <title>Shrimp-AI WebApp V3</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 120%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>" />
+    <link rel="stylesheet" href="scss/global.processed.css">
+</head>
+
+<body>
+
+    <header style="height:1px; margin-top: 0; margin-bottom: 0;" class="main-header1">
+    </header>
+
+    <nav class="main-nav" style="max-height:33px;">
+        <ul style="max-height:30px;border-radius:5px;">
+
+            <li class="active" style="max-height:21px;">
+                <a href="#schedule">
+                    <span>aiChat</span>
+                </a>
+            </li>
+            <li style="max-height:28px;">
+                <a href="#tickets2">
+                    <span>Notes</span>
+                </a>
+            </li>
+
+
+            <li style="max-height:28px;">
+                <a href="#tickets">
+                    <span>aiTools</span>
+                </a>
+            </li>
+            <li style="max-height:28px;">
+                <a href="#speakers">
+                    <span>usr</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="tabs">
+        <div class="tab" id="speakers">
+            <div id="sizeDisplay"></div>
+            <ul style="text-align: left;" class="speaker-list admin">
+           
+                
+                <li style="text-align: left;">
+                    <div>
+                        <div style="margin-bottom:5px;margin-top:-25px;">
+                            <details style="display: inline;" name="reqs">
+                                <summary style="display: inline-block; margin-left:-5px;">🔷<b>install:[<span
+                                            style="display: inline-block;" id="appmoarray0">0</span>,<span
+                                            style="display: inline-block;" id="appmoarray1">0</span>] </b></summary>
+                                <p id="appfunctions" style="display: block;margin-top:5px; margin-bottom:7px;">
+                                    <label
+                                        style="width:1.2rem;background:lightgreen; color:black; padding:5px;margin-bottom:3px;margin-bottom:1px"><b>SpeechTxt
+                                            static</b>
+                                        <input type="checkbox" id="modulStaticlnk"
+                                            style="height:1.1rem;width:1.1em;margin-top:3px;margin-bottom:1px;"
+                                            onchange="let tpag = document.getElementById('contaskbing'); let zeval = document.querySelector('#appmoarray0');if(zeval.innerText == '1') {zeval.innerText='0';tpag.childNodes[1].classList.toggle('hide'); tpag.childNodes[7].classList.toggle('hide');tpag.childNodes[10].classList.toggle('hide');tpag.childNodes[12].classList.toggle('hide');} else {zeval.innerText='1';tpag.childNodes[1].classList.toggle('hide');tpag.childNodes[7].classList.toggle('hide');tpag.childNodes[10].classList.toggle('hide');tpag.childNodes[12].classList.toggle('hide');}">
+                                    </label><br>
+                                    <label style="width:1.2rem;background:grey; padding:8px;margin-bottom:5px"><b>no
+                                            keys mobile</b>
+                                        <input type="checkbox" id="modulNokeyb"
+                                            style="height:1.1rem;width:1.1rem;margin-top:5px; background:green;"
+                                            onchange="let zeval = document.querySelector('#appmoarray1');if(zeval.innerText == '1') {zeval.innerText='0'} else {zeval.innerText='1'}">
+                                    </label>
+                                </p>
+                            </details>
+                        </div>
+                        <div style="margin-bottom:5px;">
+                            <details name="reqs">
+                                <summary><b>Permissions</b></summary>
+                                <p id="permissions">
+                                    <button data-permission="clipboard-read">Read</button>
+
+                                    <button data-permission="clipboard-write">Write</button>
+                                    <button data-permission="microphone">Mikro</button>
+                                    <button data-permission="geolocation">GPS</button>
+                                </p>
+                            </details>
+                        </div>
+
+                        <div style="margin-bottom:5px;">
+                            <details name="reqs">
+                                <summary><b>Benutzer - API-Keys</b></summary>
+
+                                <p id="userinfo">
+                                    <input type="text" id="username" style="width:95%; font-size: 0.9rem;"
+                                        placeholder="User (lsuser): mg">
+                                    <input type="text" id="versionls" style="width:95%; font-size: 0.9rem;"
+                                        placeholder="Session Key (lsmainkey): chatHistory01">
+                                    
+                                    <div class="flex items-center space-x-2">
+
+                                        <select id="model-select" style="width:95%;font-size:0.9rem;"
+                                            class="flex-1 p-2 rounded-lg border border-bolt bg-bolt-elements-prompt-background text-bolt-elements-textPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bolt-elements-focus transition-all">
+                                            <option id="model-select-option" value="">...selected</option>
+
+                                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                            <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+                                            <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                                            <option value="Add More">Add More</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="flex items-center space-x-2">
+
+                                        <select id="temperature-select" style="width:95%;font-size:0.9rem;"
+                                            class="flex-1 p-2 rounded-lg border border-bolt bg-bolt-elements-prompt-background text-bolt-elements-textPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bolt-elements-focus transition-all">
+                                            <option value="0.1">Low</option>
+                                            <option value="0.3">Medium</option>
+                                            <option value="0.5">High</option>
+
+                                            <option value="0.7">Extreme</option>
+                                            <option value="0.9">Ultra</option>
+                                        </select>
+                                    </div>
+
+                                    <input type="text" id="gemiapikey" style="width:95%; font-size: 0.9rem;"
+                                        placeholder="new Gemini API key" value="XXX">
+                                    <button id="apply-settings-btn" style="width:95%; font-size: 0.9rem;">apply</button>
+                                </p>
+                            </details>
+                        </div>
+
+                    </div>
+                </li>
+
+                <li style="font-size:1rem; padding-left:2px;margin-left:3px;">
+                    <div style="font-size:0.9rem; margin-bottom:3px;margin-top:-36px;">Farben:<button
+                            style="padding-top:0.2rem;padding-bottom:0.1rem; width:100%; min-width:60px;"
+                            onclick="document.querySelector('#theme-toggle-button').click(); if(this.textContent=='hell') {this.textContent='dunkel'} else {this.textContent='hell'}">hell</button>
+                    </div>
+                    <div style="font-size:0.9rem; display:none;">Darstellung:<button
+                            style="padding-top:0.2rem;padding-bottom:0.1rem; width:100%; min-width:60px;"
+                            onclick="if(this.textContent=='mobil') {this.textContent='desktop'} else {this.textContent='mobil';document.body.style.backgroundColor='white'}">mobil</button>
+                    </div>
+                    <div style="font-size:0.9rem"><span id="webappversion"></span></div>
+  <button id="btn-ls-console" style="width:100%; background: #1d7efd; color: white; border:none; padding: 5px; border-radius: 3px;">
+                        🗄️ LS-Console
+                     </button>
+                </li>
+                <!-- li id="aifile-updown">
+                < / li -->
+         </ul>
+        </div>
+        
+        <div class="tab active" id="schedule">
+            <link rel="stylesheet"
+                href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+            
+            <style id="gemini2aichatbotStyle">
+                :root {
+                    --text-color: #edf3ff;
+                    --subheading-color: #97a7ca;
+                    --placeholder-color: #c3cdde;
+                    --primary-color: #101623;
+                    --secondary-color: #283045;
+                    --secondary-hover-color: #333e58;
+                    --scrollbar-color: #626a7f;
+                }
+
+                * {
+                    margin: 0px;
+                    padding: 0px;
+                    box-sizing: border-box;
+                    font-family: 'Poppins', sans-serif;
+                }
+
+                body {
+                    background-color: var(--primary-color);
+                    color: var(--text-color);
+                    margin: 0px;
+                    padding: 0px;
+                }
+                
+                * textarea { width: 96%; min-height: 50px; }
+                * .hide { display: none; }
+                * show { display: flex }
+
+                body.light-theme {
+                    --text-color: #090c13;
+                    --subheading-color: #7b8cae;
+                    --placeholder-color: #606982;
+                    --primary-color: #f3f7ff;
+                    --secondary-color: #dce6f9;
+                    --secondary-hover-color: #d2ddf2;
+                    --scrollbar-color: #a2aac2;
+                }
+
+                .container {
+                    overflow-y: auto;
+                    padding: 12px 0px 10px;
+                    height: calc(100vh - 127px);
+                    scrollbar-color: var(--scrollbar-color) transparent;
+                }
+
+                .container :where(.application-header, .suggestions, .message, .prompt-wrapper) {
+                    position: relative;
+                    margin: 0px auto;
+                    padding: 0px 10px;
+                    width: 100%;
+                    max-width: 990px;
+                }
+                
+                .container .chats-container { display: flex; gap: 20px; flex-direction: column; height: 100%; }
+                .message-maindiv { position: relative; padding: 12px 16px; min-width: 80%; width: 380px; max-width: 100%; background: var(--secondary-color); border-radius: 13px 13px 3px 13px; }
+                .container .chats-container .user-message { flex-direction: column; align-items: flex-end; margin-left: 10%; margin-right: 2%; width: 81%; font-size:0.9rem; }
+                .container .chats-container .user-message .message-text { padding: 4px 6px; max-width: 100%; background: var(--secondary-color); border-radius: 13px 13px 3px 13px; font-size: 0.9rem; }
+                
+                .container .prompt-container {
+                    position: absolute;
+                    left: 0%;
+                    bottom: 1%;
+                    width: 100%;
+                    padding: 4px 2px;
+                    margin-bottom: 1%;
+                    background-color: var(--primary-color);
+                }
+
+                .prompt-container :where(.prompt-wrapper, .prompt-form, .prompt-actions) {
+                    display: flex;
+                    align-items: center;
+                    gap: 1px;
+                    height: 30px;
+                }
+
+                .prompt-container .prompt-form {
+                    height: 100%;
+                    width: 100%;
+                    border-radius: 120px;
+                    background-color: var(--secondary-color);
+                }
+
+                .prompt-form .prompt-input {
+                    width: 100%;
+                    height: 100%;
+                    background: none;
+                    color: var(--text-color);
+                    border: none;
+                    outline: none;
+                    font-size: 1rem;
+                    padding-left: 5px;
+                }
+
+                .prompt-form .prompt-input::placeholder {
+                    color: var(--placeholder-color);
+                }
+
+                .prompt-wrapper button {
+                    width: 53px;
+                    height: 100%;
+                    flex-shrink: 0;
+                    cursor: pointer;
+                    font-size: 1.2rem;
+                    margin-left: 1px;
+                    margin-right: 1px;
+                    border: none;
+                    border-radius: 50%;
+                    background-color: var(--secondary-color);
+                    color: var(--text-color);
+                    transition: 0.3s ease;
+                }
+
+                .prompt-wrapper :is(button:hover, #cancel-file-button, .file-icon) {
+                    background-color: var(--secondary-hover-color);
+                }
+
+                .prompt-form .prompt-actions {
+                    gap: 3px;
+                    margin-right: 7px;
+                }
+
+                .prompt-wrapper .prompt-form :where(.file-upload-wrapper, button, img) {
+                    position: relative;
+                    height: 35px;
+                    width: 35px;
+                }
+
+                /* Hides the inactive file buttons by default */
+                .prompt-form .file-upload-wrapper :where(button, img) {
+                    display: none;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    position: absolute;
+                }
+                
+                .prompt-form .file-upload-wrapper.active #add-file-button {
+                    display: none;
+                }
+                
+                /* Displays the add-file button when no file is active */
+                .prompt-form .file-upload-wrapper #add-file-button,
+                .prompt-form .file-upload-wrapper.active.image-attached img,
+                .prompt-form .file-upload-wrapper.active.file-attached .file-icon,
+                .prompt-form .file-upload-wrapper.active:hover #cancel-file-button {
+                    display: block;
+                }
+
+                .prompt-form :is(#stop-response-button:hover, #cancel-file-button) {
+                    color: #d62939;
+                }
+
+                .prompt-wrapper .prompt-form .file-icon {
+                    color: #1d7efd;
+                }
+
+                .prompt-form #stop-response-button,
+                body.bot-responding .prompt-form .file-upload-wrapper {
+                    display: none;
+                }
+
+                body.bot-responding .prompt-form #stop-response-button {
+                    display: block;
+                }
+
+                /* Mobile overrides */
+                @media only screen and (max-width:668px) {
+                    .prompt-container :where(.prompt-wrapper, .prompt-form, .prompt-actions) {
+                        gap: 2px;
+                        height: 43px;
+                    }
+                    .prompt-container button {
+                        width: 43px;
+                    }
+                    .prompt-form :is(.file-upload-wrapper, button, img) {
+                        height: 35px;
+                        width: 35px;
+                    }
+                }
+                
+                /* Ensure file attachment download/delete buttons are visible */
+                .file-history-item {
+                    display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.2);
+                    padding: 5px; border-radius: 5px; margin-bottom: 5px; font-size: 0.8rem;
+                }
+                .file-history-item a { color: #1d7efd; text-decoration: none; margin-right: 10px; }
+                .file-history-remove { cursor: pointer; color: red; border: none; background: none; }
+
+                /* Suggestions styling for "tile-buttons" */
+                #suggestions-list {
+                    margin-top: 15px; /* Add some spacing */
+                }
+
+                .suggestions-item {
+                    background-color: var(--secondary-color);
+                    border-radius: 8px;
+                    padding: 10px 15px;
+                    margin-bottom: 10px; /* Space between items */
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
+                }
+                .suggestions-item:hover {
+                    background-color: var(--secondary-hover-color);
+                }
+                .suggestions-item .text {
+                    flex-grow: 1;
+                    font-size: 0.95rem;
+                    color: var(--text-color);
+                }
+                .suggestions-item .icon {
+                    font-size: 1.5rem;
+                    color: var(--subheading-color);
+                }
+
+                /* Avatar Rotation for "thinking" state */
+                .bot-message.loading .avatar {
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+
+                /* Copy button styles */
+                .message-maindiv .copy-btn {
+                    position: absolute;
+                    right: 15px;
+                    top: 5px;
+                    background: rgba(0,0,0,0.5);
+                    color: white;
+                    border: none;
+                    padding: 3px 6px;
+                    border-radius: 3px;
+                    cursor: pointer;
+                    font-size: 0.7em;
+                    z-index: 10;
+                    opacity: 0; /* Hidden by default */
+                    transition: opacity 0.3s ease; /* Smooth transition */
+                    pointer-events: none; /* Prevent interaction when hidden */
+                }
+                
+                /* Show on hover of the parent message div */
+                .message-maindiv:hover .copy-btn {
+                    opacity: 1; /* Visible on hover */
+                    pointer-events: all; /* Enable interaction */
+                }
+            </style>
+
+            <div class="container section" id="gemini2aichatbotHtml" style="margin-left: 0;margin-right: 0;width:103%;">
+                <header class="application-header">
+                </header>
+                <ul id="suggestions-list" style="columns: 2; -webkit-columns: 2; -moz-columns: 2;" class="suggestions">
+                    <li class="suggestions-item">
+                        <p class="text">Erstelle eine kleine HTML-App mit js und css</p>
+                        <span class="icon material-symbols-rounded">draw</span>
+                    </li>
+                    <li class="suggestions-item">
+                        <p class="text">Beantworte meine nächsten Prompts nur mit dem von mir angeforderten ergebnis
+                            ohne weitere erklärung.</p>
+                        <span class="icon material-symbols-rounded">lightbulb</span>
+                    </li>
+                </ul>
+                <div class="chats-container"></div>
+                <div class="prompt-container">
+
+                    <div class="prompt-wrapper">
+                        <form action="#" class="prompt-form">
+                            <input type="text" placeholder="Ask Gemini" class="prompt-input" required />
+                            <div class="prompt-actions">
+                                <div class="file-upload-wrapper">
+                                    <img src="#" alt="filebild" class="file-preview" />
+
+                                <input 
+  id="file-input" 
+  type="file" 
+  accept="image/*" 
+  hidden 
+/>
+                                    <button type="button" class="file-icon material-symbols-rounded">description</button>
+                                    <button id="cancel-file-button" type="button"
+                                        class="material-symbols-rounded">close</button>
+                                    <button id="add-file-button" type="button"
+                                        class="material-symbols-rounded">attach_file</button>
+                                </div>
+                                <button id="stop-response-button" type="button"
+                                    class="material-symbols-rounded">stop_circle</button>
+
+                                <button id="send-prompt-button" class="material-symbols-rounded">arrow_upward</button>
+                            </div>
+                        </form>
+                        <button id="theme-toggle-button"
+                            class="material-symbols-rounded prompt-tools">light_mode</button>
+                        <button id="delete-chats-button" class="material-symbols-rounded prompt-tools">delete</button>
+                        <button id="save-chat-file-button" class="material-symbols-rounded prompt-tools" style="font-size:0.8rem;">💾 Chat</button>
+                        <button id="load-chat-file-button" class="material-symbols-rounded prompt-tools" style="font-size:0.8rem;">📂 Chat</button>
+                        <input type="file" id="load-chathistory-input" accept=".chathistory,application/json" hidden />
+                        <button id="toggle-fullscreen-button" onclick="fullx()" class="material-symbols-rounded prompt-tools"
+                            style="font-size:0.8rem;">fullscreen</button>
+<button id="fulls-bomodal-button" onclick="shrimpRecorder.init();" class="material-symbols-rounded prompt-tools">💦</button>
+                    </div>
+
+                </div> <input type="button" style="position: absolute; bottom:13%;left:3px;font-size:1.2rem;border:0; border-radius: 100%;
+ padding:3px;background: yellow" value="✨"
+                    onclick="if (this.style.background == 'yellow') {document.querySelector('.prompt-wrapper').style.display='none';this.style.background = 'orange';document.querySelector('.prompt-container').style.background='transparent';return};if (this.style.background == 'orange') {document.querySelector('.prompt-wrapper').style.display='block';this.style.background = 'red';document.querySelector('.prompt-container').style.background='';return} if (this.style.background == 'red') {document.querySelector('.prompt-wrapper').style.display='none';this.style.background ='green';
+ document.querySelectorAll('.prompt-tools').forEach((elem) => {elem.classList.toggle('hide') }); return} else {document.querySelector('.prompt-wrapper').style.display='';this.style.background = 'yellow'; document.querySelector('.prompt-container').style.background=''}">
+            </div>
+            
+            <script src="js/userconfirmdelete-module.js" id="userconfirmdelete-module"></script>
+            
+            <script type="module" id="gemini2aichatbotScript">
+                import { 
+                    saveVaultData, 
+                    loadVaultData, 
+                    saveSessionData, 
+                    loadSessionData, 
+                    openStorageConsole 
+                } from './js/shrimpcore-local-storage.js';
+
+                // --- Global Variables (Made window-accessible where needed for legacy calls) ---
+                window.API_KEY = 'no-key';
+                window.API_MODEL = 'gemini-2.0-flash';
+                window.API_URL = '';
+                
+                let currentUser = 'default';
+                let currentMainKey = 'history01';
+                
+                const chatHistory = [];
+                const userData = { message: "", file: {} };
+                const container = document.querySelector('.container');
+                const chatsContainer = document.querySelector('.chats-container');
+                const promptForm = document.querySelector('.prompt-form');
+                const promptInput = promptForm.querySelector('.prompt-input');
+                const fileInput = promptForm.querySelector('#file-input');
+                const fileUploadWrapper = promptForm.querySelector('.file-upload-wrapper');
+                const themeToggleButton = document.querySelector('#theme-toggle-button');
+                const suggestionsList = document.querySelector('#suggestions-list'); // Get the suggestions list
+                let typingInterval, controller;
+
+                // --- Init Two-Stage Logic ---
+                const initApp = () => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const pUser = urlParams.get('lsuser');
+                    const pMainKey = urlParams.get('lsmainkey');
+                    const pGeminiKey = urlParams.get('keygemini');
+                    const pModel = urlParams.get('setmodel');
+
+                    if (pUser) {
+                        currentUser = pUser;
+                        document.querySelector('#username').value = currentUser;
+                        
+                        // Stage 1: Vault (User Data)
+                        let vault = loadVaultData(currentUser) || {};
+                        
+                        // Priority: URL Param > Vault Data > Default
+                        if (pGeminiKey) vault.apiKey = pGeminiKey;
+                        if (pModel) vault.model = pModel;
+                        
+                        // Apply Vault to UI & Globals
+                        if (vault.apiKey) {
+                            window.API_KEY = vault.apiKey;
+                            document.querySelector('#gemiapikey').value = vault.apiKey;
+                        }
+                        if (vault.model) {
+                            window.API_MODEL = vault.model;
+                            document.querySelector('#model-select').value = vault.model;
+                        }
+                        
+                        // Save Vault Update (Stage 1)
+                        saveVaultData(currentUser, vault);
+                        console.log(`[Init] Stage 1 loaded for ${currentUser}`);
+                    }
+
+                    if (pMainKey) {
+                        currentMainKey = pMainKey;
+                        document.querySelector('#versionls').value = currentMainKey;
+                        
+                        // Stage 2: Session Data (Chat History)
+                        const sessionData = loadSessionData(currentUser, currentMainKey);
+                        if (sessionData && Array.isArray(sessionData.history)) {
+                            chatHistory.length = 0;
+                            chatHistory.push(...sessionData.history);
+                            renderHistoryFromData(); // This will call updateSuggestionsVisibility
+                            console.log(`[Init] Stage 2 loaded for ${currentMainKey}`);
+                        } else {
+                            updateSuggestionsVisibility(); // Call if no history
+                        }
+                    } else {
+                        updateSuggestionsVisibility(); // Call if no mainKey, thus no history loaded
+                    }
+                    
+                    updateApiUrl();
+                };
+
+                const updateApiUrl = () => {
+                     window.API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${window.API_MODEL}:generateContent?key=${window.API_KEY}`;
+                };
+
+                // --- Core Chat Functions ---
+
+         // --- Integration mit Shrimp Recorder: Callback für beendete Aufnahme ---
+window.recApp = async (blob, filename, mimeType) => {
+console.log("recApp received data from shrimpRecorder:", filename, mimeType, blob);
+
+// Konvertiere Blob zu Base64
+const reader = new FileReader();
+reader.readAsDataURL(blob);
+reader.onloadend = () => {
+const base64String = reader.result.split(',')[1];
+const isImage = mimeType.startsWith('image/'); // Hier eher false für Audio/Video, aber behalte es bei
+
+// Setze userData.file für die Chat-Verarbeitung
+userData.file = {
+fileName: filename,
+data: base64String,
+mime_type: mimeType,
+isImage: isImage
+};
+
+// Setze den Prompt-Input mit der spezifischen Nachricht
+promptInput.value = "read file for further instructions";
+
+// Schließe das Recorder-Modal
+if (window.shrimpRecorder) {
+window.shrimpRecorder.remove();
+}
+
+// Trigger die Chat-Formular-Absendung
+handleFormSubmit(null); // Übergabe von null als Event, da es ein interner Aufruf ist
+};
+reader.onerror = (error) => {
+console.error("Fehler beim Konvertieren des Blobs zu Base64 für recApp:", error);
+alert("Fehler beim Verarbeiten der Aufnahme für den Upload.");
+if (window.shrimpRecorder) {
+window.shrimpRecorder.remove();
+}
+};
+};
+
+// --- Core Chat Functions ---
+
+const createMessageElement = (content, ...classes) => {
+const div = document.createElement('div');
+div.classList.add('message', ...classes);
+div.innerHTML = content;
+return div;
+};
+                const scrollToBottom = () => container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+
+                // Function to escape HTML to render as text
+                const escapeHtml = (text) => {
+                    if (!text) return '';
+                    return text
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;");
+                };
+
+                const saveChat = () => {
+                     // Stage 2 Save
+                     const sessionObj = {
+                         history: chatHistory,
+                         timestamp: new Date().toISOString()
+                     };
+                     saveSessionData(currentUser, currentMainKey, sessionObj);
+                };
+
+                // Exposed globally for delete buttons in HTML
+                window.removeMessageAtIndex = (index) => {
+                    chatHistory.splice(index, 1);
+                    chatsContainer.innerHTML = '';
+                    renderHistoryFromData();
+                    saveChat();
+                    updateSuggestionsVisibility(); // Update visibility after modifying history
+                };
+                
+                // Helper to download base64 file
+                window.downloadBase64File = (base64, fileName, mimeType) => {
+                    const link = document.createElement('a');
+                    link.href = `data:${mimeType};base64,${base64}`;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+                
+                // Helper to remove file from a history item
+                window.removeFileFromHistory = (index) => {
+                    if(chatHistory[index] && chatHistory[index].parts) {
+                        // Filter out non-text parts (assuming file is in inline_data)
+                        chatHistory[index].parts = chatHistory[index].parts.filter(part => !part.inline_data);
+                        chatsContainer.innerHTML = '';
+                        renderHistoryFromData();
+                        saveChat();
+                        updateSuggestionsVisibility(); // Update visibility after modifying history
+                    }
+                };
+
+                // Global function to copy message text and update button state
+                window.copyMessageText = (buttonElement, textToCopy) => {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        buttonElement.textContent = '✅';
+                        setTimeout(() => buttonElement.textContent = '📋', 1500);
+                    }).catch(err => {
+                        console.error('Failed to copy: ', err);
+                        buttonElement.textContent = '❌';
+                        setTimeout(() => buttonElement.textContent = '📋', 1500);
+                    });
+                };
+
+                const renderHistoryFromData = () => {
+                    chatsContainer.innerHTML = '';
+                    chatHistory.forEach((chatItem, index) => {
+                        // Extract Text
+                        const textPart = chatItem.parts.find(p => p.text);
+                        const textContent = textPart ? escapeHtml(textPart.text) : "";
+                        
+                        // Check for File
+                        const filePart = chatItem.parts.find(p => p.inline_data);
+let fileHtml = '';
+if (filePart) {
+     const mime = filePart.inline_data.mime_type;
+     const data = filePart.inline_data.data;
+     // Den für die Anzeige gespeicherten Dateinamen abrufen, sonst einen generischen Namen verwenden
+     const fname = filePart.inline_data.fileNameForDisplay || "Attached_File"; 
+     
+     fileHtml = `
+        <div class="file-history-item">
+            <span>📎 ${fname} (${mime})</span>
+            <button onclick="downloadBase64File('${data}', '${fname}', '${mime}')">⬇️</button>
+            <button class="file-history-remove" onclick="removeFileFromHistory(${index})">❌</button>
+        </div>
+     `;
+     if(mime.startsWith('image/')) {
+         fileHtml += `<br><img src="data:${mime};base64,${data}" style="max-width:200px; border-radius:10px;">`;
+     }
+}
+
+                        if (chatItem.role === 'user') {
+                            const userMsgHTML = `
+                                <div class='message-text'>${textContent}</div>
+                                ${fileHtml}
+                                <button style='position:absolute;right:4%;top:-15px;padding:1px; background: transparent;' class='remove-message-history' onclick='removeMessageAtIndex(${index})'>❌</button>
+                            `;
+                            const userMsgDiv = createMessageElement(userMsgHTML, 'user-message');
+                            chatsContainer.appendChild(userMsgDiv);
+                        } else {
+                            const botMessageHTML = `
+                                <div class='message-maindiv'>
+                                    <button style='position:absolute;right:1%;top:-5px;padding:1px; background: transparent;' class='remove-message-history' onclick='removeMessageAtIndex(${index})'>❌</button>
+                                    <span class='avatar' style='font-size:larger;'>✨</span>
+                                    <button class='copy-btn' onclick="window.copyMessageText(this, this.parentElement.querySelector('.message-text').innerText)">📋</button>
+                                    <div class='message-text' style="white-space: pre-wrap;">${textContent}</div>
+                                </div>`;
+                            const botMessageDiv = createMessageElement(botMessageHTML, 'bot-message');
+                            chatsContainer.appendChild(botMessageDiv);
+                        }
+                    });
+                    if (chatHistory.length > 0) document.body.classList.add('chats-active');
+                    scrollToBottom();
+                    updateSuggestionsVisibility(); // Update visibility after rendering history
+                };
+
+                // --- Generation Logic ---
+                
+ const generateResponse = async (botMessageDiv) => {
+const textElement = botMessageDiv.querySelector('.message-text');
+controller = new AbortController();
+
+// Die Nachricht und Dateidaten des Benutzers sind bereits im 'userData'-Objekt aus handleFormSubmit verfügbar.
+const currentUserMessageParts = [{ text: userData.message }];
+if (userData.file.data) {
+    currentUserMessageParts.push({
+        inline_data: {
+            mime_type: userData.file.mime_type,
+            data: userData.file.data,
+            // Speichere den angepassten Dateinamen für die Anzeige in der Historie
+            fileNameForDisplay: userData.file.fileName 
+        }
+    });
+}
+
+// Erstelle das 'contents'-Array speziell für diese API-Anfrage.
+// Es sollte die GESAMTE vorherige chatHistory plus die AKTUELLE Benutzernachricht enthalten.
+const apiRequestContents = [
+...chatHistory, // Vorherige, bestätigte Historie
+{ role: 'user', parts: currentUserMessageParts } // Aktueller Benutzer-Prompt
+];
+
+// Debug-Ausgabe zur Überprüfung des Request-Bodys
+console.log("Sending API request with contents:", apiRequestContents);
+console.log("Full request body:", JSON.stringify({ contents: apiRequestContents }));
+console.log("API_URL used:", window.API_URL); // Debug API URL
+
+try {
+const response = await fetch(window.API_URL, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ contents: apiRequestContents }), // Sende das speziell konstruierte Array
+signal: controller.signal,
+});
+
+const data = await response.json();
+if (!response.ok) {
+// Zusätzliche Fehlerprotokollierung für bessere Diagnose
+console.error("API Error Response:", data);
+throw new Error(data.error?.message || "API Error");
+}
+
+const responseText = data.candidates[0].content.parts[0].text;
+
+textElement.textContent = responseText;
+
+// chatHistory NUR aktualisieren, wenn der API-Aufruf erfolgreich war
+chatHistory.push({ role: 'user', parts: currentUserMessageParts }); // Füge die Benutzernachricht hinzu
+chatHistory.push({ role: 'model', parts: [{ text: responseText }] }); // Füge die Bot-Antwort hinzu
+
+saveChat(); // Speichere Stufe 2
+
+} catch (error) {
+textElement.textContent = `Fehler: ${error.message}`;
+textElement.style.color = '#d62939';
+console.error("Error during Gemini API call:", error);
+
+} finally {
+userData.file = {}; // Lösche Benutzerdaten nach dem Versuch
+botMessageDiv.classList.remove('loading'); // Stop avatar rotation
+document.body.classList.remove('bot-responding');
+scrollToBottom();
+updateSuggestionsVisibility(); // Stelle sicher, dass die Vorschläge aktualisiert werden
+}
+};
+
+                const handleFormSubmit = (event) => {
+                    if (event) event.preventDefault(); // event might be null if called from suggestion click
+                    const userMessage = promptInput.value.trim();
+                    if (!userMessage || document.body.classList.contains('bot-responding')) return;
+                    
+                    userData.message = userMessage;
+                    promptInput.value = "";
+                    document.body.classList.add('chats-active', 'bot-responding');
+                    fileUploadWrapper.classList.remove('file-attached', 'img-attached', 'active');
+
+                    // Render temporary User Message
+                    const userMsgHTML = `
+                        <p class="message-text">${escapeHtml(userData.message)}</p>
+                        ${userData.file.data ? (userData.file.isImage ? `<img src="data:${userData.file.mime_type};base64,${userData.file.data}" class="image-attachment" />` : `<p class="file-attachment">📎 ${userData.file.fileName}</p>`) : ""}
+                    `;
+                    const userMsgDiv = createMessageElement(userMsgHTML, 'user-message');
+                    chatsContainer.appendChild(userMsgDiv);
+                    scrollToBottom();
+
+                    // Render temporary Bot Loading with rotation effect
+                    setTimeout(() => {
+                        const botMessageHTML = `<div class='message-maindiv'>
+                                                    <span class='avatar' style='font-size:larger;'>✨</span>
+                                                    <button class='copy-btn' onclick="window.copyMessageText(this, this.parentElement.querySelector('.message-text').innerText)">📋</button>
+                                                    <code class='message-text'>Just a sec...</code>
+                                                </div>`;
+                        const botMessageDiv = createMessageElement(botMessageHTML, 'bot-message', 'loading'); // Added 'loading' class here
+                        chatsContainer.appendChild(botMessageDiv);
+                        scrollToBottom();
+                        generateResponse(botMessageDiv);
+                    }, 600);
+                };
+
+                // --- Chat History File I/O Logic ---
+                // Save chat history to a .chathistory file
+                const saveChatToFile = () => {
+                    const currentChatData = {
+                        user: currentUser,
+                        mainKey: currentMainKey,
+                        history: chatHistory,
+                        timestamp: new Date().toISOString()
+                    };
+                    const jsonString = JSON.stringify(currentChatData, null, 2);
+                    const blob = new Blob([jsonString], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${currentUser}_${currentMainKey}_chat.chathistory`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    alert('Chat history saved to file!');
+                };
+
+                // Load chat history from a .chathistory file
+                const loadChatFromFile = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const loadedData = JSON.parse(e.target.result);
+                            if (loadedData && loadedData.history && Array.isArray(loadedData.history)) {
+                                if (confirm(`Load chat history from file? This will overwrite the current session '${currentMainKey}'.`)) {
+                                    chatHistory.length = 0;
+                                    chatHistory.push(...loadedData.history);
+                                    // Optionally update currentUser/currentMainKey if present in file
+                                    if(loadedData.user) {
+                                        currentUser = loadedData.user;
+                                        document.querySelector('#username').value = currentUser;
+                                    }
+                                    if(loadedData.mainKey) {
+                                        currentMainKey = loadedData.mainKey;
+                                        document.querySelector('#versionls').value = currentMainKey;
+                                    }
+                                    renderHistoryFromData(); // This will call updateSuggestionsVisibility
+                                    saveChat(); // Save to local storage
+                                    alert('Chat history loaded successfully!');
+                                }
+                            } else {
+                                alert('Invalid .chathistory file format.');
+                            }
+                        } catch (error) {
+                            console.error('Error parsing .chathistory file:', error);
+                            alert('Error reading chat history file. Make sure it is a valid JSON.');
+                        } finally {
+                            event.target.value = ''; // Clear file input
+                        }
+                    };
+                    reader.readAsText(file);
+                };
+
+                // --- Suggestions Functionality ---
+                const updateSuggestionsVisibility = () => {
+                    if (chatHistory.length === 0) {
+                        suggestionsList.style.display = 'grid'; // Use grid for tile-like layout
+                        suggestionsList.classList.remove('hide');
+                    } else {
+                        suggestionsList.style.display = 'none';
+                        suggestionsList.classList.add('hide');
+                    }
+                };
+
+                const setupSuggestionListeners = () => {
+                    document.querySelectorAll('.suggestions-item').forEach(item => {
+                        item.addEventListener('click', (event) => {
+                            const suggestionText = item.querySelector('.text').innerText;
+                            promptInput.value = suggestionText;
+                            // Simulate form submission
+                            handleFormSubmit(null); // Pass null as event since it's simulated
+                        });
+                    });
+                };
+
+
+                // --- Event Listeners ---
+                
+                document.querySelector('#btn-ls-console').addEventListener('click', openStorageConsole);
+                
+                document.querySelector('#apply-settings-btn').addEventListener('click', () => {
+                    const u = document.querySelector('#username').value;
+                    const mk = document.querySelector('#versionls').value;
+                    const ak = document.querySelector('#gemiapikey').value;
+                    const mod = document.querySelector('#model-select').value;
+                    const temp = document.querySelector('#temperature-select').value;
+                    
+                    if(u) currentUser = u;
+                    if(mk) currentMainKey = mk;
+                    if(ak) window.API_KEY = ak;
+                    if(mod) window.API_MODEL = mod;
+                    
+                    saveVaultData(currentUser, { 
+                        apiKey: window.API_KEY, 
+                        model: window.API_MODEL,
+                        temperature: temp 
+                    });
+                    
+                    updateApiUrl();
+                    alert("Settings applied and saved to Vault (Stage 1).");
+                    
+                    // Reload Session data if Main Key changed
+                    if(mk) {
+                         const sd = loadSessionData(currentUser, currentMainKey);
+                         if(sd && sd.history) {
+                             chatHistory.length = 0;
+                             chatHistory.push(...sd.history);
+                             renderHistoryFromData(); // This will call updateSuggestionsVisibility
+                         } else {
+                             // Clear view if new session key is empty
+                             chatsContainer.innerHTML = '';
+                             chatHistory.length = 0;
+                             updateSuggestionsVisibility(); // Call if new session key is empty
+                         }
+                    }
+                });
+
+                document.querySelector('#delete-chats-button').addEventListener('click', () => {
+                     if(confirm("Delete this session history?")) {
+                         chatHistory.length = 0;
+                         chatsContainer.innerHTML = "";
+                         document.body.classList.remove('chats-active');
+                         // Clear in Stage 2 Storage
+                         saveSessionData(currentUser, currentMainKey, { history: [] });
+                         updateSuggestionsVisibility(); // Update visibility after deleting history
+                     }
+                });
+
+                promptForm.addEventListener('submit', handleFormSubmit);
+
+                // --- FILE UPLOAD LOGIC ---
+                // Trigger the hidden file input when the attach icon is clicked
+                document.querySelector('#add-file-button').addEventListener('click', () => {
+                    fileInput.click();
+                });
+                
+                // Cancel file selection
+                document.querySelector('#cancel-file-button').addEventListener('click', () => {
+                    userData.file = {};
+                    fileUploadWrapper.classList.remove('file-attached', 'image-attached', 'active');
+                });
+                
+                // Stop Response button
+                document.querySelector('#stop-response-button').addEventListener('click', () => {
+                    if (controller) controller.abort();
+                    userData.file = {};
+                    clearInterval(typingInterval);
+                    const loadingMsg = chatsContainer.querySelector('.bot-message.loading');
+                    if(loadingMsg) loadingMsg.classList.remove('loading');
+                    document.body.classList.remove("bot-responding");
+                    updateSuggestionsVisibility(); // Update visibility if bot response was stopped
+                });
+
+                fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    let displayFileName = file.name;
+    let actualMimeType = file.type;
+    let isImage = file.type.startsWith('image/');
+
+    // Überprüfen, ob es sich um eine JavaScript-Datei handelt
+    // (application/javascript, text/javascript, application/x-javascript, oder .js-Endung)
+    if (actualMimeType.includes('javascript') || file.name.toLowerCase().endsWith('.js')) {
+        actualMimeType = 'text/plain'; // MIME-Typ auf text/plain ändern
+        
+        // Dateinamen für die Anzeige anpassen, wie vom Benutzer gewünscht (.js -> .js.txt)
+        if (!displayFileName.toLowerCase().endsWith('.txt')) {
+             displayFileName += '.txt'; 
+        }
+        console.log(`[File Upload] JS-Datei erkannt, MIME-Typ auf '${actualMimeType}' geändert. Anzeigename: '${displayFileName}'.`);
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+        fileInput.value = ""; // Dateieingabe nach dem Lesen leeren
+        const base64String = event.target.result.split(',')[1];
+        
+        // Aktualisieren des Datei-Previews/Icons im UI für das Prompt-Eingabefeld
+        const filePreviewImg = fileUploadWrapper.querySelector('.file-preview');
+        const fileIconBtn = fileUploadWrapper.querySelector('.file-icon');
+
+        if (isImage) {
+            filePreviewImg.src = event.target.result;
+            filePreviewImg.style.display = 'block';
+            fileIconBtn.style.display = 'none';
+            fileUploadWrapper.classList.add('image-attached');
+            fileUploadWrapper.classList.remove('file-attached');
+        } else {
+            // Für Nicht-Bilddateien (einschließlich jetzt als Text behandelte .js-Dateien) das generische Datei-Icon anzeigen
+            filePreviewImg.src = '#'; // Alten Bild-Preview löschen
+            filePreviewImg.style.display = 'none';
+            fileIconBtn.style.display = 'block';
+            fileUploadWrapper.classList.remove('image-attached');
+            fileUploadWrapper.classList.add('file-attached');
+        }
+        fileUploadWrapper.classList.add('active'); // Immer aktiv, wenn eine Datei angehängt ist
+
+        userData.file = {
+            fileName: displayFileName, // Den potenziell angepassten Dateinamen verwenden
+            data: base64String,
+            mime_type: actualMimeType, // Den überschriebenen MIME-Typ verwenden
+            isImage: isImage // Den ursprünglichen isImage-Wert beibehalten
+        };
+        console.log(`[File Upload] Final userData.file zur Übermittlung:`, userData.file);
+    };
+});
+
+                // Event Listeners for Chat History File I/O
+                document.querySelector('#save-chat-file-button').addEventListener('click', saveChatToFile);
+                document.querySelector('#load-chat-file-button').addEventListener('click', () => {
+                    document.querySelector('#load-chathistory-input').click();
+                });
+                document.querySelector('#load-chathistory-input').addEventListener('change', loadChatFromFile);
+
+
+                // Window Load Init
+                window.addEventListener('load', () => {
+                    initApp();
+                    setupSuggestionListeners(); // Setup listeners for suggestions
+                });
+
+                // --- Fullscreen and UI helpers ---
+                window.fullx = (ele) => {
+                    ele = ele || document.documentElement;
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    } else {
+                        ele.requestFullscreen();
+                    }
+                }
+
+                // --- WebApp Version Display ---
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.getElementById('webappversion').textContent = 'Version 3.0 (Shrimp-AI)';
+                });
+            </script>
+        </div>
+
+        <div class="tab" id="tickets2">
+             <div id="speech-notes-dom" style="padding: 10px;">
+                <h3>Sprachnotizen</h3>
+                <p style="font-size: 0.8em; color: grey;">(Funktion basiert auf Shrimp-Recorder.js)</p>
+                <button id="record-button" style="padding: 8px 15px; margin-right: 10px; background-color: #1d7efd; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    🎤 Aufnahme starten
+                </button>
+                <button id="stop-record-button" disabled style="padding: 8px 15px; background-color: #d62939; color: white; border: none; border-radius: 5px; cursor: not-allowed;">
+                    ⏹️ Aufnahme stoppen
+                </button>
+                <button id="save-note-button" disabled style="padding: 8px 15px; background-color: green; color: white; border: none; border-radius: 5px; cursor: not-allowed; margin-left: 10px;">
+                    💾 Notiz speichern
+                </button>
+                <button id="load-note-button" style="padding: 8px 15px; background-color: orange; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+                    📂 Notizen anzeigen
+                </button>
+                <br><br>
+                <textarea id="speech-text-output" placeholder="Ihre transkribierten Notizen erscheinen hier..."
+                    style="width: 98%; height: 200px; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid var(--secondary-color); background-color: var(--secondary-color); color: var(--text-color);"></textarea>
+                <div id="saved-notes-list" style="margin-top: 15px;">
+                    <h4>Gespeicherte Notizen:</h4>
+                    <ul id="notes-list-ul" style="list-style: none; padding: 0;"></ul>
+                </div>
+             </div>
+        </div>
+        
+        <div class="tab" id="tickets">
+        </div>
+
+    </main>
+
+    <script src="js/lokal.js" id="lokal-script"></script>
+    <script src="js/shrimp-recorder.js"></script>
+
+    <script>
+        // --- JavaScript for Speech Notes Tab (using shrimp-recorder.js) ---
+        // This script assumes shrimp-recorder.js is loaded and defines a global `shrimpRecorder` object
+        // with methods like start(), stop(), getTranscription(), etc.
+
+        const recordButton = document.getElementById('record-button');
+        const stopRecordButton = document.getElementById('stop-record-button');
+        const speechTextOutput = document.getElementById('speech-text-output');
+        const saveNoteButton = document.getElementById('save-note-button');
+        const loadNoteButton = document.getElementById('load-note-button');
+        const notesListUl = document.getElementById('notes-list-ul');
+
+        let isRecording = false;
+
+        // A simple notes storage for demonstration if shrimp-recorder.js doesn't provide it
+        let storedNotes = JSON.parse(localStorage.getItem('shrimp_speech_notes') || '[]');
+
+        const renderStoredNotes = () => {
+            notesListUl.innerHTML = '';
+            if (storedNotes.length === 0) {
+                notesListUl.innerHTML = '<li style="color: grey;">Keine Notizen gespeichert.</li>';
+                return;
+            }
+            storedNotes.forEach((note, index) => {
+                const li = document.createElement('li');
+                li.style.cssText = `
+                    background: var(--secondary-color); padding: 8px; margin-bottom: 5px;
+                    border-radius: 5px; display: flex; justify-content: space-between; align-items: center;
+                `;
+                const noteTextPreview = note.text.substring(0, 50) + (note.text.length > 50 ? '...' : '');
+                li.innerHTML = `
+                    <span>${note.timestamp} - ${escapeHtml(noteTextPreview)}</span>
+                    <div>
+                        <button data-index="${index}" class="view-note-btn" style="background: none; border: none; color: #1d7efd; cursor: pointer;">🔍</button>
+                        <button data-index="${index}" class="delete-note-btn" style="background: none; border: none; color: red; cursor: pointer;">🗑️</button>
+                    </div>
+                `;
+                notesListUl.appendChild(li);
+            });
+        };
+
+        const saveNotesToLocalStorage = () => {
+            localStorage.setItem('shrimp_speech_notes', JSON.stringify(storedNotes));
+        };
+
+        // Event Listeners for Speech Notes UI
+        recordButton.addEventListener('click', async () => {
+            if (window.shrimpRecorder && !isRecording) {
+                try {
+                    await navigator.mediaDevices.getUserMedia({ audio: true }); // Request mic permission
+                    window.shrimpRecorder.start(); // Assuming start() is available in shrimp-recorder.js
+                    isRecording = true;
+                    recordButton.disabled = true;
+                    stopRecordButton.disabled = false;
+                    saveNoteButton.disabled = true;
+                    speechTextOutput.value = 'Aufnahme läuft...';
+                } catch (error) {
+                    console.error("Error starting recorder:", error);
+                    alert("Fehler beim Starten der Aufnahme: " + error.message + ". Bitte Mikrofonberechtigung erteilen.");
+                }
+            } else if (!window.shrimpRecorder) {
+                alert("Sprachrekorder-Modul (shrimp-recorder.js) nicht geladen.");
+            }
+        });
+
+        stopRecordButton.addEventListener('click', async () => {
+            if (window.shrimpRecorder && isRecording) {
+                window.shrimpRecorder.stop(); // Assuming stop() is available
+                isRecording = false;
+                recordButton.disabled = false;
+                stopRecordButton.disabled = true;
+                const transcription = window.shrimpRecorder.getTranscription(); // Assuming getTranscription() is available
+                speechTextOutput.value = transcription || "Keine Sprache erkannt.";
+                if (transcription) saveNoteButton.disabled = false;
+            }
+        });
+
+        saveNoteButton.addEventListener('click', () => {
+            const text = speechTextOutput.value;
+            if (text && text.trim() !== "" && text !== "Keine Sprache erkannt." && text !== "Aufnahme läuft...") {
+                storedNotes.unshift({ // Add to the beginning
+                    text: text.trim(),
+                    timestamp: new Date().toLocaleString()
+                });
+                saveNotesToLocalStorage();
+                renderStoredNotes();
+                speechTextOutput.value = ''; // Clear after saving
+                saveNoteButton.disabled = true;
+                alert('Notiz gespeichert!');
+            } else {
+                alert('Kein Text zum Speichern vorhanden.');
+            }
+        });
+
+        loadNoteButton.addEventListener('click', renderStoredNotes); // Just re-renders the list
+
+        notesListUl.addEventListener('click', (event) => {
+            if (event.target.classList.contains('view-note-btn')) {
+                const index = parseInt(event.target.dataset.index);
+                if (!isNaN(index) && storedNotes[index]) {
+                    speechTextOutput.value = storedNotes[index].text;
+                    saveNoteButton.disabled = false; // Allow re-saving/editing
+                }
+            } else if (event.target.classList.contains('delete-note-btn')) {
+                const index = parseInt(event.target.dataset.index);
+                if (!isNaN(index) && storedNotes[index]) {
+                    if (confirm('Diese Notiz wirklich löschen?')) {
+                        storedNotes.splice(index, 1);
+                        saveNotesToLocalStorage();
+                        renderStoredNotes();
+                        // If the currently displayed note was deleted, clear the textarea
+                        if (speechTextOutput.value === storedNotes[index]?.text) {
+                            speechTextOutput.value = '';
+                            saveNoteButton.disabled = true;
+                        }
+                        alert('Notiz gelöscht!');
+                    }
+                }
+            }
+        });
+
+        // Initial render of notes on load
+        window.addEventListener('load', renderStoredNotes);
+    </script>
+</body>
+</html>

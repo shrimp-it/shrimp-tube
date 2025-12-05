@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShrimpConnect</title>
+<style>
+body {
+font-family: sans-serif;
+background-color: #f4f4f4;
+margin: 0;
+padding: 0;
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+}
+
+.chat-container {
+background-color: #fff;
+border-radius: 8px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+overflow: hidden;
+width: 80%;
+max-width: 600px; /* Maximale Breite */
+display: flex;
+flex-direction: column;
+height: 80vh; /* Volle Höhe des Viewports */
+
+}
+
+.header {
+background-color: #007bff;
+color: white;
+text-align: center;
+padding: 1rem;
+border-bottom: 1px solid #ddd;
+}
+
+.messages {
+padding: 1rem;
+overflow-y: auto; /* Scrollen bei zu vielen Nachrichten */
+flex-grow: 1;
+}
+
+.message {
+padding: 0.5rem;
+margin-bottom: 0.5rem;
+border-radius: 4px;
+background-color: #f0f0f0;
+}
+
+.input-area {
+display: flex;
+padding: 1rem;
+border-top: 1px solid #ddd;
+}
+
+.input-area input {
+flex-grow: 1;
+padding: 0.5rem;
+border-radius: 4px;
+border: 1px solid #ccc;
+margin-right: 0.5rem;
+}
+
+.input-area button {
+background-color: #007bff;
+color: white;
+border: none;
+padding: 0.5rem 1rem;
+border-radius: 4px;
+cursor: pointer;
+}
+
+.login-container {
+background-color: #fff;
+border-radius: 8px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+padding: 2rem;
+width: 80%;
+max-width: 400px;
+text-align: center;
+}
+
+.login-container input {
+width: 100%;
+padding: 0.5rem;
+margin-bottom: 1rem;
+border-radius: 4px;
+border: 1px solid #ccc;
+}
+
+.login-container button {
+background-color: #007bff;
+color: white;
+border: none;
+padding: 0.5rem 1rem;
+border-radius: 4px;
+cursor: pointer;
+width: 100%;
+}
+</style>
+</head>
+<body>
+
+<div id="login-container" class="login-container">
+<h2>Login</h2>
+<input type="text" id="username" placeholder="Benutzername">
+<button id="login-button">Anmelden</button>
+</div>
+
+<div id="chat-container" class="chat-container" style="display: none;">
+<div class="header">
+<h2>shrimpConnect</h2>
+<p>Willkommen, <span id="username-display"></span>!</p>
+</div>
+<div id="messages" class="messages">
+<!-- Nachrichten werden hier angezeigt -->
+</div>
+<div class="input-area">
+<input type="text" id="message-input" placeholder="Nachricht eingeben...">
+<button id="send-button">Senden</button>
+</div>
+</div>
+
+<script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+<script>
+const loginContainer = document.getElementById('login-container');
+const chatContainer = document.getElementById('chat-container');
+const usernameInput = document.getElementById('username');
+const loginButton = document.getElementById('login-button');
+const usernameDisplay = document.getElementById('username-display');
+const messagesDiv = document.getElementById('messages');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+
+let ably = null;
+let channel = null;
+let username = null;
+
+loginButton.addEventListener('click', () => {
+username = usernameInput.value.trim();
+if (username) {
+loginContainer.style.display = 'none';
+chatContainer.style.display = 'flex';
+usernameDisplay.textContent = username;
+initializeAbly();
+} else {
+alert('Bitte gib einen Benutzernamen ein.');
+}
+});
+
+
+function initializeAbly() {
+const apiKey = 'fmJVYg.1TqyQA:o5K81kuCMcxCNgPK7dqWF7CmopW31a5DPZ7D8X2Nvbo'; // ACHTUNG: Nicht für Produktion! Serverless Function nutzen!
+
+ably = new Ably.Realtime(apiKey);
+
+ably.connection.on('connected', () => {
+console.log('Verbunden mit Ably!');
+channel = ably.channels.get('shrimptube');
+subscribeToChannel();
+});
+
+ably.connection.on('failed', (err) => {
+console.error('Verbindungsfehler mit Ably:', err);
+});
+}
+
+
+function subscribeToChannel() {
+channel.subscribe('chat-message', (message) => {
+displayMessage(message.data.username, message.data.text);
+});
+}
+
+
+sendButton.addEventListener('click', () => {
+const messageText = messageInput.value.trim();
+if (messageText) {
+sendMessage(messageText);
+messageInput.value = '';
+}
+});
+
+
+function sendMessage(text) {
+if (channel) {
+channel.publish('chat-message', { username: username, text: text }, (err) => {
+if (err) {
+console.error('Fehler beim Senden der Nachricht:', err);
+}
+});
+} else {
+console.warn('Nicht mit dem Kanal verbunden.');
+}
+}
+
+function displayMessage(username, text) {
+const messageDiv = document.createElement('div');
+messageDiv.classList.add('message');
+messageDiv.textContent = `${username}: ${text}`;
+messagesDiv.appendChild(messageDiv);
+messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scrollt nach unten für neue Nachrichten
+}
+
+
+// Event Listener für Enter-Taste im Nachrichtenfeld
+messageInput.addEventListener("keyup", function(event) {
+if (event.key === "Enter") {
+sendButton.click();
+}
+});
+
+</script>
+
+</body>
+</html>

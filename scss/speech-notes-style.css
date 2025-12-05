@@ -1,0 +1,87 @@
+    .containerX ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .containerX p {
+      color: #444;
+    }
+
+    .containerX button:focus {
+      outline: 0;
+    }
+
+    .containerX {
+      margin: 0 auto;
+      padding: 5px 10px;
+      text-align: center;
+      width: 100%;
+      max-height: 90%;
+      overflow-y: auto;
+    }
+
+    .containerX h1 {
+      margin-bottom: 5px;
+    }
+
+    .containerX .page-description {
+      font-size: 1.1rem;
+      margin: 0 auto;
+    }
+
+    .containerX .tz-link {
+      font-size: 1em;
+      color: #1da7da;
+      text-decoration: none;
+    }
+
+    .no-browser-support {
+      display: none;
+      font-size: 1.2rem;
+      color: #e64427;
+      margin-top: 35px;
+    }
+
+    .containerX .app {
+      margin: 5px auto;
+    }
+
+    .containerX #note-textarea {
+      padding-left: 3px;
+      margin: 10px 0;
+      width: 80%;
+      min-width: 200px;
+    }
+
+    .containerX #recording-instructions {
+      margin: 15px auto 20px;
+    }
+
+    .containerX #notes {
+      padding-top: 10px;
+    }
+
+    .containerX .note {
+      background-color: lightblue;
+      border-style: 3px dotted red;
+      border-radius: 10px;
+    }
+
+    .containerX .note .header {
+      font-size: 0.9em;
+      color: #888;
+      margin-bottom: 3px;
+      border-bottom: 1px solid white;
+    }
+
+    .containerX .note .delete-note,
+    .containerX .note .listen-note,
+    .containerX .note .sel-note {
+      text-decoration: none;
+      margin-left: 15px;
+    }
+
+    .containerX .note .content {
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+    }

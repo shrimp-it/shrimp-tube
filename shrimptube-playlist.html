@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>🍤tube</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+
+<!--## app-container ###-->
+<div id="app-container">
+<button class="alphatube-btn">🍤</button>
+<header id="header">
+<div class="controls">
+<input type="text" id="video-id-input" placeholder="vid-id|id,id|pl-id">
+<button id="add-video-btn">🧲</button>
+<button id="search-btn">Search</button>
+<button id="chat-btn">Chat</button>
+
+<div class="controls-sub-pageview">
+<button id="toggle-header-btn" style="display:none;">Toggle Header</button>
+<button id="toggle-playlist-btn" onclick="window.testPlWidth()">Toggle Playlist</button>
+</div>
+</div>
+</header>
+
+<main>
+<div id="player-container">
+<div id="player"></div>
+</div>
+
+<div id="playlist-container">
+<!-- NEUER LOOK FÜR PLAYLIST-FUNKTIONS-BUTTONS HIER -->
+<div class="playlist-actions-toolbar">
+
+<!-- Gruppe von 3 kleineren Buttons (💾, 🎀, Player Controls) -->
+<div class="playlist-action-item multi-button-group">
+<span class="toolbar-sub-btn save-clip-btn" onclick="let urlParams = new URLSearchParams(window.location.search);let pltodl = urlParams.get('playlist');window.open('yt-save-clip.html?f=144&ytid='+pltodl, '_blank');" title="Save current playlist to clip file">💾</span>
+<button class="toolbar-sub-btn toggle-playlist-display-btn" onclick="document.getElementById('toggle-playlist-btn').click();" title="Toggle Playlist Visibility"> 🎀</button>
+<button id="player-controls-btn" class="player-controls-btn toolbar-sub-btn" title="Open Player Controls"><img src="/img/remote-control.png" alt="Remote"></button>
+</div>
+
+<!-- TV Programm Button mit Optionen -->
+<div class="playlist-action-item single-button-group">
+<button class="view-col-btn toolbar-main-btn" title="Open TV Program Options">📺</button>
+<div class="column-options cols-1 tvprogramm">
+<div class="column-option ok tvrogramm" data-columns="1 " data-myres=" ">
+TV (click on page)
+<div class="tvrogramm">
+
+<a href="https://www.2ix2.com/servus-tv" data-myres=" " target="_blank" data-columns="1" class="bomodal-start-btn">servusTV</a>
+</div>
+<div> TV-extern....</div>
+<div class="tvrogramm" >
+<a href="https://zattoo.com/channels?channel=one" data-myres=" " target="_blank" data-columns="1" class="bomodal-start-btn">One</a>
+</div>
+<div class="tvrogramm" >
+<a href="https://zattoo.com/channels?channel=red_bull_tv_dach_int" data-myres=" " target="_blank" data-columns="1" class="bomodal-start-btn">redBull TV</a>
+</div>
+<div class="tvrogramm" >
+<a href=" https://zattoo.com/channels?channel=bronco_de" data-myres=" " target="_blank" data-columns="1" class="bomodal-start-btn">Western TV 1*</a>
+</div>
+<div class="tvrogramm" >
+<a href="https://zattoo.com/channels?channel=grjngo_de" data-myres=" " target="_blank" data-columns="1" class="bomodal-start-btn">Western TV 2</a>
+</div>
+<div style="" >
+<a href="https://zattoo.com/ondemand" data-myres=" " target="_blank" data-columns="1" class="bomodal-start-btn">Mediathek</a>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 🍤Tube Optionen Button mit Optionen -->
+<div class="playlist-action-item single-button-group">
+<button class="view-col-btn toolbar-main-btn" title="Open Playlist Options">
+<span>🍤</span>
+</button>
+<div class="column-options cols-1">
+<div class="column-option ok" data-columns="1" data-myres="🔗">
+<span data-myres="🔗"> 🔗</span>
+<span data-myres="🔗" data-columns="1" onclick="window.ytapiNextpagetokko='false';">50 PL-vids</span>
+</div>
+<div class="column-option ok" data-myres="🧷" data-columns="2">
+<span data-myres="🧷"> 🧷</span>
+<span data-myres="🧷" data-columns="2" onclick="window.ytapiNextpagetokko='true';">all PL-vids</span>
+</div>
+<div class="column-option ok" data-columns="3" data-myres="copy" id="copyidvids_btn">
+<svg data-myres="copy" data-columns="3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+<g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor">
+<path d="M12 2a10 10 0 0 0-10 10 10 10 0 0 0 10 10 10 10 0 0 0 10-10"></path>
+</g>
+</svg>
+<span data-myres="copy" data-columns="3">copy list ids</span>
+</div>
+
+<div class="column-option ok" data-columns="3b" data-myres="copy" id="playlistmanager_btn">
+<button data-myres=" " data-columns="3b" id="myBtn3" class="bomodal-start-btn">Playlist-Manager</button>
+</div>
+
+<div class="column-option gestoppt" data-myres="D2" data-columns="4">
+<svg data-myres="D2" data-columns="4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="12" cy="12" r="3"></circle>
+<path d="M19 12h3"></path>
+<path d="M12 19v3"></path>
+<path d="M5 12H2"></path>
+<path d="M12 5V2"></path>
+</svg>
+<span data-myres="D2" data-columns="4">tune</span>
+</div>
+
+
+<div class="column-option ok" data-columns="5" data-myres="D3">
+<svg data-myres="D3" data-columns="5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M12 2v20"></path>
+<path d="M2 12h20"></path>
+<path d="M12 12h.01"></path>
+</svg>
+<span data-myres="D3" data-columns="5">center</span>
+</div>
+<div class="column-option ok" data-columns="6" data-myres=" ">
+<svg data-myres=" " data-columns="6" xmlns="http://www.w3.org/2000/svg" width="2" height="24" viewBox="0 0 2 24"></svg>
+<span data-myres=" " data-columns="6">
+<containermode style="margin-bottom:3px;">
+<button data-myres=" " data-columns="6" id="myBtn" class="bomodal-start-btn">🍤lists</button>
+</containermode>
+<containermode style="margin-bottom:3px;">
+<button data-myres=" " data-columns="6" id="myBtn2" class="bomodal-start-btn">🍤nav</button>
+</containermode>
+</span>
+</div>
+<div class="column-option gestoppt" data-columns="7">
+Vol: <input id="volume-input" type="number" oninput="document.getElementById('ra1').value = this.value" class="free-cols-target" max="100" min="0">
+<containermode>
+<button data-columns="7" id="myBtn2" class="bomodal-start-btn">get</button>
+</containermode>
+<input value="0" id="ra1" name="ra1" class="column-option-range gestoppt" type="range" oninput="this.closest('.column-option').querySelector('.free-cols-target').value=this.value;" data-columns="7"/>
+</div>
+</div>
+</div>
+</div>
+<!-- ENDE NEUER LOOK FÜR PLAYLIST-FUNKTIONS-BUTTONS -->
+
+<containermode>
+<!-- The boModal -->
+<div id="myboModal" class="bomodal">
+<!-- boModal content -->
+<div class="bomodal-content">
+<div class="bomodal-header">
+<span class="close">&times;</span>
+<div>
+<span class="login">🍤list</span><span id="ogin" class="user"></span>
+</div>
+</div>
+<div class="bomodal-body">
+<div id="login">
+<form name="form-login" id="ggapplogin" class="formlogin">
+<div>
+<input type="text" id="twusername" required placeholder="Username"/>
+<input type="email" id="twusermail" required placeholder="email"/>
+</div>
+<div>
+<span>
+<svg style="margin-top:10px;" xmlns="http://www.w3.org/2000/svg" height="30" width="30" viewBox="0 0 640 640">
+<path d="M463 448.2C440.9 409.8 399.4 384 352 384L288 384C240.6 384 199.1 409.8 177 448.2C212.2 487.4 263.2 512 320 512C376.8 512 427.8 487.3 463 448.2zM64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320zM320 336C359.8 336 392 303.8 392 264C392 224.2 359.8 192 320 192C280.2 192 248 224.2 248 264C248 303.8 280.2 336 320 336z"/>
+</svg>
+</span>
+<input type="text" id="twVerific" placeholder="Verification Token"/>
+</div>
+<div>
+<span class="fontawesome-lock"></span>
+<input type="password" id="pass" placeholder="Password"/>
+</div>
+<div>
+<input type="submit" value="Login" onClick=""/>
+</div>
+</form>
+</div>
+</div>
+<div class="bomodal-footer">
+<div style="width: 98%; background: #282e33; color: white; margin-left: 0; border: 5px solid #282e33; font-size: 1em;">
+<input type="checkbox" class="vehic" id="vehicle1" name="vehicle1" style="background: green" value="login"/>
+<label for="vehicle1">login</label>
+<input type="checkbox" class="vehic" id="vehicle2" name="vehicle2" value="config"/>
+<label for="vehicle2"> config</label>
+<input class="vehic" type="checkbox" id="vehicle3" name="vehicle3" value="Boat"/>
+<label for="vehicle3">miniApp</label>
+<input class="vehic" type="checkbox" id="vehicle4" name="vehicle3" value="Boat"/>
+<label for="vehicle4">fullApp</label>
+</div>
+</div>
+</div>
+</div>
+<div id="myboModal2" class="bomodal">
+<!-- boModal content -->
+<div class="bomodal-content">
+<div class="bomodal-header">
+<span class="close">&times;</span>
+<div>API</div>
+</div>
+<div class="bomodal-body">
+<div>
+<input type="checkbox" class="vehic" id="bomod" name="bomod" style="background: green" value="login"/>
+<label style="font-size: 1em" for="bomod">login</label>
+<input type="checkbox" class="vehic" id="bomod2" name="bomod2" value="config"/>
+<label for="bomod2"> config</label>
+<input class="vehic" type="checkbox" id="bomod3" name="bomod3" value="mini"/>
+<label for="bomod3">miniApp</label>
+<input class="vehic" type="checkbox" id="bomod4" name="bomod4" value="full"/>
+<label for="bomod4">fullApp</label>
+</div>
+</div>
+</div>
+</div>
+
+<!----Bomodal3 (iframe will be added dynamically by modal-script.js)---->
+<div id="myboModal3" class="bomodal">
+<div class="bomodal-content">
+<div class="bomodal-header">
+<span class="fullheight_btn" style="margin-right:50%;" onclick="let ele=this.parentElement.parentElement;ele.style.height='850px';ele.querySelector('.bomodal-body').style.height='790px';">💢</span>
+<span class="close">&times;</span>
+</div>
+<div class="bomodal-body" style="margin:0;padding:0;">
+<!-- The iframe will be inserted here dynamically -->
+</div>
+</div>
+</div>
+</containermode>
+
+<ul id="playlist"></ul>
+</div>
+</main>
+</div>
+
+<!--##Modals###-->
+
+<!-- #Search Modal -->
+<div id="search-modal" class="modal">
+<div class="modal-content">
+<span class="close-btn">&times;</span>
+<iframe id="search-frame" src="" frameborder="0"></iframe>
+</div>
+</div>
+
+<!-- #Chat Modal -->
+<div id="chat-modal" class="modal">
+<div class="modal-content">
+<span class="close-btn">&times;</span>
+<iframe id="chat-frame" src="" frameborder="0"></iframe>
+</div>
+</div>
+
+<!-- #Player Controls Modal -->
+<div id="player-controls-modal" class="modal">
+<div class="modal-content">
+<span class="close-btn">&times;</span>
+<iframe id="player-controls-frame" src="player-controls.html" frameborder="0"></iframe>
+</div>
+</div>
+
+<!-- #Admin Modal -->
+<div id="admin-controls-modal" class="modal">
+<div class="modal-content">
+<span class="close-btn">&times;</span>
+</div>
+</div>
+
+<!-- ## Custom Scripts ## -->
+<script src="global-utils.js"></script>
+<script src="modal-script.js"></script>
+<script src="main-app.js"></script>
+<script src="playlist-manager.js"></script>
+
+<script>
+    // --- CLEANED UP: No longer forwarding messages related to Prompt Manager ---
+    // The previous listener for 'open-prompt-manager-modal-from-editor' and 'set-final-prompt-input'
+    // is removed as shrimp-ai.html now manages its own modal for this feature.
+    // The previous listener for closing myboModal3 to re-show the floating button is also removed.
+</script>
+
+</body>
+</html>
+

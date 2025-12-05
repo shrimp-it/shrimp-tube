@@ -1,0 +1,17 @@
+  .desktop {
+      background: lightblue;
+      font-size: 14px;
+    }
+
+  .desktop>input {
+      font-size: 12px;
+    }
+
+  .mobile {
+      background: grey;
+      font-size: 14px;
+    }
+
+  .mobile >input {
+      font-size: 12px;
+    }

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
+
+  <title>YouTube Query Explorer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .query-list {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.1);
+    }
+    .query-item {
+      border-bottom: 1px solid #ddd;
+      padding: 15px 0;
+    }
+    .query-item:last-child {
+      border-bottom: none;
+    }
+    .query-buttons button {
+      padding: 8px 12px;
+      margin-right: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .en-btn { background-color: #28a745; color: #fff; }
+    .de-btn { background-color: #dc3545; color: #fff; }
+    .watchlist-controls {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .watchlist-controls button {
+      padding: 8px 12px;
+      margin: 6px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>YouTube Query Explorer</h1>
+  <div style="text-align:center; margin-bottom:20px;">
+    <label for="apiKey">🔑 YouTube API Key:</label>
+    <input type="text" id="apiKey" placeholder="Enter API Key" style="width:300px;" />
+  </div>
+  <div class="query-list" id="queryList"></div>
+  <div class="watchlist-controls">
+    <button onclick="saveWatchlist()">💾 Save Watchlist as File</button>
+    <button onclick="copyWatchlist()">📋 Copy to Clipboard</button>
+    <button onclick="showWatchlistPage()">📺 Show as HTML Page</button>
+  </div>
+
+  <script>
+    const queries = [
+      { id: 1, name: "Psychedelic Experiences", searchEN: "(psychedelics OR shrooms OR LSD OR DMT OR ayahuasca) personal stories", searchDE: "(psychedelika OR pilze OR LSD OR DMT OR ayahuasca) persönliche geschichten" },
+      { id: 2, name: "Extreme Mountain Biking", searchEN: "(mountain biking OR downhill OR enduro) crashes", searchDE: "(mountainbiken OR downhill OR enduro) stürze" },
+      { id: 3, name: "Ancient Civilizations", searchEN: "(ancient history OR pyramids OR archaeology) documentary", searchDE: "(antike geschichte OR pyramiden OR archäologie) dokumentation" },
+      { id: 4, name: "Star Wars Lore", searchEN: "(star wars OR darth vader OR ahsoka) audio comic OR what if", searchDE: "(star wars OR darth vader OR ahsoka) audio-comic OR was wäre wenn" }
+    ];
+
+    let watchlist = [];
+
+    function createQueryUI() {
+      const list = document.getElementById('queryList');
+      queries.forEach(q => {
+        const item = document.createElement('div');
+        item.className = 'query-item';
+        item.innerHTML = `
+          <h3>${q.name} (ID: ${q.id})</h3>
+          <p><strong>English:</strong> ${q.searchEN}</p>
+          <p><strong>Deutsch:</strong> ${q.searchDE}</p>
+          <div class="query-buttons">
+            <button class="en-btn" onclick="runSearch('${q.searchEN}', ${q.id})">Search EN</button>
+            <button class="de-btn" onclick="runSearch('${q.searchDE}', ${q.id})">Search DE</button>
+          </div>
+          <details id="details-${q.id}" style="margin-top:10px;">
+            <summary>🔍 Show Results</summary>
+            <ul id="results-${q.id}"></ul>
+          </details>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    async function runSearch(query, id) {
+      const key = document.getElementById("apiKey").value;
+      if (!key) return alert("Please enter a YouTube API key.");
+      const apiURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=5&key=${key}`;
+      const res = await fetch(apiURL);
+      const data = await res.json();
+      const resultsContainer = document.getElementById(`results-${id}`);
+      resultsContainer.innerHTML = '';
+      data.items.forEach(video => {
+        const li = document.createElement('li');
+        const title = video.snippet.title;
+        const vid = video.id.videoId;
+        li.innerHTML = `
+          ${title}
+          <button onclick="addToWatchlist('${vid}', \`${title}\`)">➕ Add to Watchlist</button>
+        `;
+        resultsContainer.appendChild(li);
+      });
+    }
+
+    function addToWatchlist(id, title) {
+      if (!watchlist.find(v => v.id === id)) {
+        watchlist.push({ id, title });
+        alert(`Added "${title}" to watchlist.`);
+      }
+    }
+
+    function saveWatchlist() {
+      const blob = new Blob([JSON.stringify(watchlist, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'watchlist.json';
+      a.click();
+    }
+
+    function copyWatchlist() {
+      const text = watchlist.map(v => `${v.title} - https://youtube.com/watch?v=${v.id}`).join('\n');
+      navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+    }
+
+    function showWatchlistPage() {
+      const html = `
+        <!DOCTYPE html>
+        <html><head><title>Watchlist</title></head><body>
+        <h2>My Watchlist</h2>
+        ${watchlist.map((v, i) => `
+          <div>
+            <h3>${v.title}</h3>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/${v.id}?autoplay=0" frameborder="0" allowfullscreen></iframe>
+          </div>
+        `).join('')}
+        </body></html>
+      `;
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
+
+    createQueryUI();
+  </script>
+</body>
+</html>

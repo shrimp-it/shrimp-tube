@@ -1,0 +1,130 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,800,400italic);
+.main-nav {
+  text-align: center;
+}
+
+.main-nav ul {
+ width: 100%;
+ list-style: none;
+  display: inline-flex;
+  border: 2px solid black;
+  margin: 0.2rem 0;
+  border-radius: 15px;
+  overflow: hidden;
+}
+.main-nav ul li {
+  width: 24%;
+margin:0;
+max-height: 32px;
+text-wrap: nowrap;
+ 
+}
+.main-nav ul li a {
+padding-right: 10px;
+padding-bottom:8px;
+padding-top: 6px;
+padding-left:6px;
+  display: inline-block;
+text-wrap: nowrap;
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+}
+
+.main-nav ul li a svg {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin-right: 0.4rem;
+}
+
+.main-nav ul li a svg,
+.main-nav ul li a span {
+  vertical-align: middle;
+}
+
+.main-nav ul li.active a {
+  background: black;
+  color: white;
+}
+
+.main-nav ul li.active svg {
+  fill: white;
+}
+
+.tabs .tab {
+  display: none;
+}
+
+.tabs .tab.active {
+  display: block;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+max-width:800px;
+}
+
+.main-header {
+  text-align: center;
+  background: black;
+  color: white;
+  padding: 3rem 5rem 3rem;
+}
+
+.main-header h1 {
+  margin: 0 0 0.5rem 0;
+}
+
+.main-header a {
+  color: white;
+}
+
+h1 {
+  font-size: 3rem;
+  margin: 0 0 1rem 0;
+}
+
+p {
+  margin: 0 0 0.5rem 0;
+}
+
+main.tabs {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+.speaker-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.speaker-list li {
+  width: 48%;
+  margin: 4px 4px 4% 4px;
+  text-align: center;
+  border: 2px solid black;
+  border-radius: 4px;
+  padding: 35px 20px;
+}
+
+.speaker-list li span {
+  display: block;
+}
+
+.schedule dt {
+  font-weight: bold;
+}
+
+.schedule dt~dt {
+  margin-top: 1rem;
+}

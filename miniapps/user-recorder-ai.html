@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recorder v2.3</title>
+    <style>
+        .shrimp-recorder-container {
+            margin-top: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .shrimp-recorder-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+
+        .shrimp-recorder-btn-primary {
+            background-color: #007bff;
+            color: #fff;
+        }
+        
+        .shrimp-recorder-btn-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .shrimp-recorder-btn-info {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+
+        .shrimp-recorder-download {
+            display: none; /* Hide download link initially */
+            margin-bottom: 1.5rem;
+        }
+
+        /* Initially hide the stop button */
+        #shrimp-recorder-stop {
+            display: none;
+        }
+
+        .shrimp-recorder-video-wrapper {
+            padding: 3rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .shrimp-recorder-video-element {
+            max-width: 100%; /* Responsive video */
+            height: auto;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="shrimp-recorder-container">
+        <span>
+            <a id="shrimp-recorder-download" class="shrimp-recorder-download">
+                <button type="button" class="shrimp-recorder-btn shrimp-recorder-btn-primary">Download</button>
+            </a>
+        </span>
+        <button type="button" class="shrimp-recorder-btn shrimp-recorder-btn-danger" id="shrimp-recorder-stop">Stop</button>
+        <button type="button" class="shrimp-recorder-btn shrimp-recorder-btn-info" id="shrimp-recorder-recordAudio">Record Audio</button>
+        <button type="button" class="shrimp-recorder-btn shrimp-recorder-btn-info" id="shrimp-recorder-recordVideo">Record Video</button>
+        <button type="button" class="shrimp-recorder-btn shrimp-recorder-btn-info" id="shrimp-recorder-recordScreen">Record Screen</button>
+
+        <div class="shrimp-recorder-video-wrapper">
+            <video class="shrimp-recorder-video-element" autoplay height='480' width="640" muted></video>
+        </div>
+    </div>
+
+    <script>
+        // Use a self-executing anonymous function to encapsulate the recorder logic
+        // and avoid polluting the global scope.
+        (function() {
+            let shouldStop = false;
+            let stopped = false;
+
+            const videoElement = document.querySelector(".shrimp-recorder-video-element");
+            const downloadLink = document.getElementById('shrimp-recorder-download');
+            const stopButton = document.getElementById('shrimp-recorder-stop');
+            const recordAudioButton = document.getElementById('shrimp-recorder-recordAudio');
+            const recordVideoButton = document.getElementById('shrimp-recorder-recordVideo');
+            const recordScreenButton = document.getElementById('shrimp-recorder-recordScreen');
+            const infoButtons = document.querySelectorAll('.shrimp-recorder-btn-info');
+
+            function startRecord() {
+                infoButtons.forEach(button => button.disabled = true);
+                downloadLink.style.display = 'none';
+                stopButton.style.display = 'inline-block'; // Show the stop button
+            }
+
+            function stopRecord() {
+                infoButtons.forEach(button => button.disabled = false);
+                // The download link is displayed when the recording blob is ready.
+                stopButton.style.display = 'none'; // Hide the stop button
+            }
+
+            const audioRecordConstraints = {
+                echoCancellation: true
+            };
+
+            stopButton.addEventListener('click', function() {
+                shouldStop = true;
+            });
+
+            const handleRecord = function({ stream, mimeType }) {
+                startRecord();
+                let recordedChunks = [];
+                stopped = false;
+                const mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = function(e) {
+                    if (e.data.size > 0) {
+                        recordedChunks.push(e.data);
+                    }
+                    if (shouldStop === true && stopped === false) {
+                        mediaRecorder.stop();
+                        stopped = true;
+                    }
+                };
+
+                mediaRecorder.onstop = function() {
+                    const blob = new Blob(recordedChunks, { type: mimeType });
+                    recordedChunks = [];
+                    const filename = window.prompt('Enter file name');
+                    downloadLink.href = URL.createObjectURL(blob);
+                    
+                    // Set the download filename on the anchor's child button or the anchor itself
+                    const downloadButton = downloadLink.querySelector('button');
+                    const extension = mimeType.split('/')[1] === 'mp4' ? '.mp4' : '.webm'; // Simple extension logic
+                    downloadLink.download = `${filename || 'recording'}${extension}`;
+
+                    downloadLink.style.display = 'inline-block'; // Show download link
+                    
+                    // Stop all tracks in the stream to turn off camera/mic light
+                    if (stream) {
+                       stream.getTracks().forEach(track => track.stop());
+                    }
+                    
+                    stopRecord();
+                    videoElement.srcObject = null;
+                };
+
+                mediaRecorder.start(200);
+            };
+
+            async function recordAudio() {
+                const mimeType = 'audio/webm';
+                shouldStop = false;
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: audioRecordConstraints });
+                    handleRecord({ stream, mimeType });
+                } catch (error) {
+                    console.error("Error accessing audio:", error);
+                    alert("Error accessing audio. Please check your microphone permissions.");
+                    stopRecord(); // Ensure UI is reset on failure
+                }
+            }
+
+            async function recordVideo() {
+                const mimeType = 'video/mp4';
+                shouldStop = false;
+                const constraints = {
+                    audio: { "echoCancellation": true },
+                    video: { "width": { "min": 640, "max": 1024 }, "height": { "min": 480, "max": 768 } }
+                };
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    videoElement.srcObject = stream;
+                    handleRecord({ stream, mimeType });
+                } catch (error) {
+                    console.error("Error accessing video:", error);
+                    alert("Error accessing video. Please check your camera and microphone permissions.");
+                    stopRecord();
+                }
+            }
+
+            async function recordScreen() {
+                const mimeType = 'video/mp4';
+                shouldStop = false;
+                if (!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia)) {
+                    return window.alert('Screen Record not supported!');
+                }
+
+                let stream = null;
+                try {
+                    const displayStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { cursor: "motion" },
+                        audio: { 'echoCancellation': true }
+                    });
+                    videoElement.srcObject = displayStream; 
+
+                    if (window.confirm("Record audio with screen?")) {
+                        const audioContext = new AudioContext();
+                        try {
+                            const voiceStream = await navigator.mediaDevices.getUserMedia({ audio: { 'echoCancellation': true }, video: false });
+                            const userAudio = audioContext.createMediaStreamSource(voiceStream);
+                            const audioDestination = audioContext.createMediaStreamDestination();
+                            userAudio.connect(audioDestination);
+
+                            if (displayStream.getAudioTracks().length > 0) {
+                                const displayAudio = audioContext.createMediaStreamSource(displayStream);
+                                displayAudio.connect(audioDestination);
+                            }
+
+                            const tracks = [...displayStream.getVideoTracks(), ...audioDestination.stream.getTracks()];
+                            stream = new MediaStream(tracks);
+                            handleRecord({ stream, mimeType });
+
+                        } catch (audioError) {
+                            console.error("Error accessing microphone for screen recording:", audioError);
+                            alert("Error accessing microphone. Screen recording will proceed without microphone audio.");
+                            stream = displayStream; 
+                            handleRecord({ stream, mimeType });
+                        }
+                    } else {
+                        stream = displayStream;
+                        handleRecord({ stream, mimeType });
+                    }
+                    videoElement.srcObject = stream;
+                } catch (error) {
+                    console.error("Error accessing screen:", error);
+                    alert("Error accessing screen. Please check your screen recording permissions.");
+                    stopRecord();
+                }
+            }
+
+            recordAudioButton.addEventListener('click', recordAudio);
+            recordVideoButton.addEventListener('click', recordVideo);
+            recordScreenButton.addEventListener('click', recordScreen);
+        })(); // Immediately execute the function
+    </script>
+</body>
+</html>

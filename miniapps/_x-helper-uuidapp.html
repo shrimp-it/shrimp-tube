@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meine WebApp mit UUID Generator</title>
+<!-- Ihre weiteren Styles oder Skripte hier -->
+<style>
+ 
+</style>
+</head>
+<body>
+
+ 
+<div id="uuid-app-container">
+<!-- Hier wird der UUID-Generator von appmodUUID.js eingefügt -->
+</div>
+
+<!-- Dies ist der entscheidende <script type="module"> Tag -->
+<script src="./js/appmodUUID.js";></script >
+<script>
+// Importieren Sie das Modul (stellen Sie sicher, dass der Pfad korrekt ist)
+ 
+
+document.addEventListener('DOMContentLoaded', () => {
+const myContainer = document.getElementById('uuid-app-container');
+
+if (myContainer) {
+// 1. Einstellungen definieren
+appmodUUID.settings = {
+ targetElement: myContainer,
+ uuidLength: 12, // Die gewünschte Länge der UUID
+ onGenerateCallback: (newUUID) => {
+    navigator.clipboard.writeText(newUUID);
+    console.log('Neue UUID erfolgreich generiert:', newUUID);
+   // Hier könnten Sie die UUID an ein Formularfeld übergeben, speichern etc.
+  }
+ };
+
+ // 2. UUID-Generator UI initialisieren
+ appmodUUID.init();
+
+//   Nach 2 Sekunden den UUID-Generator wieder entfernen
+
+// wenn 1x ausgelöst, dann abbrechen 
+  setTimeout(() => {       
+       appmodUUID.destroy();
+       }, 2000);  
+
+} else {
+console.error('Das Zielelement #uuid-app-container wurde nicht gefunden.');
+}
+});
+</script>
+</body>
+</html>

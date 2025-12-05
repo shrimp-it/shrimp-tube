@@ -1,0 +1,510 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="robots" content="noindex">
+ <!--meta http-equiv=refresh content="0; url=/validate/"--> 
+<title>shrimpTubeControls</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<style>
+body {
+font-family: sans-serif;
+background-color: transparent;
+color: black;
+padding: 0.1rem;
+display: block;
+
+/* Removed unnecessary margin */
+}
+details {margin-bottom:4px;}
+summary {font-size: 1.1rem; margin-bottom:4px;font-weight:600;}
+select, option {font-size: 1.1rem}
+
+#remote-container {
+height: auto;
+border: 5px solid #333;
+/* Dark grey border */
+border-radius: 15px;
+/* Rounded corners */
+padding: 1rem;
+width: 300px;
+/* Adjust width as needed */
+margin: 0 auto;
+/* Center the remote */
+background-color: #f0f0f0;
+/* Light grey background */
+}
+
+button {
+background-color: #555;
+/* Slightly lighter grey */
+color: #fff;
+border: none;
+padding: 0.45rem 1em;
+width:100%;
+/* Slightly bigger buttons */
+margin: 0.25rem;
+cursor: pointer;
+border-radius: 5px;
+/* Slight rounding */
+font-size: 1rem;
+/* Adjust font size as needed */
+transition: background-color 0.2s ease;
+/* Smooth hover effect */
+}
+
+button:hover {
+background-color: #777;
+/* Lighter grey on hover */
+}
+
+input[type="text"] {
+padding: 0.2rem;
+margin: 0.2rem;
+width: 100%;
+font-size:1.1rem;
+/* Fill the container width */
+box-sizing: border-box;
+/* Include padding and border in the width */
+}
+
+.hidden {
+display: none;
+}
+.barcode-in {
+border: 8px solid rgb(13, 66, 190);
+border-radius: 10px;
+padding:5px;
+display: flex;
+justify-content: center;
+align-items: center;
+font-weight: bold;
+font-size: 1.2em;
+color: darkblue;
+}
+
+.grid-container {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+/* Three columns */
+gap: 0.25rem;
+/* Space between buttons */
+margin-bottom: 0.5rem;
+/* Space below the grid */
+}
+
+.grid-container button {
+width: 100%;
+/* Buttons fill grid cells */
+box-sizing: border-box;
+/* Include padding and border in the width */
+}
+
+.center-buttons {
+text-align: center;
+/* Center buttons in a row */
+}
+
+.roto180 {
+rotate: 180deg;
+}
+</style>
+</head>
+<body>
+
+<div id="remote-container">
+<label for="p2pmessage"><b>🍤Control Message</b></label>
+<input type="text" id="p2pmessage" value="">
+<details>
+<summary>Remote Control UUID:</summary>
+<input type="text" id="uuid" value="hkccz7jx">
+<input type="text" id="partnername" value="Alex">
+</details>
+<label for="volume-input" > Vol <input id="volume-input" type="range" max="100" min="0" value=0> </label>
+<div class="grid-container">
+<button id="rw" class="roto180">▶▶</button>
+<button id="play">▶</button>
+<button id="ff">▶▶</button>
+<button id="skiplast">⏮</button>
+<button id="pause">⏸</button>
+<button id="skipnext">⏭</button>
+</div>
+
+<details>
+<summary>admin</summary>
+<div class="grid-container">
+<button id="unmutebutton" style="font-size:1.5rem;" onclick="if(this.textContent ==='🔈') {this.textContent ='🔇'} else{this.textContent ='🔈'};" >🔈</button>
+<button id="stopvideobtn">stop in 6 sek</button>
+<button class="vids" id="pip-button">Fullscr</button>
+<button id="p2pbtn" >add-P2P-vids</button>
+<button id="clickfirstbtn">Start First vid</button>
+<button id="xxxx6">xxxx1</button>
+</div>
+</details>
+<details>
+<summary>Sutitle & Language</summary>
+<div class="grid-container">
+<button id="captions">subtitle</button>
+<div style="padding:4px;margin-left:4px;border-radius: 10px;border:2px solid black;">
+<select id="caption-language">
+<option value="en">English</option>
+<option value="de">German</option>
+<option value="fr">Französ.</option>
+<!-- Add more languages as needed -->
+</select></label>
+<button style="width:90%;padding-left:2px;padding-right:2px;border:2px solid black;" id="set-caption-language">Set</button>
+</div>
+<div class="center-buttons">
+<button id="set-audio-track">Set Audio Track</button>
+</div>
+</div>
+</details>
+<details>
+<summary>Quality & QR-Connex</summary>
+<div class="grid-container">
+<label for="video-quality">Vid-Quali:
+<select id="video-quality">
+<option value="small">Small</option>
+<option value="medium">Medium</option>
+<option value="large">Large</option>
+<option value="hd720">HD 720</option>
+<option value="hd1080">HD 1080</option>
+<option value="default">Default</option>
+</select></label>
+<button id="set-video-quality">Apply Quali.</button> <button class="toggle-qr-btn">QR show</button>
+</div>
+<div class="center-buttons">
+
+</div>
+
+<div style="text-align:center;" class="qrcode-cont hidden">
+<div class="barcode-in" style="">
+<div> QR TO JOIN</div>
+</div>
+<!--button onclick="addScript('script',textstringer)">Reload Page</button-->
+</div>
+
+</details>
+</div>
+
+<script>
+
+// ##############
+// ### URL Param
+// player-controls.html?remotecontrol=hkccz7jx&partner=mobile&qrlinktext=https://sweltering-van.surge.sh/player-controls.html?remotecontrol=hkccz7jx&partner=Alex
+// ###
+// ?remotecontrol= fixedUUID = quickParam('remotecontrol');
+// &qrlinktext= https://sweltering-van.surge.sh/player-controls.html?remotecontrol=hkccz7jx&partner=mobile
+// &partner= chatUserName = quickParam("partner")
+// ##############
+
+const uuidInput = document.getElementById('uuid');
+const p2pInput = document.getElementById('p2pmessage');
+const p2pBtn = document.getElementById('p2pbtn');
+const clickFirstBtn = document.getElementById('clickfirstbtn');
+const setVolumeInput = document.getElementById('volume-input');
+const partnernameInput= document.getElementById('partnername');
+const playBtn = document.getElementById('play');
+const pauseBtn = document.getElementById('pause');
+const ffBtn = document.getElementById('ff');
+const rwBtn = document.getElementById('rw');
+const captionsBtn = document.getElementById('captions');
+const skipnextBtn = document.getElementById('skipnext');
+const skiplastBtn = document.getElementById('skiplast');
+const captionLanguageSelect = document.getElementById('caption-language');
+const setCaptionLanguageBtn = document.getElementById('set-caption-language');
+const setAudioTrackBtn = document.getElementById('set-audio-track');
+const videoQualitySelect = document.getElementById('video-quality');
+const setVideoQualityBtn = document.getElementById('set-video-quality');
+const stopVideo6000Btn = document.getElementById('stopvideobtn');
+const unMuteVideoBtn = document.getElementById('unmutebutton');
+const pipButton = document.getElementById("pip-button");
+let ws;
+// # your remote uuid
+let fixedUUID = uuidInput.value //quickParam("remotecontrol"); "hkccz7jx";
+// # your wss server address
+const serverAddress = "wss://cloud.achex.ca";
+
+const remoteControlBroadcast = "RemoteControlChannel"; // Define a specific broadcast channel
+const remoteControlPass = "none"; // Define a specific pass for remote control
+
+// uuidInput.value= fixedUUID;
+
+let chatUserName = quickParam("partner") || partnernameInput.value; // Alex Now set to a fixed value
+let client_id = fixedUUID;
+
+
+// ## Function to simulate a button click
+function simulateClick(buttonId) {
+if(!buttonId.split('(')[1]) {
+console.log('simulateClick called with:', buttonId);
+const button = document.getElementById(buttonId);
+if (button) {
+button.click();
+console.log('Button clicked:', buttonId);
+} else {
+console.log('Button not found:', buttonId);p2pInput.value.split(',')
+}} else if (buttonId.split('setPlayerVolume')[1]){
+setVolumeInput.value=parseInt(buttonId.split('setPlayerVolume(')[1]);
+console.log('setPlayerVolume('+buttonId.split('setPlayerVolume(')[1]);
+console.log('setPlayerVolume('+setVolumeInput.value);
+parent.setPlayerVolume(setVolumeInput.value)
+} else {
+parent.addVideosToPlaylist(buttonId.split('(')[1].split(')')[0].split(','))
+}
+
+}
+
+// ## Get the remotecontrol parameter from the URL
+const urlParams = new URLSearchParams(window.location.search);
+const remoteControlUUID = urlParams.get('remotecontrol');
+
+if (remoteControlUUID === fixedUUID) {
+// Remote Control Instance (Client)
+console.log('Remote control Unit Connecting to:', serverAddress);
+ws = new WebSocket(serverAddress);
+
+ws.onopen = () => {
+console.log('Connected to WebSocket server as remote controller unit.');
+
+// ##Authenticate
+ws.send(JSON.stringify({ "auth": chatUserName + "@" + client_id, "passwd": fixedUUID }));
+ws.onmessage = (event) => {
+console.log('Received message from server:', event.data);
+const message = JSON.parse(event.data);
+if (message.auth === "OK") {
+console.log('Authentication successful. Attaching Listeners');
+// ## We will listen now the remote connections
+
+
+playBtn.addEventListener('click', () => {
+console.log('Play button clicked (remote).');
+ws.send(JSON.stringify({ to: chatUserName + '@'+ client_id,msg: 'play' }));
+});
+
+pauseBtn.addEventListener('click', () => {
+console.log('Pause button clicked (remote).');
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id, msg: 'pause' }));
+});
+
+
+ffBtn.addEventListener('click', () => {
+console.log('FF button clicked (remote).');
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id, msg: 'ff' }));
+});
+
+rwBtn.addEventListener('click', () => {
+console.log('RW button clicked (remote).');
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id, msg: 'rw' }));
+});
+
+captionsBtn.addEventListener('click', () => {
+console.log('Captions button clicked (remote).');
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id, msg: 'captions' }));
+});
+
+clickFirstBtn.addEventListener('click', () => {
+console.log('clickFirstBtn button clicked (remote).');
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id, msg: 'clickFirstBtn' }));
+});
+
+skipnextBtn.addEventListener('click', () => {
+console.log('Skipnext button clicked (remote).');
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id, msg: 'skipnext' }));
+});
+skiplastBtn.addEventListener('click', () => {
+console.log('Skiplast button clicked (remote).');
+ws.send(JSON.stringify({ to:chatUserName + '@' + client_id, msg: 'skiplast' }));
+});
+
+setCaptionLanguageBtn.addEventListener('click', () => {
+console.log('SetCaptionLanguage button clicked (remote).');
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id, msg: 'set-caption-language' }));
+});
+
+stopVideo6000Btn.addEventListener('click', () => {
+console.log('button clicked (remote).'+stopVideo6000Btn.id);
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id,msg: 'stopvideobtn' }));
+});
+
+setVolumeInput.addEventListener('change', (eve) => {
+console.log('button clicked (remote).'+setVolumeInput.id);
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id, msg: 'setPlayerVolume('+eve.target.value+')' }));
+});
+
+p2pBtn.addEventListener('click', (eve) => {
+console.log('button clicked (remote).'+p2pBtn.id);
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id, msg: 'setVideoInput('+p2pInput.value+')' }));
+});
+
+pipButton.addEventListener('click', () => {
+console.log('button clicked (remote).'+pipButton.id);
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id,msg: pipButton.id}));
+});
+
+unMuteVideoBtn.addEventListener('click', (ev) => {
+console.log('Button clicked (remote).'+unMuteVideoBtn.id);
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id,msg: unMuteVideoBtn.id}));
+// ws.send(JSON.stringify({ to: chatUserName + '@' + client_id,msg: 'unMuteVideoAPI(tmpikon)'}));
+});
+
+setAudioTrackBtn.addEventListener('click', () => {
+console.log('SetAudioTrack button clicked (remote).');
+ws.send(JSON.stringify({ to: chatUserName + '@' + client_id, msg: 'set-audio-track' }));
+});
+
+setVideoQualityBtn.addEventListener('click', () => {
+console.log('SetVideoQuality button clicked (remote).');
+ws.send(JSON.stringify({ to:chatUserName + '@' + client_id, msg: 'set-video-quality' }));
+});
+}}
+};
+
+ws.onclose = () => {
+console.log('Disconnected from WebSocket server.');
+};
+
+// ## Control Instance (Server)
+} else if (!remoteControlUUID) {
+console.log('Player ready for Controller Mode. Connecting to:', serverAddress);
+ws = new WebSocket(serverAddress);
+
+ws.onopen = () => {
+console.log('###Connected to WebSocket server as controllable player unit.');
+
+// ## Authenticate
+ws.send(JSON.stringify({ "auth": chatUserName + "@" + client_id, "passwd": fixedUUID }));
+
+
+// ## Received message from remote Controller Unit
+ws.onmessage = (event) => {
+console.log("Received message from remote Controller Unit:", event.data);
+
+const message = JSON.parse(event.data);
+
+// ## Extract the action and simulate the click
+const action = message.msg;
+console.log("Before Aktion-Received NEW message from server: ", event.data);
+if (action) {
+console.log("After Aktion Received NEW message from server:", message.msg);
+
+
+const buttonId = action;
+simulateClick(buttonId);
+}
+}
+};
+
+
+ws.onclose = () => {
+console.log('Disconnected from WebSocket server.');
+ws.onopen(); // neu!!! 0509
+};
+
+// ## Basic player control functions (local)
+playBtn.addEventListener('click', () => { parent.playVideoAPI(); });
+pauseBtn.addEventListener('click', () => { parent.pauseVideoAPI(); });
+ffBtn.addEventListener('click', () => { parent.seekForwardAPI(10); });
+rwBtn.addEventListener('click', () => { parent.seekBackwardAPI(10); });
+captionsBtn.addEventListener('click', () => { parent.toggleCaptionsAPI(); });
+skipnextBtn.addEventListener('click', () => { parent.skipNextAPI(); });
+skiplastBtn.addEventListener('click', () => { parent.skipLastAPI(); });
+stopVideo6000Btn.addEventListener('click', () => { parent.stopVideoInAPI(); });
+setVolumeInput.addEventListener('change', (ev) => { parent.setPlayerVolume(ev.target.value); });
+p2pBtn.addEventListener('click', (ev) => { parent.addVideosToPlaylist(p2pInput.value.split(',')) });
+pipButton.addEventListener('click', () => { parent.togglePictureInPictureAPI(); });
+clickFirstBtn.addEventListener('click', () => {parent.clickFirstPlaylistItem(); });
+unMuteVideoBtn.addEventListener('click', () => { let fdf= unMuteVideoBtn.textContent; parent.unMuteVideoAPI(fdf); });
+setCaptionLanguageBtn.addEventListener('click', () => {
+const languageCode = captionLanguageSelect.value;
+parent.setCaptionLanguageAPI(languageCode);
+});
+
+setAudioTrackBtn.addEventListener('click', () => {
+parent.setAudioTrackAPI(); // No track ID for now
+});
+
+setVideoQualityBtn.addEventListener('click', () => {
+const quality = videoQualitySelect.value;
+parent.setVideoQualityAPI(quality);
+});
+}
+
+// ## barcode-in
+const qrcodeelementin = document.querySelector(".barcode-in");
+
+// ## quickParam
+function quickParam(qp) {
+const link_now = new URL(window.location.href);
+return link_now.searchParams.get(qp);
+}
+
+
+window.addEventListener("load", async () => {
+const QRINVITE = {};
+QRINVITE.lnk = encodeURIComponent(`https://shrimptube.firebaseapp.com/player-controls.html?&remotecontrol=${fixedUUID}&partner=${partnernameInput.value}`);
+//quickParam("qrlinktext") || "no link provided";
+const cur_API = `<img class="barcode" width="300" height="300" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${QRINVITE.lnk}" alt="kein qr" title="ShrimpIt" width="250" height="250" />`;
+
+console.log('QRINVITE.lnk: '+QRINVITE.lnk);
+console.log('cur_API: '+cur_API);
+
+const div = document.createElement("DIV");
+div.innerHTML = cur_API;
+if(!qrcodeelementin) {
+document.body.append(div);
+} else {
+qrcodeelementin.innerHTML = "";
+qrcodeelementin.append(div);
+}
+/*div.addEventListener("load", (evt) => {
+const a = document.createElement("a")
+a.href = URL.createObjectURL(evt.data)
+a.download = "capture.webm"
+a.click}) */
+});
+
+
+// # addScript(tag, txt)
+// ## ad skript tag with skrits
+// const textstringer ="window.location.reload();";
+
+function addScript(tag, txt) {
+let jsCode = txt || "alert('lllllll')";
+var url;
+if (tag === "script") {
+url = URL.createObjectURL(new Blob([jsCode]));
+}
+return new Promise((resolve, reject) => {
+const s = document.createElement(tag); //  const s =  document.createElement('script');
+//s.setAttribute(atr, src);
+if (tag === "script") {
+s.setAttribute("src", url);
+} else {
+s.setAttribute("src", txt);
+}
+s.addEventListener("load", resolve);
+s.addEventListener("error", reject);
+document.body.appendChild(s);
+});
+};
+
+// ## To-DO Loeschen
+const loc = document.location;
+console.log(loc.href);
+// ## To-DO
+
+// ## Toggle QR MG
+document.querySelector(".toggle-qr-btn").addEventListener("click", () => {
+console.log(
+"Toggle qr img div"
+);
+document.querySelector(".qrcode-cont").classList.toggle("hidden");
+console.log("Header visibility toggled ..");
+});
+
+</script>
+</body>
+</html>

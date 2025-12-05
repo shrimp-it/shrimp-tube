@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown Generator & Importer</title>
+<style>
+bodycontainermd {
+font-family: Arial, sans-serif;
+display: flex;
+justify-content: center;
+align-items: flex-start; /* Aligned to top */
+min-height: 100vh;
+background-color: #f4f4f4;
+margin: 0;
+padding-top: 0; /* Add some padding from the top */
+box-sizing: border-box;
+}
+
+.container {
+background-color: #fff;
+padding: 30px;
+border-radius: 8px;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+text-align: center;
+max-width: 600px;
+width: 100%;
+}
+
+h1, h2 { /* Added h2 */
+color: #333;
+margin-bottom: 20px;
+}
+
+p {
+color: #555;
+margin-bottom: 30px;
+line-height: 1.6;
+}
+
+input[type="file"] {
+display: block;
+width: calc(100% - 20px);
+margin: 0 auto 20px auto;
+padding: 10px;
+border: 1px solid #ddd;
+border-radius: 4px;
+background-color: #f9f9f9;
+}
+
+button {
+background-color: #007bff;
+color: white;
+padding: 12px 25px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+font-size: 16px;
+transition: background-color 0.3s ease;
+margin-bottom: 20px;
+}
+
+button:hover:not(:disabled) {
+background-color: #0056b3;
+}
+
+button:disabled {
+background-color: #cccccc;
+cursor: not-allowed;
+}
+
+a#downloadLink, .extracted-file-item a { /* Apply styles to download links */
+display: inline-block;
+background-color: #28a745;
+color: white;
+padding: 12px 25px;
+border-radius: 5px;
+text-decoration: none;
+font-size: 16px;
+transition: background-color 0.3s ease;
+margin-top: 15px;
+margin-right: 10px; /* Spacing for multiple links */
+margin-bottom: 10px; /* Spacing for list items */
+}
+
+a#downloadLink:hover, .extracted-file-item a:hover {
+background-color: #218838;
+}
+
+.extracted-file-item {
+margin-bottom: 10px;
+padding: 10px;
+border: 1px solid #eee;
+border-radius: 4px;
+background-color: #f9f9f9;
+display: flex; /* Flexbox for alignment */
+justify-content: space-between; /* Space between text and link */
+align-items: center; /* Vertically align items */
+flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+.extracted-file-item span {
+flex-grow: 1; /* Allow text to grow */
+text-align: left;
+margin-right: 10px;
+word-break: break-all; /* Ensure long filenames wrap */
+}
+.extracted-file-item a {
+flex-shrink: 0; /* Don't shrink the button */
+padding: 8px 15px; /* Smaller button */
+font-size: 14px;
+margin-top: 0; /* Remove top margin */
+margin-bottom: 0; /* Remove bottom margin */
+}
+
+hr {
+border: 0;
+height: 1px;
+background: #ccc;
+margin: 40px 0;
+}
+
+details {
+  margin-bottom: 10px;
+}
+
+details summary {
+  cursor: pointer;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+details textarea {
+  width: 100%;
+  height: 150px;
+  margin-top: 5px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+</style>
+</head>
+<body>
+<bodycontainermd>
+<div class="container">
+ <details><summary>Text Datei Generator aus Dateien</summary>
+ <p>Wählen Sie eine oder mehrere Textdateien (z.B. .txt, .js, .html, .css) von Ihrem lokalen System aus. Der Inhalt wird in eine Text-Datei (.txt) mit den angegebenen Formatierungsregeln umgewandelt.</p>
+<input type="file" id="fileInput" multiple accept=".txt, .js, .html, .css, .md, .json, .xml, .log">
+<button id="generateMd" disabled>Textdatei erstellen</button>
+<a id="downloadLink" style="display: none;"></a>
+</details> 
+<hr>
+
+ <details><summary>Text-Datei importieren</summary>
+  <p>Wählen Sie eine Text-Datei (.txt) aus, um die darin enthaltenen Dateien zu extrahieren und herunterzuladen.</p>
+  <input type="file" id="importMdInput" accept=".txt">
+  <button id="importMd" disabled>Textdatei importieren</button>
+  <div id="extractedFilesList" style="margin-top: 20px; text-align: left;">
+  <!-- Extrahierte Dateien werden hier aufgelistet -->
+ </details> 
+ </div>
+</div>
+</bodycontainermd>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+const fileInput = document.getElementById('fileInput');
+const generateButton = document.getElementById('generateMd');
+const downloadLink = document.getElementById('downloadLink');
+
+const importMdInput = document.getElementById('importMdInput');
+const importMdButton = document.getElementById('importMd');
+const extractedFilesList = document.getElementById('extractedFilesList');
+
+let selectedFilesToGenerate = []; // Speichert die vom Benutzer ausgewählten Dateien für die Generierung
+let objectUrls = []; // Zur Verfolgung erstellter Object URLs für die Bereinigung
+
+// Hilfsfunktion zur Ermittlung des MIME-Typs anhand der Dateierweiterung
+function getMimeTypeFromExtension(extension) {
+const mimeTypes = {
+'txt': 'text/plain',
+'js': 'application/javascript',
+'html': 'text/html',
+'css': 'text/css',
+'md': 'text/markdown',
+'json': 'application/json',
+'xml': 'application/xml',
+'log': 'text/plain',
+'jpg': 'image/jpeg',
+'jpeg': 'image/jpeg',
+'png': 'image/png',
+'gif': 'image/gif',
+'svg': 'image/svg+xml',
+'pdf': 'application/pdf',
+'zip': 'application/zip',
+'rar': 'application/x-rar-compressed',
+// Weitere Typen bei Bedarf hinzufügen
+};
+return mimeTypes[extension.toLowerCase()] || 'application/octet-stream'; // Standardwert, wenn nicht gefunden
+}
+
+// --- Logik zur Text-Generierung ---
+fileInput.addEventListener('change', (event) => {
+selectedFilesToGenerate = Array.from(event.target.files);
+generateButton.disabled = selectedFilesToGenerate.length === 0;
+downloadLink.style.display = 'none';
+downloadLink.href = '#';
+downloadLink.textContent = '';
+});
+
+generateButton.addEventListener('click', async () => {
+if (selectedFilesToGenerate.length === 0) {
+alert('Bitte wählen Sie zuerst Dateien aus, um eine Textdatei zu erstellen.');
+return;
+}
+
+let markdownContent = '';
+const fileReadPromises = selectedFilesToGenerate.map(file => {
+return new Promise((resolve) => {
+const reader = new FileReader();
+reader.onload = (e) => {
+resolve({
+name: file.name,
+type: file.type, // MIME-Typ direkt vom File-Objekt
+content: e.target.result
+});
+};
+reader.onerror = (e) => {
+console.error("Fehler beim Lesen der Datei:", file.name, e);
+resolve({
+name: file.name,
+type: file.type, // Auch im Fehlerfall den Typ übergeben
+content: `[Fehler beim Lesen der Datei: ${file.name}]`
+});
+};
+reader.readAsText(file);
+});
+});
+
+const fileData = await Promise.all(fileReadPromises);
+
+fileData.forEach(data => {
+const extension = data.name.includes('.') ? data.name.split('.').pop() : ''; // Erweiterung extrahieren
+const mimeType = data.type || getMimeTypeFromExtension(extension); // Tatsächlichen Dateityp oder Schätzung verwenden
+
+markdownContent += '-----\n'; // Erste Trennlinie
+markdownContent += '-----\n'; // Zweite Trennlinie
+markdownContent += `Filename: ${data.name} (${extension})\n`; // Dateiname und -typ
+markdownContent += `* mime-typ: ${mimeType}\n\n`; // MIME-Typ
+markdownContent += `${data.content}\n\n`; // Dateiinhalt und zwei Zeilenumbrüche
+});
+
+// Remove the last "-----\n-----\nFilename: ...\n* mime-typ: ...\n\n" block
+markdownContent = markdownContent.replace(/(-----\n-----\nFilename: .+\n\* mime-typ: .+\n\n)$/, '');
+markdownContent += '----- Fertig.';
+
+const blob = new Blob([markdownContent], { type: 'text/plain' });
+const url = URL.createObjectURL(blob);
+downloadLink.href = url;
+downloadLink.download = 'generated_web-app.txt';
+downloadLink.textContent = 'generated_web-app.txt herunterladen';
+downloadLink.style.display = 'block';
+
+// Diese URL zur Bereinigungsliste hinzufügen
+objectUrls.push(url);
+});
+
+// --- Logik zum Text-Import ---
+importMdInput.addEventListener('change', (event) => {
+importMdButton.disabled = event.target.files.length === 0;
+extractedFilesList.innerHTML = ''; // Vorherige Liste leeren
+cleanupObjectUrls(); // Vorherige URLs bereinigen
+});
+
+importMdButton.addEventListener('click', async () => {
+if (importMdInput.files.length === 0) {
+alert('Bitte wählen Sie zuerst eine Textdatei zum Importieren aus.');
+return;
+}
+
+const mdFile = importMdInput.files[0];
+const reader = new FileReader();
+
+reader.onload = async (e) => {
+const mdContent = e.target.result;
+const extractedFiles = parseMarkdownFile(mdContent);
+
+extractedFilesList.innerHTML = ''; // Vorherige Liste leeren
+cleanupObjectUrls(); // Vorherige URLs bereinigen
+
+if (extractedFiles.length === 0) {
+extractedFilesList.innerHTML = '<p>Keine Dateien im Markdown gefunden oder ungültiges Format.</p>';
+return;
+}
+
+extractedFiles.forEach(file => {
+const listItem = document.createElement('div');
+listItem.className = 'extracted-file-item';
+
+const details = document.createElement('details');
+const summary = document.createElement('summary');
+summary.textContent = `${file.name} (${file.type})`;
+details.appendChild(summary);
+
+const textarea = document.createElement('textarea');
+textarea.value = file.content;
+textarea.readOnly = true; // Optional: Benutzer kann den Inhalt nicht bearbeiten
+details.appendChild(textarea);
+
+const downloadFileLink = document.createElement('a');
+const blob = new Blob([file.content], { type: file.type });
+const url = URL.createObjectURL(blob);
+downloadFileLink.href = url;
+downloadFileLink.download = file.name;
+downloadFileLink.textContent = `Download`; // Oder 'Download ${file.name}'
+
+objectUrls.push(url); // Zur Bereinigungsliste hinzufügen
+
+listItem.appendChild(details);
+//listItem.appendChild(fileNameSpan);
+listItem.appendChild(downloadFileLink);
+extractedFilesList.appendChild(listItem);
+});
+};
+
+reader.onerror = (e) => {
+console.error("Fehler beim Lesen der Textdatei:", mdFile.name, e);
+extractedFilesList.innerHTML = '<p>Fehler beim Lesen der Textdatei.</p>';
+};
+
+reader.readAsText(mdFile);
+});
+
+function parseMarkdownFile(mdContent) {
+const files = [];
+// Regex, um einen Dateiblock gemäß dem neuen Generierungsschema zu finden.
+// Es erfasst:
+// Gruppe 1: Vollständiger Dateiname (z.B. my_script.js)
+// Gruppe 2: Dateierweiterung (z.B. js)
+// Gruppe 3: MIME-Typ (z.B. application/javascript)
+// Gruppe 4: Dateiinhalt (nicht-gierig, bis zum nächsten Trennzeichen oder Dateiende)
+const regex = /^-----\r?\n-----\r?\nFilename: (.+) \((.+)\)\r?\n\* mime-typ: (.+)\r?\n\r?\n([\s\S]*?)(?=-----(\s*)-----|$----- Fertig\.)/gm;
+
+let match;
+while ((match = regex.exec(mdContent)) !== null) {
+// Entfernen Sie nachgestellte Zeilenumbrüche aus dem Inhalt,
+// die aufgrund von `[\s\S]*?` und `\n\n` nach dem Inhalt erfasst werden könnten.
+//let content = match[4].replace(/\n\n$/, ''); // Entfernt genau zwei Zeilenumbrüche, wenn sie am Ende des Inhalts stehen
+
+files.push({
+name: match[1], // Vollständiger Dateiname mit Erweiterung
+extension: match[2], // Nur die Erweiterung
+type: match[3], // MIME-Typ
+content: match[4]
+});
+}
+return files;
+}
+
+// Funktion zum Widerrufen aller erstellten Object URLs, um Speicherlecks zu vermeiden
+function cleanupObjectUrls() {
+objectUrls.forEach(url => URL.revokeObjectURL(url));
+objectUrls = []; // Liste leeren
+}
+
+// URLs bereinigen, wenn die Seite entladen wird
+window.addEventListener('beforeunload', cleanupObjectUrls);
+});
+</script>
+</body>
+</html>

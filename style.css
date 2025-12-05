@@ -1,0 +1,1138 @@
+body {
+font-family: sans-serif;
+margin: 0;
+background-color: #121212;
+color: #fff;
+display: flex;
+flex-direction: column;
+height: 100vh;
+}
+
+#load-playlist-url-btn {
+background: transparent;
+padding: 0;
+border-radius: 100%;
+border: 1px solid yellow;
+display: none;
+}
+
+#app-container {
+display: flex;
+flex-direction: column;
+height: 100%;
+width: 100%;
+}
+
+#filter-container {
+z-index: 999;
+border-style: 3px solid red;
+position: absolute;
+top: 40px;
+right: 40px;
+}
+
+#toggle-playlist-btn {
+background: transparent;
+border: 1px solid green;
+cursor: pointer;
+font-size: 0.95rem;
+padding: 1px;
+margin-bottom: 2px;
+margin-left: 2px;
+border: 1px solid green;
+padding-bottom: 3px;
+margin-left: 3px
+}
+
+header {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+/* Align items to the top */
+flex-direction: row;
+/* Stack header elements vertically */
+padding: 0;
+margin-top: 2px;
+margin-left: 3px;
+background-color: #212121;
+z-index: 555;
+/* Ensure header is above player */
+min-height: 60px;
+}
+
+.controls {
+z-index: 999;
+display: flex;
+flex-wrap: wrap;
+gap: 0.3rem;
+margin-top: 1px;
+margin-left: -3px;
+/* to push controls closer to the top */
+}
+
+.input-btn-group,
+.subpage-btn-group,
+.toggle-btn-group,
+.fileaction-btn-group {
+display: flex;
+gap: 0.2rem;
+/* Reduced spacing */
+}
+
+.controls button {
+z-index: 999;
+margin-left: 0;
+/* Remove individual button margins */
+padding: 0.1rem 0.2rem;
+border: 1px solid #ccc;
+border-radius: 5px;
+cursor: pointer;
+font-size: 0.8rem;
+}
+
+/* Style for input-btn-group */
+.input-btn-group button {
+background-color: #333;
+color: #fff;
+border-radius: 0;
+/* Remove border radius */
+}
+
+/* Style for subpage-btn-group */
+.subpage-btn-group button,
+.player-controls-btn {
+background-color: #007bff;
+color: white;
+/* Keep default styles */
+}
+
+/* Style for toggle-btn-group */
+.toggle-btn-group button {
+background-color: #6c757d;
+color: white;
+}
+
+/* Style for fileaction-btn-group */
+.fileaction-btn-group button,
+#select-toggle-btn,
+#start-timer-btn,
+.green-btn { /* #select-toggle-btn was here already */
+background-color: #28a745;
+color: white;
+}
+
+/* NEW: Styles for the "all vids" / "50 vids" toggle button (from previous update) */
+#toggle-vid-limit-btn {
+background-color: #6c757d; /* Similar to other toggle buttons */
+color: white;
+padding: 0.1rem 0.6rem;
+border: 1px solid #ccc;
+border-radius: 5px;
+cursor: pointer;
+font-size: 0.8rem;
+white-space: nowrap; /* Prevent text wrap */
+}
+#toggle-vid-limit-btn:hover {
+background-color: #5a6268;
+}
+
+/* NEW: Style for Clear Playlist button (from previous update) */
+#clear-playlist-option {
+background-color: #dc3545; /* Red for destructive action */
+color: white;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+#clear-playlist-option:hover {
+background-color: #c82333;
+}
+#clear-playlist-option svg {
+margin-right: 5px;
+}
+
+/* Task 3: Styling for #playlist-mode-select when it replaces "free2" */
+#playlist-mode-select.free2-replacement-select {
+background-color: #6c757d; /* Consistent with other toggle-like buttons */
+color: white;
+border: 1px solid #ccc;
+border-radius: 5px;
+cursor: pointer;
+font-size: 0.8rem;
+padding: 0.1rem 0.4rem; /* Less padding */
+width: 90px; /* More width for option text */
+text-align: center;
+-webkit-appearance: none; /* Remove default dropdown arrow */
+-moz-appearance: none;
+appearance: none;
+background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2C197.399L146.2%2C56.6C145.4%2C55.8%20144.6%2C55.4%20143.8%2C55.4c-0.8%2C0-1.6%2C0.4-2.4%2C1.2L5.4%2C197.399c-1.6%2C1.6-1.6%2C4%2C0%2C5.6c1.6%2C1.6%2C4%2C1.6%2C5.6%2C0L143.8%2C64.6l132.8%2C132.8c1.6%2C1.6%2C4%2C1.6%2C5.6%2C0C288.6%2C201.399%2C288.6%2C198.999%2C287%2C197.399z%22%2F%3E%3C%2Fsvg%3E'); /* Custom arrow for select */
+background-repeat: no-repeat;
+background-position: right 5px center;
+background-size: 0.6em auto;
+}
+#playlist-mode-select.free2-replacement-select:hover {
+background-color: #5a6268;
+}
+/* Styling for options within the select dropdown */
+#playlist-mode-select.free2-replacement-select option {
+padding: 0.2rem 0.5rem;
+font-size: 0.8rem;
+background-color: #333;
+color: white;
+}
+
+/* Task 7: NEW Export/Import PL Buttons styling */
+#export-pl-snapshot-btn,
+#import-pl-snapshot-btn {
+background-color: #007bff; /* Similar to search/chat buttons */
+color: white;
+padding: 0.1rem 0.6rem;
+border: 1px solid #ccc;
+border-radius: 5px;
+cursor: pointer;
+font-size: 0.8rem;
+white-space: nowrap;
+}
+#export-pl-snapshot-btn:hover,
+#import-pl-snapshot-btn:hover {
+background-color: #0056b3;
+}
+
+
+input::placeholder {
+color: grey;
+opacity: 0.5;
+font-style: italic;
+}
+
+main {
+display: flex;
+flex-grow: 1;
+}
+
+#player-container {
+flex-grow: 2;
+position: sticky;
+top: 0;
+z-index: 1;
+/* Ensure player is above playlist */
+background-color: #121212;
+/* Ensure background is visible when sticky */
+max-height: 1024px;
+/* Limit height to viewport height */
+height: 100%;
+/* 100%Ensure it doesn't exceed viewport height */
+overflow: hidden;
+/* Hide any overflowing content */
+padding-bottom: 10px;
+}
+
+#player {
+position: sticky;
+width: 100%;
+z-index: 1000;
+
+max-height: 790px;
+height: auto;
+/* Allow the height to adjust based on aspect ratio */
+aspect-ratio: 16 / 9;
+/* Ensure it doesn't exceed the container's height */
+}
+
+#playlist-container {
+flex-grow: 1;
+padding: 0.5rem;
+background-color: #181818;
+overflow-y: auto;
+max-width: 50%;
+position: relative;
+/* Wichtig für die absolute Positionierung der Column Options */
+}
+
+/* Neuer Container für die Funktions-Buttons */
+.playlist-actions-toolbar {
+display: flex;
+flex-wrap: wrap;
+/* Ermöglicht Umbruch in neue Zeile */
+gap: 8px;
+/* Abstand zwischen den Elementen */
+width: 100%;
+justify-content: space-around;
+/* Verteilt die Elemente gleichmäßig */
+padding: 5px 0;
+margin-bottom: 4px;
+/* Abstand zur eigentlichen Playlist */
+background-color: #212121;
+/* Hintergrund, damit es optisch abgesetzt ist */
+border-bottom: 1px solid #333;
+box-sizing: border-box;
+/* Padding und Border werden in der Gesamtgröße berücksichtigt */
+}
+
+/* Basis-Stil für jedes quadratische Flex-Item */
+.playlist-action-item {
+flex: 1 1 calc(25% - 8px);
+/* Drei Elemente pro Zeile, abzüglich gap */
+aspect-ratio: 1:4;
+/* Macht das Element quadratisch */
+display: flex;
+justify-content: center;
+/* Zentriert Inhalt vertikal */
+align-items: center;
+/* Zentriert Inhalt horizontal */
+border-radius: 8px;
+/* Leichte Rundung für die Box */
+box-sizing: border-box;
+/* Padding und Border werden in der Gesamtgröße berücksichtigt */
+position: relative;
+/* Für die korrekte Positionierung der column-options */
+background-color: transparent;
+/* Standardhintergrund */
+padding: 0;
+margin: 0;
+}
+
+/* Spezifischer Stil für die Gruppe von 3 kleineren Buttons */
+.playlist-action-item.multi-button-group {
+display: flex;
+flex-direction: row;
+/* Buttons nebeneinander */
+justify-content: space-around;
+/* Gleichmäßig verteilen */
+align-items: center;
+/* Vertikal zentrieren */
+padding: 5px;
+/* Etwas Innenabstand */
+background-color: transparent;
+/* Kein expliziter Hintergrund, damit Flex-Item-Farbe durchscheint */
+border: none;
+/* Keine extra Border */
+flex: 1 1 calc(33.33% - 8px);
+/* Nimmt den gleichen Platz wie ein einzelnes Element ein */
+}
+
+/* Allgemeine Stile für the Buttons in der Toolbar, Sub-Buttons und Main-Buttons */
+.toolbar-sub-btn,
+.toolbar-main-btn {
+display: flex;
+justify-content: center;
+align-items: center;
+border-radius: 50%;
+/* Standardmäßig rund */
+cursor: pointer;
+box-sizing: border-box;
+/* Allgemeine Schriftgröße */
+padding: 0;
+margin: 0;
+}
+
+/* Stile für die Sub-Buttons (Save, Toggle Playlist, Player Controls) */
+.playlist-action-item.multi-button-group .toolbar-sub-btn {
+width: 35px;
+/* Feste Größe für kleine Buttons */
+height: 35px;
+font-size: 1.1rem;
+/* Schriftgröße für kleine Buttons */
+background: transparent;
+border: 1px solid green;
+}
+
+/* Spezifische Overrides für save-clip-btn (💾) */
+.save-clip-btn {
+transform: rotate(90deg);
+/* CSS-Eigenschaft statt Inline-Stil */
+padding-top: 4px;
+border-bottom: 3px solid green;
+}
+
+/* Spezifische Overrides für toggle-playlist-display-btn (🎀) */
+.toggle-playlist-display-btn {
+border-bottom: 2px solid green;
+padding-right: 2px;
+padding-top: 0;
+font-size: 1.2rem;
+}
+
+/* Spezifische Overrides für player-controls-btn (Remote) */
+#player-controls-btn {
+background: white;
+border: 1px solid green;
+border-bottom: 3px solid green;
+border-left: 3px solid green;
+border-right: 3px solid green;
+padding-right: 2px;
+padding-top: 1px;
+}
+
+#player-controls-btn img {
+background: white;
+border-radius: 50%;
+margin-top: 2px;
+width: 25px;
+height: 20px;
+}
+
+
+/* NEU: Stile für die Haupt-Buttons (TV, 🍤) - angepasste Größe */
+.playlist-action-item .toolbar-main-btn {
+width: 35px;
+/* Feste Breite */
+height: 35px;
+/* Feste Höhe */
+font-size: 1.1rem;
+/* Angepasste Schriftgröße */
+background-color: white;
+/* Standard-Border für Main-Buttons beibehalten für visuelle Unterscheidung */
+border: 4px solid #083e95;
+border-bottom: 2px solid #083e95;
+border-left: none;
+border-radius: 50%;
+/* Sicherstellen, dass sie rund sind */
+display: flex;
+/* Flexbox für Zentrierung des Inhalts */
+justify-content: center;
+align-items: center;
+}
+
+/* Spezifische Overrides für TV-Programm-Button (📺) */
+.playlist-action-item .toolbar-main-btn[title="Open TV Program Options"] {
+border: 2px solid #083e95;
+border-bottom: none;
+border-left: none;
+padding-bottom: 1px;
+/* font-size wird von .toolbar-main-btn geerbt */
+}
+
+/* Spezifische Overrides für 🍤-Button */
+.playlist-action-item .toolbar-main-btn[title="Open Playlist Options"] {
+border: 4px solid #083e95;
+border-bottom: 2px solid #083e95;
+border-left: none;
+padding-top: 0;
+margin: 0;
+/* font-size wird von .toolbar-main-btn geerbt */
+}
+
+.playlist-action-item .toolbar-main-btn[title="Open Playlist Options"] span {
+font-size: 1.1em;
+/* Angepasst, damit 🍤 Icon in den kleineren Button passt */
+padding: 0;
+margin: 0;
+background: transparent;
+}
+
+
+/* Positionierung der Column Options innerhalb der neuen Struktur */
+.column-options {
+position: absolute;
+/* Muss absolut sein, damit es über anderen Inhalten liegt */
+top: 100%;
+/* Direkt unter dem zugehörigen Button */
+left: 0;
+transform-origin: top center;
+background-color: #282828;
+/* Hintergrundfarbe anpassen */
+border: 1px solid #555;
+/* Leichter Rand */
+z-index: 10;
+/* Über anderen Playlist-Inhalten */
+width: max-content;
+/* Passt sich dem Inhalt an */
+padding: 5px;
+border-radius: 5px;
+box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+#playlist {
+list-style: none;
+padding: 0;
+margin-bottom: 90px;
+}
+
+#playlist li {
+padding: 0.5rem;
+cursor: pointer;
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-bottom: 1px solid #333;
+/* Added a subtle divider */
+}
+
+#playlist li:last-child {
+border-bottom: none;
+/* Remove border from last item */
+}
+
+#playlist li:hover {
+background-color: #333;
+}
+
+#playlist li.active {
+background-color: #444;
+font-weight: bold;
+color: lightblue;
+border: 1px solid green;
+}
+
+/* For selected items in selection mode */
+#playlist li.selected {
+background-color: #007bff; /* Highlight selected items */
+color: white;
+}
+#playlist li.selected .current-time {
+color: lightgray;
+}
+
+
+.current-time {
+font-size: 0.8rem;
+color: #aaa;
+}
+
+.playlist-container > #playlist > li > span {
+margin-right: 2rem;
+max-width: 83%;
+padding-right: 2rem;
+}
+
+.download-video-btn {
+position: absolute;
+right: 23px;
+background-color: transparent;
+border: none;
+color: #ccc;
+cursor: pointer;
+margin-right: 0.5rem;
+margin-top: -15px;
+font-size: 1rem;
+
+/* Spacing between download and remove */
+}
+
+.ask-ai-btn {
+position: absolute;
+right: 42px;
+font-size: 1rem;
+background-color: transparent;
+border: none;
+color: #ccc;
+cursor: pointer;
+margin-right: 0.5rem;
+margin-top: 14px;
+
+/* Spacing between download and remove */
+}
+
+.download-video-btn:hover {
+background: green;
+}
+
+.remove-video-btn {
+background: transparent;
+padding: 0;
+border-radius: 100%;
+border: none;
+
+}
+
+.remove-video-btn:hover {
+background: red;
+}
+
+.modal {
+display: none;
+position: fixed;
+z-index: 1000;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+overflow: hidden;
+background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+background-color: #282828;
+margin: 0;
+padding: 0;
+border: none;
+width: 100%;
+height: 100%;
+position: absolute;
+top: 0;
+left: 0;
+display: flex;
+flex-direction: column;
+z-index: 1000;
+}
+
+#player-controls-modal > .modal-content {
+background-color: transparent;
+margin: 0;
+padding: 0;
+border: none;
+width: 100%;
+height: 100%;
+position: absolute;
+top: 0;
+left: 0;
+display: flex;
+flex-direction: column;
+z-index: 1000;
+}
+
+.close-btn {
+color: #aaa;
+align-self: flex-end;
+font-size: 28px;
+font-weight: bold;
+padding: 10px;
+cursor: pointer;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+color: white;
+text-decoration: none;
+}
+
+iframe {
+width: 100%;
+height: 100%;
+border: none;
+z-index: 1001;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+main {
+flex-direction: column;
+}
+
+#player-container {
+flex-grow: 2;
+/* Player takes more space */
+position: sticky;
+top: 0;
+height: auto;
+/* Adjust height as needed */
+}
+
+#playlist-container {
+max-width: 100%;
+flex-grow: 1;
+/* Playlist takes less space */
+margin-top: 0;
+/* Reset margin */
+}
+
+#player {
+position: sticky;
+width: 100%;
+min-height: 160px;
+margin-top: 3px;
+flex-grow: 2;
+height: auto;
+/* Allow the height to adjust based on aspect ratio */
+aspect-ratio: 16 / 9;
+padding-bottom: 2px;
+padding-top: 20px
+/* Ensure it doesn't exceed the container's height */
+}
+
+header {
+flex-direction: column;
+align-items: flex-start;
+min-height: 80px;
+}
+
+.controls {
+gap: 2px;
+}
+
+.input-btn-group,
+.subpage-btn-group,
+.toggle-btn-group,
+.fileaction-btn-group {
+display: flex;
+gap: 2px;
+/* Reduced spacing */
+}
+
+.controls button {
+margin: 0.1rem;
+font-size: 0.7rem;
+padding: 0.15rem 0.75rem;
+}
+
+.playlist-actions-toolbar {
+flex-direction: row;
+/* Immer noch Reihe, aber mehr Umbrüche */
+justify-content: space-between;
+gap: 5px;
+/* Kleinerer Gap für Mobile */
+}
+
+.playlist-action-item {
+flex: 1 1 calc(33.33% - 8px); /* Drei Elemente pro Zeile, abzüglich gap */
+aspect-ratio: 1; /* Macht das Element quadratisch */
+display: flex;
+justify-content: center; /* Zentriert Inhalt vertikal */
+align-items: center; /* Zentriert Inhalt horizontal */
+border-radius: 8px; /* Leichte Rundung für die Box */
+box-sizing: border-box; /* Padding und Border werden in der Gesamtgröße berücksichtigt */
+position: relative; /* Für die korrekte Positionierung der column-options */
+background-color: transparent; /* Standardhintergrund */
+padding: 0;
+margin: 0;
+/* NEU: Maximale Größe für die Flexbox-Elemente */
+max-width: 50px;
+max-height: 50px;
+}
+.playlist-action-item.multi-button-group {
+flex: 0 0 calc(50% - 5px);
+/* Nimmt den gleichen Platz wie ein einzelnes Element ein */
+}
+
+/* Column options auf mobilen Geräten besser positionieren */
+.column-options {
+left: 50%;
+/* Zentrieren */
+transform: translateX(-50%) translateY(0%);
+width: 90vw;
+/* Breiter auf kleinen Bildschirmen */
+max-width: 300px;
+/* Aber nicht zu breit */
+box-sizing: border-box;
+}
+}
+
+.hidden {
+display: none !important;
+}
+
+#video-id-input {
+min-width: 100px;
+max-width: 65%;
+margin-left: 6px;
+/* General minimum width */
+}
+
+/* Mobile styles for input */
+@media (max-width: 768px) {
+#video-id-input {
+margin-left: 5px;
+max-width: 100px;
+font-size: 11px;
+padding: 1px;
+max-height: 1.1rem;
+/* Mobile minimum width */
+}
+}
+
+/* Style for Add Video button */
+#add-video-btn {
+max-width: 25px;
+margin-left: -0.8rem;
+margin-top: -1px;
+background-color: transparent;
+border-radius: 100%;
+border: 3px solid white;
+border-left: 2px dotted black;
+margin-right: 4px;
+padding-right: 2px;
+padding-left: 3px;
+}
+
+.alphatube-btn {
+cursor: pointer;
+height: 30px;
+width: 30px;
+position: absolute;
+z-index: 999;
+top: 0;
+right: 0;
+margin: 0;
+border-style: none;
+font-size: 1.2rem;
+padding: 2px;
+background-color: transparent;
+}
+
+#sleep-timer-input {
+max-width: 35px;
+}
+
+/* This will be removed from playlist-manager.js dynamic creation */
+/* #playlist-mode-select {
+max-width: 50px;
+font-size: 0.7rem;
+} */
+
+.bodycontainer {
+font-family: monospace;
+text-align: center;
+}
+
+.tvrogramm a {
+color: #fff;
+float: right;
+text-decoration: none;
+text-align: left;
+border: 1px solid black;
+padding: 13px 10px;
+border-radius: 3px;
+font: bold 14px/1 'Open Sans', sans-serif;
+text-transform: uppercase;
+background-color: #3340b8;
+cursor: pointer;
+width: 82%;
+}
+
+.tvrogramm button {
+color: #fff;
+float: right;
+text-decoration: none;
+display: inline-block;
+padding: 13px 10px;
+border-radius: 3px;
+font: bold 14px/1 'Open Sans', sans-serif;
+text-transform: uppercase;
+background-color: #329420;
+width: 100%;
+cursor: pointer;
+}
+
+/* View Toolbar Styles */
+label.col-opt-detail {
+padding: 0;
+padding-left: 13px;
+margin: 0;
+align: center;
+color: white;
+font-size: 0.9rem;
+}
+
+.column-options {
+display: none;
+position: absolute;
+background-color: #f9f9f9;
+box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+padding: 2px;
+margin-top: 2px;
+z-index: 1;
+}
+
+.cols-1 {
+grid-template-columns: repeat(1, 1fr);
+gap: 1px;
+}
+
+.cols-2 {
+grid-template-columns: repeat(2, 1fr);
+gap: 2px;
+}
+
+.cols-3 {
+grid-template-columns: repeat(3, 1fr);
+gap: 2px;
+}
+
+.cols-4 {
+grid-template-columns: repeat(4, 1fr);
+gap: 1px;
+}
+
+.column-option {
+padding: 4px;
+text-align: left;
+vertical-align: middle;
+cursor: pointer;
+border: 1px solid #ddd;
+background-color: #4282a2;
+color: white;
+width: 8rem;
+max-width: 100%;
+}
+
+.column-option > svg {
+padding: 0;
+margin: 0;
+}
+
+.column-option[data-columns="1"] {
+background-color: #2980b9;
+}
+
+/* blau */
+.column-option[data-columns="2"] {
+background-color: #27ae60;
+}
+
+/* grün */
+.column-option[data-columns="3"] {
+background-color: #e67e22;
+}
+
+/* orange */
+.column-option[data-columns="4"] {
+background-color: #9b59b6;
+}
+
+/* lila */
+.column-option.selected {
+border: 2px solid lightgreen;
+}
+
+.column-option.selected {
+/* color: black !important;*/
+font-weight: 600;
+}
+
+/* The boModal (background) */
+.bomodal {
+display: none;
+/* Hidden by default */
+position: fixed;
+/* Stay in place */
+z-index: 1000;
+/* Sit on top, changed from 1 to 1000 to be above other modals */
+left: 0;
+top: 0;
+min-width: 100%;
+/* Full width */
+height: 100%;
+/* Full height */
+overflow: auto;
+/* Enable scroll if needed */
+background-color: rgb(0, 0, 0);
+/* Fallback color */
+background-color: rgba(0, 0, 0, 0.4);
+/* Black w/ opacity */
+-webkit-animation-name: fadeIn;
+/* Fade in the background */
+-webkit-animation-duration: 0.4s;
+animation-name: fadeIn;
+animation-duration: 0.4s;
+}
+
+/* boModal Content */
+.bomodal-content {
+column-count: 1;
+position: fixed;
+bottom: 0;
+background-color: #282e33;
+color: white;
+width: 100%;
+-webkit-animation-name: slideIn;
+-webkit-animation-duration: 0.4s;
+animation-name: slideIn;
+animation-duration: 0.4s;
+}
+
+/* The Close Button */
+.bomodal * .close {
+color: white;
+float: right;
+font-size: 36px;
+font-weight: bold;
+margin-right: 19px;
+margin-top: -13px;
+}
+
+.bomodal * .close:hover,
+.bomodal * .close:focus {
+color: #000;
+text-decoration: none;
+cursor: pointer;
+}
+
+.bomodal * .bomodal-header {
+padding: 0 5px 5px 15px;
+background-color: #5cb85c;
+color: white;
+font-size: 1em;
+font-weight: 600;
+color: white;
+background: black;
+margin: 0;
+margin-left: 1px;
+min-width: 99.9%;
+border-radius: 0 15px 0 0;
+}
+
+.bomodal * .bomodal-body {
+padding: 0;
+margin-left: 0;
+min-width: 99.9%;
+}
+
+.bomodal * .bomodal-footer {
+padding: 0;
+color: black;
+font-weight: 600;
+font-size: smaller;
+min-width: 99.9%;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+from {
+bottom: -300px;
+opacity: 0;
+}
+
+to {
+bottom: 0;
+opacity: 1;
+}
+}
+
+@keyframes slideIn {
+from {
+bottom: -300px;
+opacity: 0;
+}
+
+to {
+bottom: 0;
+opacity: 1;
+}
+}
+
+@-webkit-keyframes fadeIn {
+from {
+opacity: 0;
+}
+
+to {
+opacity: 1;
+}
+}
+
+@keyframes fadeIn {
+from {
+opacity: 0;
+}
+
+to {
+opacity: 1;
+}
+}
+
+@charset "utf-8";
+
+* .bomodal * {
+font-family: "Open Sans", Arial, sans-serif;
+}
+
+.bomodal * .frmcheckbx {
+width: 15px;
+height: 15px;
+}
+
+.bomodal * .vehic {
+min-width: 13px;
+min-height: 13px;
+background-color: #363b41;
+}
+
+.bomodal * .formlogin input {
+border: none;
+width: 100px;
+font-size: 16px;
+line-height: 1.5em;
+padding: 0;
+-webkit-appearance: none;
+}
+
+.bomodal * #login .login {
+font-family: "Open Sans", Arial, sans-serif;
+padding: 2px 8px 2px 2px;
+min-width: 98%;
+border-radius: 1px;
+color: white;
+background: #282e33;
+border-top: 4px solid #434a52;
+border-bottom: 0 solid #434a52;
+}
+
+after {
+clear: both;
+}
+
+#login {
+margin: 0;
+width: 98%;
+min-width: 200px;
+}
+
+#login form {
+margin: auto;
+padding: 22px 22px 22px 22px;
+min-width: 95%;
+border-radius: 5px;
+background: #282e33;
+border-top: 3px solid #434a52;
+border-bottom: 3px solid #434a52;
+}
+
+#login form span {
+background-color: #363b41;
+border-radius: 3px 0px 0px 3px;
+border-right: 3px solid #434a52;
+color: #606468;
+display: block;
+float: left;
+line-height: 50px;
+text-align: center;
+width: 50px;
+height: 50px;
+}
+
+#login form input[type="text"] {
+background-color: #3b4148;
+border-radius: 0px 3px 3px 0px;
+color: #a9a9a9;
+margin-bottom: 1em;
+padding: 0 16px;
+min-width: 230px;
+height: 50px;
+}
+
+#login form input[type="password"] {
+background-color: #3b4148;
+border-radius: 0px 3px 3px 0px;
+color: #a9a9a9;
+margin-bottom: 1em;
+padding: 0 16px;
+min-width: 235px;
+height: 50px;
+}
+
+#login form input[type="email"] {
+background-color: #3b4148;
+border-radius: 0px 3px 3px 0px;
+color: #a9a9a9;
+margin-bottom: 1em;
+padding: 0 16px;
+min-width: 80%;
+height: 50px;
+}
+
+#login form input[type="submit"] {
+background: #b5cd60;
+border: 0;
+width: 100%;
+height: 40px;
+border-radius: 3px;
+color: black;
+cursor: pointer;
+transition: background 0.3s ease-in-out;
+}
+
+#login form input[type="submit"]:hover {
+background: #16aa56;
+color: white;
+}

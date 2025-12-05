@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>AI Software Engineer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  
+<style>
+body {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  font-family: 'Roboto', sans-serif;
+}
+
+.border-custom {
+  border-color: #393939;
+}
+
+.text-custom {
+  color: #d4d4d4;
+}
+
+.bg-custom {
+  background-color: #2b2b2b;
+}
+
+.resize-handle {
+  width: 5px;
+  cursor: col-resize;
+  background-color: #393939;
+}
+
+.resize-handle-horizontal {
+  height: 5px;
+  cursor: row-resize;
+  background-color: #393939;
+}
+
+.fixed-size {
+  width: 30px;
+}
+
+.bolt-elements-textPrimary {
+  color: rgb(255, 255, 255);
+}
+
+.bolt-elements-prompt-background {
+  background-color: rgb(51, 51, 51);
+}
+
+.bg-bolt-elements-prompt-background {
+  --tw-bg-opacity: 1;
+  background-color: rgb(51 51 51 / var(--tw-bg-opacity));
+}
+
+.border-bolt {
+  --tw-border-opacity: 1;
+  border-color: rgb(107 114 128 / var(--tw-border-opacity));
+}
+
+.bolt-elements-focus {
+  --tw-ring-offset-shadow: var(--tw-ring-offset-width) 0 0 0;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-ring-inset: var(--tw-empty,
+      /*!*/
+      /*!*/
+    );
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #0000;
+  --tw-ring-color: rgb(147 197 253 / 0.5);
+  --tw-ring-offset-shadow-skilled: var(--tw-ring-offset-width) 0 0 0 var(--tw-ring-offset-color);
+  --tw-ring-shadow-skilled: 0 0 #0000;
+  --tw-shadow-skilled: 0 0 #0000;
+  --tw-ring-opacity: 1;
+  --tw-ring-width: 2px;
+}
+
+.focus-visible\:outline-none:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-visible\:ring-2:focus-visible {
+  --tw-ring-offset-shadow: var(--tw-ring-offset-width) 0 0 0 var(--tw-ring-offset-color);
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-ring-inset: var(--tw-empty,
+      /*!*/
+      /*!*/
+    );
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #0000;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow-skilled: var(--tw-ring-offset-width) 0 0 0 var(--tw-ring-offset-color);
+  --tw-ring-shadow-skilled: 0 0 #0000;
+  --tw-shadow-skilled: 0 0 #0000;
+  --tw-ring-opacity: 1;
+  --tw-ring-width: 2px;
+}
+
+.focus-visible\:ring-bolt-elements-focus:focus-visible {
+  --tw-ring-offset-shadow: var(--tw-ring-offset-width) 0 0 0 var(--tw-ring-offset-color);
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-ring-inset: var(--tw-empty,
+      /*!*/
+      /*!*/
+    );
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #0000;
+  --tw-ring-color: rgb(147 197 253 / 0.5);
+  --tw-ring-offset-shadow-skilled: var(--tw-ring-offset-width) 0 0 0 var(--tw-ring-offset-color);
+  --tw-ring-shadow-skilled: 0 0 #0000;
+  --tw-shadow-skilled: 0 0 #0000;
+  --tw-ring-opacity: 1;
+  --tw-ring-width: 2px;
+}
+
+.left-panel-iframe {
+border: 0; 
+display: block; 
+height: 100%; 
+margin: 0; 
+padding: 0; 
+width: 100%; overflow-y: scroll;
+ -webkit-overflow-scrolling: touch;
+}
+#editor-container { 
+width: 100%;
+overflow: scroll;
+ -webkit-overflow-scrolling: touch;
+}
+.hide { 
+display:none;
+visibility:hidden;
+ 
+}
+
+#file-list li{ 
+font-size: 0.7rem;
+  width: 90%;
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+overflow-y:auto;
+ 
+ -webkit-overflow-scrolling: touch;
+}
+</style>
+</head>
+
+<body>
+  <div id="app" class="flex flex-1 h-screen">
+   <div id="left-panel" class="w-1/4 border-r border-custom flex flex-col">
+      <div class="p-4 border-b border-custom" style="height:30px;margin:0;padding:0;">
+     <span class="text-custom" onclick="document.getElementById('right-panel').classList.toggle('hide')">AI Editor</span>
+      </div>
+      <div class="iframe-holder flex-1 p-4 overflow-y-auto" style="padding:0;margin:0;">
+ <iframe id="geminiiframe" class="left-panel-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; camera; microphone" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>  
+      </div>
+      <div class="p-4 border-t border-custom" style="max-height:1px;display:none;">
+        
+      </div>
+    </div>
+    <div class="resize-handle" id="vertical-resize-handle"></div>
+    <div class="flex-1 flex flex-col" id="right-panel">
+      <div class="flex items-center border-b border-custom p-2">
+        <div class="flex-1 flex items-center">
+          <span class="text-custom" onclick="document.getElementById('left-panel').classList.toggle('hide')">Code Editor</span>
+        </div>
+        <div class="flex items-center space-x-2 ml-auto">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-key text-custom"></i>
+            <input type="text" id="api-input" placeholder="API Key" class="w-32 p-1 bg-custom text-custom rounded-lg" value="">
+          </div>
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-cogs text-custom"></i>
+            <select id="model-select" class="flex-1 p-2 rounded-lg border border-bolt bg-bolt-elements-prompt-background text-bolt-elements-textPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bolt-elements-focus transition-all">
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+               <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+  	 <option value="gemini-2.0-flash-lite">gemini-2.0-flash</option>   
+  	 <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+              <option value="Add More">Add More</option>
+            </select>
+          </div>
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-temperature-high text-custom"></i>
+            <select id="temperature-select" class="flex-1 p-2 rounded-lg border border-bolt bg-bolt-elements-prompt-background text-bolt-elements-textPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bolt-elements-focus transition-all">
+              <option value="0.1">Low</option>
+              <option value="0.3">Med</option>
+              <option value="0.5">High</option>
+              <option value="0.7">Extra</option>
+              <option value="0.9">Ultra</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 ml-4">
+          <i class="fas fa-save text-custom cursor-pointer" id="save-btn"></i>
+          <i class="fas fa-sync-alt text-custom cursor-pointer" id="editor-preview-btn"></i>
+          <i class="fas fa-cog text-custom"></i>
+        </div>
+      </div>
+      <div class="resize-handle-horizontal"></div>
+      <div class="flex flex-1">
+        <div id="file-explorer" class="w-1/4 border-r border-custom p-2">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-custom">Files</span>
+            <div class="flex space-x-2">
+              <label for="file-input" class="fas fa-folder-open text-custom cursor-pointer" title="Open Files"></label>
+              <input type="file" id="file-input" webkitdirectory multiple style="display: none;" />
+              <i class="fas fa-download text-custom cursor-pointer" title="Download Current File"></i>
+            </div>
+          </div>
+          <ul class="text-custom overflow-y-auto" id="file-list">
+            <li>.bashrc</li>
+            <li>.gitconfig</li>
+          </ul>
+        </div>
+        <div class="resize-handle" id="vertical-resize-handle-2"></div>
+        <div id="editor-container" class="flex-1"></div>
+      </div>
+      <div class="resize-handle-horizontal" id="horizontal-resize-handle-2"></div>
+      <div class="border-t border-custom p-2">
+        <div class="text-custom">Terminal (read-only)</div>
+        <div id="terminal" class="bg-custom p-2 rounded-lg h-24 overflow-y-auto">
+          <p class="text-custom">$ Agent is initialized, waiting for task...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
+  <script> 
+const terminalOutput = document.getElementById('terminal');
+function logToTerminal(message) {
+    const p = document.createElement('p');
+    p.classList.add('text-custom');
+    p.textContent = `$ ${message}`;
+    terminalOutput.appendChild(p);
+    terminalOutput.scrollTop = terminalOutput.scrollHeight; // Auto-scroll to bottom
+}
+
+// Get URL parameters
+let modelSel
+// keygemini=AIzaSyC3_0ADKYP1xpZAZi5-a_C693fxxxxx&lsuser=mg3&lsmainkey=chatHistoryMG3&setmodel=gemini-2.0-flash
+function setIframeParam(modelsel) {
+  xv= modelsel || document.getElementById('model-select').value;
+  const urlParams = new URLSearchParams(window.location.search);
+  const keyGemini = urlParams.get('keygemini') ; 
+  const lsUser = urlParams.get('lsuser');
+  const lsmainKey = urlParams.get('lsmainkey');
+   modelSel = document.getElementById('model-select').value;
+  document.getElementById('api-input').value = keyGemini;
+  const iframSrc = `shrimp-ai.html?keygemini=${keyGemini}&lsuser=${lsUser}&lsmainkey=${lsmainKey}&setmodel=${modelSel}`;
+  document.getElementById('geminiiframe').src = iframSrc ;
+logToTerminal('iframSour: '+iframSrc);
+}
+
+setIframeParam();
+document.getElementById('model-select').addEventListener('change', (e) => {
+ alert(e.target.value);
+   setIframeParam(e.target.value) 
+});
+
+ 
+const verticalResizeHandle = document.getElementById("vertical-resize-handle");
+const leftPanel = document.getElementById("left-panel");
+let isResizingVertical = false;
+
+verticalResizeHandle.addEventListener('mousedown', (e) => {
+  isResizingVertical = true;
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isResizingVertical) return;
+  const newWidth = e.clientX - leftPanel.offsetLeft;
+  leftPanel.style.width = `${Math.max(200, Math.min(window.innerWidth * 0.5, newWidth))}px`;
+});
+
+document.addEventListener('mouseup', () => {
+  isResizingVertical = false;
+});
+
+const verticalResizeHandle2 = document.getElementById('vertical-resize-handle-2');
+const fileExplorer = document.getElementById('file-explorer');
+let isResizingVertical2 = false;
+
+verticalResizeHandle2.addEventListener('mousedown', (e) => {
+  isResizingVertical2 = true;
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isResizingVertical2) return;
+  const containerWidth = fileExplorer.parentElement.offsetWidth;
+  const newWidth = e.clientX - fileExplorer.offsetLeft;
+  fileExplorer.style.width = `${Math.max(100, Math.min(containerWidth * 0.5, newWidth))}px`;
+});
+
+document.addEventListener('mouseup', () => {
+  isResizingVertical2 = false;
+});
+
+const fileInput = document.getElementById('file-input');
+const fileList = document.getElementById('file-list');
+const saveBtn = document.getElementById('save-btn');
+const prevBtn = document.getElementById('editor-preview-btn');
+let editor;
+let currentFile = null;
+let loadedFiles = {}; // Store file content by path
+
+// Function to get language mode based on file extension
+function getLanguageMode(fileName) {
+  const extension = fileName.split('.').pop();
+  switch (extension) {
+    case 'js':
+      return 'javascript';
+    case 'css':
+      return 'css';
+    case 'html':
+    case 'htm':
+      return 'html';
+    case 'json':
+      return 'json';
+    case 'py':
+      return 'python';
+    case 'ts':
+      return 'typescript';
+    default:
+      return 'plaintext';
+  }
+}
+
+fileInput.addEventListener('change', (event) => {
+  fileList.innerHTML = '';
+  loadedFiles = {};
+  for (const file of event.target.files) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      loadedFiles[file.name] = e.target.result;
+      const li = document.createElement('li');
+      li.textContent = file.name;
+      li.dataset.fileName = file.name;
+      li.addEventListener('click', () => {
+        currentFile = file.name;
+        const language = getLanguageMode(file.name);
+        editor.setModel(monaco.editor.createModel(loadedFiles[file.name], language));
+        // Save editor content to local storage on change
+        editor.onDidChangeModelContent(() => {
+          localStorage.setItem('editorContent', editor.getValue());
+          localStorage.setItem('editorLanguage', language); // Save language too
+        });
+      });
+      fileList.appendChild(li);
+    };
+    reader.readAsText(file);
+  }
+});
+
+saveBtn.addEventListener('click', () => {
+  if (currentFile) {
+    const content = editor.getValue();
+    const blob = new Blob([content], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = currentFile;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+});
+prevBtn.addEventListener('click', () => {
+  if (currentFile) {
+    const contentB = editor.getValue();
+    const blob = new Blob([contentB], { type: 'text/html' });
+    const pref = document.createElement('a');
+     pref.href = URL.createObjectURL(blob);
+    pref.target = '_blank';
+    
+    document.body.appendChild(pref);
+     pref.click();
+    document.body.removeChild(pref);
+  }
+});
+require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' }});
+
+require(['vs/editor/editor.main'], function() {
+  const savedContent = localStorage.getItem('editorContent');
+  const savedLanguage = localStorage.getItem('editorLanguage') || 'plaintext'; // Default to plaintext if no language saved
+
+  editor = monaco.editor.create(document.getElementById('editor-container'), {
+    value: savedContent || '// Select a file to begin\n',
+    language: savedLanguage
+  });
+
+  // Update localStorage on content change
+  editor.onDidChangeModelContent(() => {
+    localStorage.setItem('editorContent', editor.getValue());
+    // The language is already set when a file is opened or on initial load
+    // No need to update localStorage.setItem('editorLanguage') here unless the user manually changes language within Monaco
+  });
+});
+
+// --- REMOVED/CLEANED UP Message forwarding for Prompt Manager Modal ---
+// The forwarding logic is removed as shrimp-ai.html now manages its own modal.
+window.addEventListener('message', (event) => {
+    // Listen for messages from shrimp-ai.html to control its floating button
+    if (event.data && (event.data.type === 'hide-shrimp-ai-floating-button' || event.data.type === 'show-shrimp-ai-floating-button')) {
+        const geminiIframe = document.getElementById('geminiiframe');
+        if (geminiIframe && geminiIframe.contentWindow) {
+            // Forward the message to the shrimp-ai.html iframe
+            geminiIframe.contentWindow.postMessage(event.data, '*');
+        } else {
+            logToTerminal('Error: geminiiframe not found or not ready for forwarding floating button control.');
+        }
+    }
+});
+// --- END REMOVED/CLEANED UP ---
+</script>
+</body>
+
+</html>

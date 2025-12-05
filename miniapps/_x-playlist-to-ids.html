@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Playlist Viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Allgemeine Styles */
+:root {
+--primary-color: #EF4444; /* Rot, passend zum Download-Button */
+--secondary-color: #10B981; /* Grün */
+--text-color-dark: #2D3436;
+--text-color-light: #4A5568;
+--bg-light: #F8F8F8;
+--bg-dark: #E2E8F0;
+--border-color: #CBD5E0;
+--card-bg: #FFFFFF;
+}
+
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+}
+
+body {
+font-family: 'Inter', sans-serif;
+background-color: var(--bg-light);
+color: var(--text-color-dark);
+line-height: 1.6;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 20px;
+}
+
+.container {
+max-width: 900px;
+width: 100%;
+margin: 0 auto;
+padding: 0 15px;
+}
+
+h1, h2 {
+text-align: center;
+margin-bottom: 20px;
+color: var(--primary-color);
+}
+
+h1 {
+font-size: 2.5em;
+margin-top: 20px;
+margin-bottom: 40px;
+font-weight: 700;
+}
+
+h2.playlist-title-header {
+font-size: 2em;
+margin-top: 40px;
+margin-bottom: 25px;
+color: var(--text-color-dark);
+font-weight: 600;
+}
+
+/* Input Section Styling */
+.section-playlist-input {
+background-color: var(--card-bg);
+border-radius: 12px;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+padding: 30px;
+margin-bottom: 40px;
+width: 100%;
+}
+
+.input-box {
+display: flex;
+flex-direction: column;
+gap: 15px;
+align-items: center;
+}
+
+.input-url {
+width: 100%;
+padding: 15px 20px;
+border: 2px solid var(--border-color);
+border-radius: 8px;
+font-size: 1.1em;
+color: var(--text-color-dark);
+transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-url:focus {
+outline: none;
+border-color: var(--primary-color);
+box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.button-group {
+display: flex;
+gap: 15px;
+width: 100%;
+justify-content: center;
+flex-wrap: wrap; /* Erlaubt Umbruch auf kleinen Bildschirmen */
+}
+
+.btn-quality {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 12px 20px;
+border-radius: 8px;
+background-color: var(--bg-dark);
+color: var(--text-color-dark);
+font-weight: 500;
+font-size: 1em;
+cursor: pointer;
+transition: background-color 0.2s ease;
+user-select: none; /* Verhindert Textauswahl */
+}
+
+.btn-quality:hover {
+background-color: #CFD8DC;
+}
+
+.btn-quality svg {
+stroke: var(--text-color-dark);
+transition: stroke 0.2s ease;
+}
+
+.btn-download {
+background-color: var(--primary-color);
+color: white;
+padding: 14px 25px;
+border: none;
+border-radius: 8px;
+font-size: 1.1em;
+font-weight: 600;
+cursor: pointer;
+transition: background-color 0.2s ease, transform 0.1s ease;
+box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+}
+
+.btn-download:hover {
+background-color: #DC2626;
+transform: translateY(-1px);
+}
+
+.btn-download:active {
+background-color: #B91C1C;
+transform: translateY(1px);
+box-shadow: 0 2px 5px rgba(239, 68, 68, 0.2);
+}
+
+.btn-download:disabled {
+background-color: #A0AEC0;
+cursor: not-allowed;
+box-shadow: none;
+transform: none;
+}
+
+.download-note {
+font-size: 0.95em;
+color: var(--text-color-light);
+text-align: center;
+margin-top: 20px;
+padding: 0 10px;
+}
+
+.download-note.error {
+color: var(--primary-color);
+font-weight: 500;
+}
+.download-note.loading {
+color: var(--secondary-color);
+font-weight: 500;
+}
+
+/* Playlist Results Styling */
+.section-playlist-results {
+width: 100%;
+margin-bottom: 50px;
+}
+
+.playlist-video-list {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+gap: 25px;
+margin-top: 20px;
+}
+
+.video-item {
+background-color: var(--card-bg);
+border-radius: 10px;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+overflow: hidden;
+display: flex;
+flex-direction: column;
+transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.video-item:hover {
+transform: translateY(-5px);
+box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.video-item-thumbnail {
+width: 100%;
+height: 180px; /* Feste Höhe für Thumbnails */
+object-fit: cover;
+display: block;
+}
+
+.video-item-content {
+padding: 15px;
+flex-grow: 1;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+}
+
+.video-item-title {
+font-size: 1.1em;
+font-weight: 600;
+color: var(--text-color-dark);
+margin-bottom: 10px;
+line-height: 1.4;
+display: -webkit-box;
+-webkit-line-clamp: 2; /* Maximal 2 Zeilen für den Titel */
+-webkit-box-orient: vertical;
+overflow: hidden;
+text-overflow: ellipsis;
+min-height: 3em; /* Stellt sicher, dass der Titelbereich immer eine gewisse Höhe hat */
+}
+
+.video-item-meta {
+font-size: 0.9em;
+color: var(--text-color-light);
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-top: 10px; /* Etwas Abstand zum Titel */
+padding-top: 10px; /* Abstand zur Linie */
+border-top: 1px solid var(--bg-dark); /* Trennlinie */
+}
+
+.video-item-meta span {
+display: block;
+}
+
+.video-item-meta .uploader {
+font-weight: 500;
+}
+
+.video-item-link {
+display: inline-block;
+margin-top: 15px;
+padding: 8px 15px;
+background-color: var(--primary-color);
+color: white;
+text-decoration: none;
+border-radius: 5px;
+font-size: 0.9em;
+font-weight: 500;
+transition: background-color 0.2s ease;
+}
+
+.video-item-link:hover {
+background-color: #DC2626;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+.input-box {
+flex-direction: column;
+}
+.button-group {
+flex-direction: column;
+width: auto; /* Buttons können sich in Spalte strecken */
+}
+.btn-quality, .btn-download {
+width: 100%;
+text-align: center;
+justify-content: center;
+}
+.playlist-video-list {
+grid-template-columns: 1fr; /* Eine Spalte auf kleinen Bildschirmen */
+}
+.video-item-thumbnail {
+height: 200px;
+}
+}
+</style>
+<script>
+/**
+_x-playlist-to-ids.html?list=https://www.youtube.com/playlist?list=PLtOOfefuLDNGneMY2IPBcHRLU5evzlT0V
+*/
+
+
+</script>
+</head>
+<body>
+
+<main class="container">
+<section class="section section-playlist-input">
+<div class="input-box">
+<input type="text" id="playlistUrl" class="input-url" placeholder="YouTube Playlist URL einfügen..." value="">
+<div class="button-group">
+<!-- Der btn-quality ist im Original-Fragment vorhanden, wird aber für diese App nicht direkt verwendet,
+da wir nur die Playlist-Informationen anzeigen und keine Download-Qualität auswählen.
+Ich lasse ihn zur Demonstration der Fragmente bestehen, er ist aber funktionslos. -->
+<div class="btn-quality" data-value="720">
+<span>25 max!</span>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="24" height="24" rx="6" fill="white"></rect>
+<path d="M8 11L12 15L16 11" stroke="#2D3436" stroke-linecap="round"></path>
+</svg>
+</div>
+<button id="loadPlaylist" type="button" class="btn-download">
+<span>Playlist laden</span>
+</button>
+</div>
+</div>
+<p id="loadingMessage" class="download-note"></p>
+</section>
+
+<section class="section section-playlist-results">
+<h2 id="playlistHeader" class="playlist-title-header" style="display: none;"></h2>
+<div id="playlistItems" class="playlist-video-list">
+<!-- Playlist-Videos werden hier dynamisch eingefügt -->
+</div>
+</section>
+</main>
+
+<script>
+
+
+document.addEventListener('DOMContentLoaded', () => {
+const urlParams = new URLSearchParams(window.location.search);
+document.getElementById("playlistUrl").value=  urlParams.get("list") || "https://youtube.com/playlist?list=PLtOOfefuLDNHcFKKv_QGS_fNsCZKgkvVq";
+
+const initialPlaylistParam = urlParams.get("playlist");
+const playlistUrlInput = document.getElementById('playlistUrl');
+const loadPlaylistButton = document.getElementById('loadPlaylist');
+const loadingMessage = document.getElementById('loadingMessage');
+const playlistHeader = document.getElementById('playlistHeader');
+const playlistItemsContainer = document.getElementById('playlistItems');
+
+// API-Schlüssel (dies ist ein Platzhalter, der in einer realen App ersetzt werden MUSS)
+const LOADER_TO_API_KEY = "dfcb6d76f2f6a9894gjkege8a4ab232222";
+const DEFAULT_FORMAT = "720"; // Standardformat für die API-Anfrage (relevant für loader.to, aber hier nur Platzhalter)
+const API_LIMIT = 25; // Maximale Anzahl der abzurufenden Playlist-Items
+
+// Hilfsfunktion, um Playlist ID aus URL zu extrahieren
+function getPlaylistIdFromUrl(url) {
+try {
+const urlObj = new URL(url);
+return urlObj.searchParams.get('list');
+} catch (e) {
+console.error("Fehler beim Parsen der URL:", e);
+return null;
+}
+}
+
+// Funktion zum Anzeigen des Ladezustands oder Fehlermeldungen
+function showMessage(msg, type = 'info') {
+loadingMessage.textContent = msg;
+loadingMessage.className = `download-note ${type}`;
+}
+
+// Funktion zum Leeren der Ergebnisse
+function clearResults() {
+playlistItemsContainer.innerHTML = '';
+playlistHeader.style.display = 'none';
+playlistHeader.textContent = '';
+showMessage('');
+}
+
+// Funktion zum Rendern einzelner Video-Items
+function renderVideoItem(video) {
+const item = document.createElement("div");
+item.className = "video-item";
+
+// Dauerformatierung (HH:MM:SS)
+let duration = 'N/A';
+if (video?.info?.duration !== undefined) {
+const totalSeconds = video.info.duration;
+if (totalSeconds === 0) {
+duration = '0:00';
+} else {
+const hours = Math.floor(totalSeconds / 3600);
+const minutes = Math.floor((totalSeconds % 3600) / 60);
+const seconds = totalSeconds % 60;
+
+const parts = [];
+if (hours > 0) parts.push(String(hours).padStart(2, '0'));
+parts.push(String(minutes).padStart(2, '0'));
+parts.push(String(seconds).padStart(2, '0'));
+duration = parts.join(':');
+}
+}
+
+item.innerHTML = `
+<img class="video-item-thumbnail" src="${video?.info?.thumbnail_url || 'https://via.placeholder.com/320x180?text=No+Thumbnail'}" alt="${video?.info?.title || 'Video Thumbnail'}">
+<div class="video-item-content">
+<h3 class="video-item-title">${video?.info?.title || 'Unbekannter Titel'}</h3>
+<div class="video-item-meta">
+<span class="uploader">Kanal: ${video?.info?.uploader || 'Unbekannt'}</span>
+<span class="duration">Dauer: ${duration}</span>
+</div>
+<a href="${video?.url || '#'}" target="_blank" rel="noopener noreferrer" class="video-item-link">
+Video ansehen
+</a>
+</div>
+`;
+playlistItemsContainer.appendChild(item);
+}
+
+// Hauptfunktion zum Laden der Playlist
+loadPlaylistButton.addEventListener('click', async () => {
+const inputUrl = playlistUrlInput.value.trim();
+if (!inputUrl) {
+showMessage('Bitte eine YouTube Playlist URL eingeben!', 'error');
+return;
+}
+
+clearResults();
+loadPlaylistButton.disabled = true;
+showMessage('Playlist wird geladen...', 'loading');
+
+const playlistId = getPlaylistIdFromUrl(inputUrl);
+let headerText = 'YouTube Playlist Items';
+if (playlistId) {
+headerText = `Playlist Items (ID: ${playlistId})`;
+}
+playlistHeader.textContent = headerText; // <--- HIER WIRD DER HEADER GESETZT
+playlistHeader.style.display = 'block';
+
+try {
+const response = await fetch(
+"https://loader.to/api/ajax/playlistJSON?format=" +
+DEFAULT_FORMAT +
+"&api=" + LOADER_TO_API_KEY +
+"&limit=" + API_LIMIT +
+"&url=" +
+encodeURIComponent(inputUrl),
+{
+cache: "no-store",
+}
+);
+
+if (!response.ok) {
+// Versuche, den Fehlertext von der API zu bekommen
+const errorText = await response.text();
+throw new Error(`HTTP Fehler! Status: ${response.status} - ${errorText}`);
+}
+
+const data = await response.json();
+
+// --- START DEBUG LOGGING (aus Fragmenten übernommen) ---
+console.log(`DEBUG: Fetch response received. Link: ${inputUrl}, Data:`, data);
+// --- END DEBUG LOGGING ---
+
+if (!Array.isArray(data) || data.length === 0) {
+showMessage('Keine Videos in dieser Playlist gefunden oder ungültige Antwort.', 'error');
+playlistHeader.style.display = 'none'; // Header ausblenden, wenn keine Ergebnisse
+return;
+}
+
+// Falls die API einen Playlist-Titel im JSON zurückgibt (abhängig von der API-Struktur)
+// Die loader.to API gibt den Playlist-Namen nicht direkt in der Haupt-Array-Antwort zurück.
+// Wenn die API ihn in einem übergeordneten Objekt oder einem der Video-Objekte hätte,
+// könnte man ihn hier extrahieren. Beispiel:
+// if (data.playlist_title) {
+// playlistHeader.textContent = data.playlist_title;
+// } else if (data[0] && data[0].playlist_title) {
+// playlistHeader.textContent = data[0].playlist_title;
+// }
+
+
+// Hier werden die Playlist-Elemente gerendert
+data.forEach((video) => { // 'key' wird hier nicht direkt im HTML verwendet, daher weggelassen
+renderVideoItem(video);
+});
+
+showMessage(`Erfolgreich ${data.length} Videos geladen.`, 'info');
+
+} catch (error) {
+console.error("Fehler beim Laden der Playlist:", error);
+// Versuche, eine spezifischere Fehlermeldung anzuzeigen
+let displayError = error.message;
+if (error.message.includes('API-Schlüssel')) { // Eigene Prüfung für API-Key Hinweis
+displayError += ' Bitte prüfen Sie den im Code hinterlegten LOADER_TO_API_KEY!';
+}
+showMessage(`Fehler beim Laden der Playlist: ${displayError}`, 'error');
+playlistHeader.style.display = 'none';
+} finally {
+loadPlaylistButton.disabled = false;
+}
+});
+
+// Initiales Laden der vordefinierten Playlist beim Start
+// Dies löst den Klick auf den Button aus, sobald die Seite geladen ist.
+loadPlaylistButton.click();
+});
+</script>
+
+</body>
+</html>

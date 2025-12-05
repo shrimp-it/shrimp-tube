@@ -1,0 +1,719 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex">
+<meta name="mobile-web-app-capable" content="yes">
+ <!--meta http-equiv=refresh content="0; url=/validate/"--> 
+
+
+<title>YouTube Suche</title>
+<style>
+/* General Styles */
+body {
+font-family: sans-serif;
+margin: 0;
+padding: 0;
+background-color: #121212;
+color: #fff;
+}
+
+.container {
+padding: 5px;
+}
+
+/* Modal Styles */
+.yt-search-modal,
+.admin-modal {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+margin:0;
+padding:0;
+background: rgba(0, 0, 0, 0.5);
+z-index: 1000;
+overflow: auto;
+/* Make modal scrollable */
+}
+
+.modal-content {
+background: #282828;
+padding: 18px;
+margin: 4px 0;
+/*margin: 10px auto;*/
+/*##Reduced margin*/
+/*max-width: 800px;*/
+position: relative;
+border-radius: 88px;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+height: 90vh;
+/* Increased max height */
+display: flex;
+flex-direction: column;
+overflow: hidden;
+/* Prevent content from overflowing */
+}
+
+.close-modal {
+position: absolute;
+right: 15px;
+top: 8px;
+cursor: pointer;
+font-size: 20px;
+color: #aaa;
+}
+
+.close-modal:hover {
+color: green;
+}
+
+/* Input and Button Styles */
+.input-group {
+margin: 10px 0;
+}
+
+.input-group label {
+display: block;
+margin-bottom: 5px;
+}
+
+.input-group input[type="text"],
+.input-group select {
+width: 95%;
+padding: 8px;
+margin-bottom: 5px;
+border: 1px solid #555;
+border-radius: 4px;
+background-color: #333;
+color: #fff;
+}
+
+.input-group select {
+width: auto;
+}
+
+.history-btn,
+#searchButton,
+.show-favorites-btn,
+#saveAdminSettings {
+padding: 8px 12px;
+margin: 5px;
+border: none;
+border-radius: 4px;
+background-color: #007bff;
+color: white;
+cursor: pointer;
+font-size: 14px;
+}
+
+.reset-btn {
+background-color: #ff4444;
+padding: 5px 10px;
+margin-left: 5px;
+display: none;
+}
+
+/* Filter Styles */
+.filter-group {
+margin: 10px 0;
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+}
+
+.filter-group label {
+margin-right: 5px;
+}
+
+/* Results Container Styles */
+.results-container {
+max-height: 90vh;
+overflow-y: auto;
+margin-top: 20px;
+padding: 0;
+/* Remove padding */
+list-style: none;
+}
+
+/* Result Item Styles (similar to playlist) */
+.search-result-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 0.5rem;
+border-bottom: 1px solid #333;
+cursor: pointer;
+}
+
+.search-result-item:last-child {
+border-bottom: none;
+}
+
+.search-result-item:hover {
+background-color: #333;
+}
+
+.search-result-item img {
+max-width: 80px;
+margin-right: 1rem;
+}
+
+.search-result-item span {
+flex-grow: 1;
+}
+
+.search-result-item button {
+background-color: transparent;
+border: none;
+color: #ccc;
+cursor: pointer;
+margin-left: 0.5rem;
+}
+
+.search-result-item button:hover {
+color: #fff;
+}
+
+/* Admin Section Styles */
+.admin-section {
+margin-top: 20px;
+}
+
+/* Pagination Styles */
+.pagination {
+display: flex;
+justify-content: space-between;
+margin-top: 10px;
+}
+
+.pagination button {
+padding: 5px 10px;
+border: none;
+border-radius: 4px;
+background-color: #555;
+color: white;
+cursor: pointer;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+.modal-content {
+margin: 5px;
+}
+
+.filter-group {
+flex-direction: column;
+align-items: flex-start;
+}
+
+.filter-group label {
+margin-bottom: 5px;
+}
+}
+
+/* Admin Modal Styles */
+.admin-section h3 {
+color: #ddd;
+margin-bottom: 10px;
+}
+
+/* Tool Buttons */
+.links-column {
+display: flex;
+flex-direction: column;
+gap: 5px;
+align-items: center;
+}
+
+.thumbnail {
+max-width: 100%;
+height: auto;
+}
+
+/* Responsive Hidden Column */
+@media (max-width: 768px) {
+.hidden-column {
+display: none;
+}
+}
+
+.modal-content table {
+width: 100%;
+border-collapse: collapse;
+}
+
+.modal-content th,
+.modal-content td {
+padding: 8px;
+border: 1px solid #ddd;
+word-wrap: break-word;
+}
+
+.modal-content th {
+position: relative;
+background-color: #f5f5f5;
+}
+
+.modal-content th input[type="checkbox"] {
+margin-left: 5px;
+}
+
+.modal-content .links-column {
+display: flex;
+flex-direction: column;
+gap: 5px;
+align-items: center;
+}
+
+.modal-content .thumbnail {
+max-width: 100%;
+height: auto;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h2></h2>
+<div class="subContainer">
+<button class="new-yt-search-modal">YouTube Suche öffnen</button>
+<button class="open-admin-modal">Admin öffnen</button>
+</div>
+</div>
+
+<script src="https://apis.google.com/js/client.js"></script>
+<script>
+
+
+const webApp = {
+initYouTubeSearch: function() {
+const modalHTML = `
+<div class="yt-search-modal">
+<div class="modal-content">
+<span class="close-modal">❌</span>
+<div class="input-group">
+<!--label for="searchInput">🔍</label-->
+<input type="text" id="searchInput" placeholder="Suchbegriffe eingeben">
+<button class="history-btn" id="prevSearch">◄</button>
+<button class="history-btn" id="nextSearch">►</button>
+<button class="reset-btn" id="resetSearch">clear history</button>
+
+<label style="margin-top: 10px;">
+<input type="checkbox" checked id="rememberSearch"> q-save
+</label>
+</div>
+
+<details>
+<summary>Suchfilter</summary>
+<div class="filter-group">
+<label>Dauer:</label>
+<select id="durationFilter">
+<option value="any">all</option>
+<option value="short">S (&lt; 4 Min)</option>
+<option value="medium">M (4-20 Min)</option>
+<option value="long">L (&gt; 20 Min)</option>
+</select>
+<label>Sprache:</label>
+<select id="languageFilter">
+<option value="">all</option>
+<option value="de">Deutsch</option>
+<option value="en">Englisch</option>
+</select>
+<label>Datum:</label>
+<select id="recencyFilter">
+<option value="">all</option>
+<option value="today">heute</option>
+<option value="thisYear">lfd. Jahr</option>
+</select>
+</div>
+</details>
+
+<button id="searchButton">Anfrage-Start</button>
+<button class="show-favorites-btn" id="showFavorites" style="display:none;">Zeige Favoriten</button>
+<ul class="results-container" id="youtube-suche"></ul>
+</div>
+</div>
+`;
+
+
+
+
+
+//https://shrimptube.firebaseapp.com/yt-query-clips.html?apiKey=&name=&ytquery=
+document.body.insertAdjacentHTML('beforeend', modalHTML);
+const modal = document.querySelector('.yt-search-modal');
+const closeModal = document.querySelector('.close-modal');
+const searchInput = document.getElementById('searchInput');
+const searchButton = document.getElementById('searchButton');
+const showFavoritesBtn = document.getElementById('showFavorites');
+const resultsContainer = document.getElementById('youtube-suche');
+const rememberCheckbox = document.getElementById('rememberSearch');
+const prevButton = document.getElementById('prevSearch');
+const nextButton = document.getElementById('nextSearch');
+const resetSearch = document.getElementById('resetSearch');
+const durationFilter = document.getElementById('durationFilter');
+const languageFilter = document.getElementById('languageFilter');
+const recencyFilter = document.getElementById('recencyFilter');
+let searchHistory = [];
+let currentHistoryIndex = -1;
+let favorites = [];
+let isYtInitialized = false;
+const getUsername = () => {
+return JSON.parse(localStorage.getItem('adminSettings') || '{}').username || '';
+};
+const YoutubeSearch = {
+apiKey: '',
+maxResults: 25,
+currentPage: 0,
+searchQuery: '',
+nextPageToken: '',
+prevPageTokens: [],
+isShowingFavorites: false,
+columnVisibility: {},
+initializeYtFunctions: function() {
+if (!isYtInitialized) {
+gapi.client.load('youtube', 'v3', () => {
+isYtInitialized = true;
+console.log('YouTube API initialisiert');
+});
+}
+},
+loadApiKey: function() {
+const username = getUsername();
+if (!username) return;
+this.apiKey = localStorage.getItem(`${username}_youtubeApiKey`) || '';
+},
+loadSettings: function() {
+const username = getUsername();
+if (!username) return;
+const savedVisibility = JSON.parse(localStorage.getItem(`${username}_columnVisibility`) || '{}');
+this.columnVisibility = {
+favorite: true,
+thumbnail: true,
+title: true,
+description: true,
+uploadDate: true,
+duration: true,
+creator: true,
+links: true,
+...savedVisibility
+};
+const savedRemember = localStorage.getItem(`${username}_rememberSearch`);
+rememberCheckbox.checked = savedRemember === 'true';
+},
+saveColumnVisibility: function() {
+const username = getUsername();
+if (username) {
+localStorage.setItem(`${username}_columnVisibility`, JSON.stringify(this.columnVisibility));
+}
+},
+searchAndDisplay: function(searchQuery, pageToken = '') {
+this.isShowingFavorites = false;
+if (!this.apiKey) {
+alert('Bitte geben Sie einen API-Schlüssel im Admin-Bereich ein!');
+return;
+}
+this.searchQuery = searchQuery;
+this.initializeYtFunctions();
+gapi.client.setApiKey(this.apiKey);
+this.performSearch(searchQuery, pageToken);
+},
+performSearch: function(query, pageToken) {
+const request = gapi.client.youtube.search.list({
+part: 'snippet',
+q: query,
+maxResults: this.maxResults,
+type: 'video',
+pageToken: pageToken,
+videoDuration: durationFilter.value,
+relevanceLanguage: languageFilter.value,
+...(this.getPublishedAfterDate() && {
+publishedAfter: this.getPublishedAfterDate()
+})
+});
+request.execute((response) => {
+if (response.error) {
+alert('Fehler bei der Suche: ' + response.error.message);
+return;
+}
+this.nextPageToken = response.nextPageToken || '';
+this.getVideoDetails(response.result.items);
+});
+},
+getPublishedAfterDate: function() {
+const recency = recencyFilter.value;
+const now = new Date();
+if (recency === 'today') {
+return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0)).toISOString();
+}
+if (recency === 'thisYear') {
+return new Date(Date.UTC(now.getUTCFullYear(), 0, 1, 0, 0, 0)).toISOString();
+}
+return '';
+},
+getVideoDetails: function(videos) {
+const videoIds = videos.map(video => video.id.videoId || video.id).join(',');
+const request = gapi.client.youtube.videos.list({
+part: 'snippet,contentDetails',
+id: videoIds
+});
+request.execute((response) => {
+if (response.error) {
+alert('Fehler bei Video-Details: ' + response.error.message);
+return;
+}
+this.displayResults(response.result.items);
+});
+},
+displayResults: function(videos) {
+let resultsHTML = '';
+videos.forEach(video => {
+const snippet = video.snippet;
+const duration = this.formatDuration(video.contentDetails.duration);
+const videoId = video.id;
+resultsHTML += `
+<li class="search-result-item">
+<img src="${snippet.thumbnails.default.url}" alt="Video Thumbnail">
+<span>
+${snippet.title}
+<br>
+${snippet.channelTitle} - ${duration}
+</span>
+<button class="add-to-playlist-btn" data-videoid="${videoId}" onclick="this.parentElement.style.backgroundColor='green';">Add to Playlist</button>
+</li>
+`;
+});
+resultsContainer.innerHTML = resultsHTML;
+document.querySelectorAll('.add-to-playlist-btn').forEach(button => {
+button.addEventListener('click', (e) => {
+const videoId = e.target.dataset.videoid;
+parent.addVideosToPlaylist(videoId);
+window.parent.postMessage({
+type: 'add-to-playlist',
+videoId: videoId
+}, '*');
+window.parent.postMessage({ type: 'add-from-chat', ids: videoId}, '*');
+});
+});
+// Add pagination controls
+let paginationHTML = `
+<div class="pagination">
+<button id="prevBtn" ${this.currentPage === 0 ? 'disabled' : ''}>
+Zurück
+${this.currentPage > 0 ? `<span class="page-counter">${this.currentPage}</span>` : ''}
+</button>
+<button id="nextBtn" ${!this.nextPageToken ? 'disabled' : ''}>Vorwärts</button>
+</div>
+`;
+let ifbtn_a = document.getElementById('prevBtn');
+let ifbtn_b = document.getElementById('nextBtn');
+
+if(ifbtn_a) {ifbtn_a.remove()};
+if(ifbtn_b) {ifbtn_b.remove()};
+
+
+resultsContainer.insertAdjacentHTML('afterend', paginationHTML);
+document.getElementById('prevBtn').addEventListener('click', () => this.goPrevious());
+document.getElementById('nextBtn').addEventListener('click', () => this.goNext());
+},
+formatDuration: function(duration) {
+const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+const hours = (match[1] ? parseInt(match[1]) : 0);
+const minutes = (match[2] ? parseInt(match[2]) : 0);
+const seconds = (match[3] ? parseInt(match[3]) : 0);
+return `${hours > 0 ? hours + ':' : ''}${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+},
+goNext: function() {
+if (this.nextPageToken) {
+this.currentPage++;
+this.prevPageTokens.push(this.nextPageToken);
+this.searchAndDisplay(this.searchQuery, this.nextPageToken);
+}
+},
+goPrevious: function() {
+if (this.currentPage > 0) {
+this.currentPage--;
+const prevToken = this.prevPageTokens.pop();
+this.searchAndDisplay(this.searchQuery, this.prevPageTokens[this.prevPageTokens.length - 1] || '');
+}
+}
+};
+document.querySelector('.new-yt-search-modal').addEventListener('click', () => {
+const username = getUsername();
+if (!username) {
+alert('Bitte zuerst einen Username im Admin-Bereich festlegen!');
+return;
+}
+modal.style.display = 'block';
+YoutubeSearch.loadApiKey();
+YoutubeSearch.loadSettings();
+searchHistory = JSON.parse(localStorage.getItem(`${username}_ytSearchHistory`) || '[]');
+favorites = JSON.parse(localStorage.getItem(`${username}_ytFavorites`) || '[]');
+if (searchHistory.length > 0) {
+searchInput.value = searchHistory[searchHistory.length - 1];
+currentHistoryIndex = searchHistory.length - 1;
+resetSearch.style.display = 'inline-block';
+}
+});
+closeModal.addEventListener('click', () => {
+modal.style.display = 'none';
+resultsContainer.innerHTML = '';
+});
+searchButton.addEventListener('click', () => {
+const username = getUsername();
+if (!username) return;
+const query = searchInput.value;
+YoutubeSearch.apiKey = localStorage.getItem(`${username}_youtubeApiKey`) || '';
+if (rememberCheckbox.checked && query && !searchHistory.includes(query)) {
+searchHistory.push(query);
+localStorage.setItem(`${username}_ytSearchHistory`, JSON.stringify(searchHistory));
+currentHistoryIndex = searchHistory.length - 1;
+resetSearch.style.display = 'inline-block';
+}
+localStorage.setItem(`${username}_rememberSearch`, rememberCheckbox.checked);
+YoutubeSearch.currentPage = 0;
+YoutubeSearch.prevPageTokens = [];
+YoutubeSearch.searchAndDisplay(query);
+});
+showFavoritesBtn.addEventListener('click', () => {
+YoutubeSearch.currentPage = 0;
+YoutubeSearch.prevPageTokens = [];
+YoutubeSearch.showFavorites(0);
+});
+prevButton.addEventListener('click', () => {
+if (currentHistoryIndex > 0) {
+currentHistoryIndex--;
+searchInput.value = searchHistory[currentHistoryIndex];
+}
+});
+nextButton.addEventListener('click', () => {
+if (currentHistoryIndex < searchHistory.length - 1) {
+currentHistoryIndex++;
+searchInput.value = searchHistory[currentHistoryIndex];
+}
+});
+resetSearch.addEventListener('click', () => {
+const username = getUsername();
+if (!username) return;
+searchHistory = [];
+localStorage.removeItem(`${username}_ytSearchHistory`);
+searchInput.value = '';
+resetSearch.style.display = 'none';
+currentHistoryIndex = -1;
+});
+},
+initAdmin: function() {
+const modalHTML = `
+<div class="admin-modal">
+<div class="modal-content">
+<span class="close-modal">❌</span>
+<h2>User Admin</h2>
+<div class="admin-section">
+<h3>User-ID</h3>
+<div class="input-group">
+<label for="username">Username (erforderlich):</label>
+<input type="text" id="username" placeholder="Username eingeben" required>
+</div>
+<div class="input-group">
+<label for="email">Email:</label>
+<input type="email" id="email" placeholder="Email eingeben">
+</div>
+<div class="input-group">
+<label for="apiKey">API-Schlüssel:</label>
+<input type="text" id="apiKey" placeholder="YouTube API-Schlüssel">
+<button class="reset-btn" id="resetApiKey">Reset</button>
+</div>
+<button id="saveAdminSettings">Speichern</button>
+</div>
+</div>
+</div>
+`;
+document.body.insertAdjacentHTML('beforeend', modalHTML);
+const usrname = quickParam('name');
+const ytapikey = quickParam('apiKey');
+const ytquerystring = quickParam('ytquery');
+document.getElementById('apiKey').value=ytapikey ;
+document.getElementById('username').value=usrname ;
+localStorage.setItem(`${usrname}_youtubeApiKey`, ytapikey);
+
+const settingssave = {
+username: usrname,
+email: ''
+};
+localStorage.setItem('adminSettings', JSON.stringify(settingssave ));
+
+
+
+document.getElementById('searchInput').value=ytquerystring ;
+
+const modal = document.querySelector('.admin-modal');
+const closeModal = modal.querySelector('.close-modal');
+const usernameInput = document.getElementById('username');
+const emailInput = document.getElementById('email');
+const apiKeyInput = document.getElementById('apiKey');
+const saveButton = document.getElementById('saveAdminSettings');
+const resetApiKey = document.getElementById('resetApiKey');
+const loadSettings = () => {
+const settings = JSON.parse(localStorage.getItem('adminSettings') || '{}');
+const username = settings.username || '';
+usernameInput.value = username;
+emailInput.value = settings.email || '';
+apiKeyInput.value = localStorage.getItem(`${username}_youtubeApiKey`) || '';
+if (apiKeyInput.value) resetApiKey.style.display = 'inline-block';
+};
+const saveSettings = () => {
+const username = usrname ;
+const ytapikeyname = ytapikey;
+if (!username) {
+alert('Bitte einen Username eingeben!');
+return;
+}
+const settings = {
+username: username,
+email: emailInput.value
+};
+localStorage.setItem('adminSettings', JSON.stringify(settings));
+localStorage.setItem(`${username}_youtubeApiKey`, ytapikeyname);
+alert('Einstellungen gespeichert!');
+};
+
+document.querySelector('.open-admin-modal').addEventListener('click', () => {
+modal.style.display = 'block';
+loadSettings();
+});
+closeModal.addEventListener('click', () => {
+modal.style.display = 'none';
+});
+saveButton.addEventListener('click', saveSettings);
+resetApiKey.addEventListener('click', () => {
+const username = usernameInput.value.trim();
+if (!username) return;
+localStorage.removeItem(`${username}_youtubeApiKey`);
+apiKeyInput.value = '';
+resetApiKey.style.display = 'none';
+});
+}
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+webApp.initYouTubeSearch();
+webApp.initAdmin();
+document.querySelector('.new-yt-search-modal').click();
+// setInterval(function () { document.querySelector('#searchButton').click(); }, 500);
+// setInterval(function () { document.querySelector('#searchButton').click(); }, 1000);
+
+});
+
+function quickParam(qp) {
+const link_now = new URL(window.location.href);
+const r = link_now.searchParams.get(qp);
+return r;
+}
+</script>
+</body>
+
+</html>

@@ -1,0 +1,136 @@
+<style>
+  * {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: #000;
+  margin: 0;
+}
+
+.center-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.square {
+  width: 90px;
+  height: 90px;
+  background-color: #00B0FF;
+  transition: transform 300ms ease-out;
+}
+  
+  
+
+.expand {
+  transform: scale(2.5);
+}
+.expand2 {
+  transform: scale(1.5);
+}
+
+.press {
+  background-color: #689F38;
+}
+ 
+.doubletap {
+    background-color: #FF3D00;
+} 
+  
+.center-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.js"></script>
+   
+<body class="center-center">  
+
+    <div class="square sq1"></div> 
+  <div style="background: transparent;width: 5px;"> </div>
+    <div class="square sq2"></div>
+  <script>
+  //src="/scripts/tap-gesture.js"
+// Get a reference to an element
+const square = document.querySelector('.sq1');
+const square2 = document.querySelector('.sq2');
+// Create a manager to manage the element
+var manager = new Hammer.Manager(square);
+var manager2 = new Hammer.Manager(square2);    
+ 
+// Create a recognizer for Tab
+    var Tap = new Hammer.Tap({
+      taps: 1
+    });
+    
+    // Add the recognizer to the manager
+    manager.add(Tap);
+    // Subscribe to the desired event
+ 
+    manager.on('tap', function(e) {
+      e.target.classList.toggle('expand');
+    });
+
+
+// Create a recognizer for Press
+    var Press = new Hammer.Press({
+      time: 500
+    });
+        var Press2 = new Hammer.Press({
+      time: 500
+    });
+    // Add the recognizer to the manager
+    manager.add(Press);
+    // Subscribe to desired event
+    manager.on('press', function(e) {
+      e.target.classList.toggle('press');
+    });
+     manager2.add(Press2);
+    // Subscribe to desired event
+    manager2.on('press', function(e) {
+      e.target.classList.toggle('expand2');
+    });
+
+ // 
+// Create a recognizer DoubleTap
+    var DoubleTap = new Hammer.Tap({
+      event: 'doubletap',
+      taps: 2
+    });
+    // Add the recognizer to the manager
+    manager2.add(DoubleTap);
+    // Subscribe to desired event
+    manager2.on('doubletap', function(e) {      
+        e.target.classList.toggle('doubletap');    
+    });
+  
+  // Create a recognizer
+var Swipe = new Hammer.Swipe();
+
+// Add the recognizer to the manager
+manager2.add(Swipe);
+
+// Declare global variables to swiped correct distance
+var deltaX = 0;
+var deltaY = 0;
+
+// Subscribe to a desired event
+manager2.on('swipe', function(e) {
+  deltaX = deltaX + e.deltaX;
+  var direction = e.offsetDirection;
+  var translate3d = 'translate3d(' + deltaX + 'px, 0, 0)';
+  
+  if (direction === 4 || direction === 2) {
+    e.target.innerText = deltaX;
+    e.target.style.transform = translate3d;
+  }
+});
+  </script>
+</body>   

@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <title>chatV8</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <style>
+        code[class*="language-"],
+        pre[class*="language-"] {
+            color: black;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            direction: ltr;
+            text-align: left;
+            white-space: pre;
+            word-spacing: normal;
+            word-break: normal;
+            line-height: 1.5;
+            -moz-tab-size: 4;
+            -o-tab-size: 4;
+            tab-size: 4;
+            -webkit-hyphens: none;
+            -moz-hyphens: none;
+            -ms-hyphens: none;
+            hyphens: none;
+        }
+        pre[class*="language-"] {
+            position: relative;
+            margin: .5em 0;
+            -webkit-box-shadow: -1px 0px 0px 0px #358ccb, 0px 0px 0px 1px #dfdfdf;
+            -moz-box-shadow: -1px 0px 0px 0px #358ccb, 0px 0px 0px 1px #dfdfdf;
+            box-shadow: -1px 0px 0px 0px #358ccb, 0px 0px 0px 1px #dfdfdf;
+            border-left: 10px solid #358ccb;
+            background-color: #fdfdfd;
+            background-image: -webkit-linear-gradient(transparent 50%, rgba(69, 142, 209, 0.04) 50%);
+            background-image: -moz-linear-gradient(transparent 50%, rgba(69, 142, 209, 0.04) 50%);
+            background-image: -ms-linear-gradient(transparent 50%, rgba(69, 142, 209, 0.04) 50%);
+            background-image: -o-linear-gradient(transparent 50%, rgba(69, 142, 209, 0.04) 50%);
+            background-image: linear-gradient(transparent 50%, rgba(69, 142, 209, 0.04) 50%);
+            background-size: 3em 3em;
+            background-origin: content-box;
+            overflow: visible;
+            max-height: 30em;
+        }
+        code[class*="language"] {
+            max-height: inherit;
+            height: 100%;
+            padding: 0 1em;
+            display: block;
+            overflow: auto;
+        }
+        :not(pre) > code[class*="language-"],
+        pre[class*="language-"] {
+            background-color: #fdfdfd;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            margin-bottom: 1em;
+        }
+        :not(pre) > code[class*="language-"] {
+            position: relative;
+            padding: .2em;
+            -webkit-border-radius: 0.3em;
+            -moz-border-radius: 0.3em;
+            -ms-border-radius: 0.3em;
+            -o-border-radius: 0.3em;
+            border-radius: 0.3em;
+            color: #c92c2c;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        pre[class*="language-"]:before,
+        pre[class*="language-"]:after {
+            content: '';
+            z-index: -2;
+            display: block;
+            position: absolute;
+            bottom: 0.75em;
+            left: 0.18em;
+            width: 40%;
+            height: 20%;
+            -webkit-box-shadow: 0px 13px 8px #979797;
+            -moz-box-shadow: 0px 13px 8px #979797;
+            box-shadow: 0px 13px 8px #979797;
+            -webkit-transform: rotate(-2deg);
+            -moz-transform: rotate(-2deg);
+            -ms-transform: rotate(-2deg);
+            -o-transform: rotate(-2deg);
+            transform: rotate(-2deg);
+        }
+        :not(pre) > code[class*="language-"]:after,
+        pre[class*="language-"]:after {
+            right: 0.75em;
+            left: auto;
+            -webkit-transform: rotate(2deg);
+            -moz-transform: rotate(2deg);
+            -ms-transform: rotate(2deg);
+            -o-transform: rotate(2deg);
+            transform: rotate(2deg);
+        }
+        .namespace {
+            opacity: .7;
+        }
+        @media screen and (max-width: 767px) {
+            pre[class*="language-"]:before,
+            pre[class*="language-"]:after {
+                bottom: 14px;
+                -webkit-box-shadow: none;
+                -moz-box-shadow: none;
+                box-shadow: none;
+            }
+        }
+        .token.tab:not(:empty):before,
+        .token.cr:before,
+        .token.lf:before {
+            color: #e0d7d1;
+        }
+        pre[class*="language-"].line-numbers {
+            padding-left: 0;
+        }
+        pre[class*="language-"].line-numbers code {
+            padding-left: 3.8em;
+        }
+        pre[class*="language-"].line-numbers .line-numbers-rows {
+            left: 0;
+        }
+        pre[class*="language-"][data-line] {
+            padding-top: 0;
+            padding-bottom: 0;
+            padding-left: 0;
+        }
+        pre[data-line] code {
+            position: relative;
+            padding-left: 4em;
+        }
+        pre .line-highlight {
+            margin-top: 0;
+        }
+        .chatpluginchat {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .chatpluginchat li {
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px dotted #B3A9A9;
+        }
+        .chatpluginchat li.left .chat-body {
+            margin-left: 60px;
+        }
+        .chatpluginchat li.right .chat-body {
+            margin-right: 60px;
+        }
+        .chatpluginchat li .chat-body p {
+            margin: 0;
+            color: #777777;
+        }
+        .panel .slidedown .glyphicon, .chatpluginchat .glyphicon {
+            margin-right: 5px;
+        }
+        .panel-body {
+            overflow-y: scroll;
+            height: 250px;
+        }
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            background-color: #F5F5F5;
+        }
+        ::-webkit-scrollbar {
+            width: 12px;
+            background-color: #F5F5F5;
+        }
+        ::-webkit-scrollbar-thumb {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+            background-color: #555;
+        }
+
+        /* Custom styles for chat message buttons */
+        .chat-body .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-body .header .message-actions {
+            display: flex;
+            gap: 5px; /* Space between buttons */
+        }
+
+        .chat-body .header .message-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            color: #666;
+        }
+
+        .chat-body .header .message-actions button:hover {
+            color: #333;
+        }
+    </style>
+    <script>
+        // URL parameters for current presets: ?name=Markus&room=RoomMRDURSTintG001&pass=jhfjHlsFF2230x
+        const myIcon = "🏋️";
+        const myName = "Markus‍";
+        const otherIcon = "😎‍,🚚‍,🚒‍,🏍‍,😎‍,😎‍,😎‍,😎‍,😎‍,😎‍";
+        const myUrlImg = (indx) => {
+            const icons = otherIcon.split(",");
+            return typeof indx === 'number' && indx >= 0 && indx < icons.length ? icons[indx] : myIcon;
+        };
+
+        class ChatSocket {
+            constructor(element, opciones) {
+                this.element = element;
+                this.idChat = element.id;
+                // Parse URL parameters
+                const params = new URLSearchParams(window.location.search);
+                const storedName = localStorage.getItem('chatUserName');
+                const urlParams = {
+                    Nombre: params.get('name') || storedName || "Anonym",
+                    Room: params.get('room') || "RoomMRDURSTintG001",
+                    pass: params.get('pass') || "jhfjHlsFF2230x"
+                };
+                this.defaults = {
+                    Room: "RoomMRDURSTintG001",
+                    pass: "jhfjHlsFF2230x",
+                    lblTitulChat: " Chats für ",
+                    lblCampoEntrada: "Message",
+                    lblSenden: "Send",
+                    textoAyuda: myUrlImg(0),
+                    Nombre: "Anonym",
+                    urlImg: myUrlImg(0),
+                    btnEntrar: "btnEntrar",
+                    btnSenden: "btnSenden",
+                    lblBtnSenden: "Senden",
+                    lblTxtEntrar: "txtEntrar",
+                    lblTxtSenden: "txtMessage",
+                    lblBtnEntrar: "Enter",
+                    idDialogo: "DialogoEntrada",
+                    classChat: "",
+                    idOnline: "ListaOnline",
+                    lblUsuariosOnline: "Users joined: <span id='totalusr'>0</span>",
+                    lblEntradaNombre: "Name:",
+                    panelColor: "success",
+                    inactiveTimeout: 30000 // Configurable inactivity timeout (30 seconds)
+                };
+                // Merge URL parameters, provided options, and defaults (URL params take precedence)
+                this.opciones = { ...this.defaults, ...opciones, ...urlParams };
+                this.ws = null;
+                this.activeUsers = new Map(); // Track active users with sID, Nombre, lastSeen, and iconIndex
+                this.messageStore = new Map(); // Track messages with ID for localStorage
+                this.init();
+            }
+
+            init() {
+                this.setupOnlineList();
+                // Check if all required URL parameters are present for auto-login
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('name') && params.get('room') && params.get('pass')) {
+                    this.opciones.Nombre = params.get('name');
+                    localStorage.setItem('chatUserName', this.opciones.Nombre);
+                    this.iniciarChat();
+                } else {
+                    this.crearEntrada();
+                }
+            }
+
+            loadMessages() {
+                const storedMessages = localStorage.getItem(`chatMessages_${this.opciones.Nombre}`);
+                if (storedMessages) {
+                    const messages = JSON.parse(storedMessages);
+                    messages.forEach(msg => {
+                        this.agregarItem({
+                            sID: msg.sID,
+                            Nombre: msg.Nombre,
+                            Contenido: msg.Contenido,
+                            Timestamp: msg.Timestamp,
+                            MessageID: msg.MessageID
+                        }, false); // Don't save to localStorage again
+                    });
+                }
+            }
+
+            setupOnlineList() {
+                if (!document.getElementById(this.opciones.idOnline)) {
+                    this.opciones.idOnline = `${this.idChat}listaOnline`;
+                    const div = document.createElement('div');
+                    div.id = this.opciones.idOnline;
+                    this.element.appendChild(document.createElement('br'));
+                    this.element.appendChild(div);
+                }
+            }
+
+            updateUserCount() {
+                const totalUsers = Math.max(this.activeUsers.size - 1, 0); // Subtract 1, ensure non-negative
+                const totalusrElement = document.getElementById('totalusr');
+                if (totalusrElement) {
+                    totalusrElement.textContent = totalUsers;
+                }
+            }
+
+            iniciarConexion() {
+                const conex = JSON.stringify({ setID: this.opciones.Room, passwd: this.opciones.pass });
+                this.ws = new WebSocket("wss://cloud.achex.ca");
+                this.ws.onopen = () => {
+                    this.ws.send(conex);
+                    this.checkActiveUsers(); // Start checking active users
+                };
+                this.ws.onmessage = (event) => {
+                    try {
+                        const obj = JSON.parse(event.data);
+                        if (obj.action === "users") {
+                            // Handle server-provided user list
+                            const userList = document.getElementById('listaOnline');
+                            const currentUsers = new Set(this.activeUsers.keys());
+                            let totalUsers = 0;
+                            obj.users.forEach((user, index) => {
+                                if (!this.activeUsers.has(user.sID)) {
+                                    this.activeUsers.set(user.sID, {
+                                        Nombre: user.Nombre,
+                                        lastSeen: Date.now(),
+                                        iconIndex: index
+                                    });
+                                    const li = document.createElement('li');
+                                    li.className = 'list-group-item';
+                                    li.id = user.sID;
+                                    li.innerHTML = `<span style="padding:1px;font-size:1.5em;" class="label label-success">${myUrlImg(index)}</span><span style="background:black;color:white;padding:1px;font-size:1.5em;">${index + 1}</span> - ${user.Nombre}`;
+                                    userList.appendChild(li);
+                                } else {
+                                    this.activeUsers.set(user.sID, {
+                                        ...this.activeUsers.get(user.sID),
+                                        lastSeen: Date.now(),
+                                        iconIndex: index // Ensure consistent index
+                                    });
+                                    const existingLi = document.getElementById(user.sID);
+                                    if (existingLi) {
+                                        existingLi.innerHTML = `<span style="padding:1px;font-size:1.5em;" class="label label-success">${myUrlImg(index)}</span><span style="background:black;color:white;padding:1px;font-size:1.5em;">${index + 1}</span> - ${user.Nombre}`;
+                                    }
+                                }
+                                currentUsers.delete(user.sID);
+                                totalUsers++;
+                            });
+                            // Remove users not in the server list
+                            currentUsers.forEach(sID => {
+                                const userElement = document.getElementById(sID);
+                                if (userElement) userElement.remove();
+                                this.activeUsers.delete(sID);
+                            });
+                            this.updateUserCount();
+                        } else if (obj.action === "leave" && obj.sID) {
+                            // Handle user leave event
+                            const userElement = document.getElementById(obj.sID);
+                            if (userElement) userElement.remove();
+                            this.activeUsers.delete(obj.sID);
+                            this.updateUserCount();
+                        } else if (obj.sID && obj.Nombre) {
+                            // Handle user join or message
+                            const userList = document.getElementById('listaOnline');
+                            if (!this.activeUsers.has(obj.sID)) {
+                                const index = this.activeUsers.size;
+                                this.activeUsers.set(obj.sID, {
+                                    Nombre: obj.Nombre,
+                                    lastSeen: Date.now(),
+                                    iconIndex: index
+                                });
+                                const li = document.createElement('li');
+                                li.className = 'list-group-item';
+                                li.id = obj.sID;
+                                li.innerHTML = `<span style="padding:1px;font-size:1.5em;" class="label label-success">${myUrlImg(index)}</span><span style="background:black;color:white;padding:1px;font-size:1.5em;">${index + 1}</span> - ${user.Nombre}`;
+                                userList.appendChild(li);
+                                this.updateUserCount();
+                                // Trigger alive-ping for all clients
+                                this.usuarioOnline();
+                                this.ws.send(JSON.stringify({ action: "getUsers", to: this.opciones.Room }));
+                            } else {
+                                this.activeUsers.set(obj.sID, {
+                                    ...this.activeUsers.get(obj.sID),
+                                    lastSeen: Date.now()
+                                });
+                            }
+                            this.agregarItem(obj); // Add message if present
+                        }
+                    } catch (error) {
+                        console.warn('Error parsing WebSocket message:', error);
+                    }
+                };
+                this.ws.onclose = () => {
+                    alert("Conexión cerrada");
+                    this.activeUsers.clear();
+                    document.getElementById('listaOnline').innerHTML = '';
+                    this.updateUserCount();
+                };
+            }
+
+            checkActiveUsers() {
+                setInterval(() => {
+                    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+                    try {
+                        // Request active users from server
+                        this.ws.send(JSON.stringify({ action: "getUsers", to: this.opciones.Room }));
+                        // Fallback: Clean up inactive users based on timeout
+                        const now = Date.now();
+                        const userList = document.getElementById('listaOnline');
+                        for (const [sID, user] of this.activeUsers) {
+                            if (now - user.lastSeen > this.opciones.inactiveTimeout) {
+                                const userElement = document.getElementById(sID);
+                                if (userElement) userElement.remove();
+                                this.activeUsers.delete(sID);
+                            }
+                        }
+                        this.updateUserCount();
+                    } catch (error) {
+                        console.warn('Error in checkActiveUsers:', error);
+                    }
+                }, 10000);
+            }
+
+            iniciarChat() {
+                if (document.getElementById(this.opciones.lblTxtEntrar)) {
+                    this.opciones.Nombre = document.getElementById(this.opciones.lblTxtEntrar).value || this.opciones.Nombre;
+                }
+                localStorage.setItem('chatUserName', this.opciones.Nombre);
+                const dialogDiv = document.getElementById(this.opciones.idDialogo);
+                if (dialogDiv) dialogDiv.style.display = 'none';
+                document.getElementById(this.opciones.idOnline).style.display = 'block';
+                this.crearChat();
+                this.loadMessages(); // Moved after crearChat to ensure DOM is ready
+                this.usuarioOnline();
+                this.getOnline();
+                this.iniciarConexion();
+            }
+
+            crearEntrada() {
+                const dialogDiv = document.createElement('div');
+                dialogDiv.id = this.opciones.idDialogo;
+                dialogDiv.className = this.opciones.classChat;
+                dialogDiv.innerHTML = `
+                    <div class="panel-footer" style="margin-top:100px;">
+                        <div class="input-group">
+                            <input id="${this.opciones.lblTxtEntrar}" type="text" class="form-control input-sm" value="${this.opciones.lblEntradaNombre}">
+                            <span class="input-group-btn">
+                                <button id="${this.opciones.btnEntrar}" class="btn btn-success btn-sm">${this.opciones.lblBtnEntrar}</button>
+                            </span>
+                        </div>
+                    </div>`;
+                this.element.appendChild(dialogDiv);
+                const onlineDiv = document.getElementById(this.opciones.idOnline);
+                onlineDiv.innerHTML = `
+                    <div class="panel panel-${this.opciones.panelColor}">
+                        <div class="panel-heading"><span class="glyphicon glyphicon-user"></span> ${this.opciones.lblUsuariosOnline}</div>
+                        <div class="panel-body"><ul class="list-group" id="listaOnline"></ul></div>
+                        <div class="panel-footer"><div class="input-group"><div><a href="https://mglich.github.io/web/"> Github</a></div></div></div>`;
+                document.getElementById(this.opciones.lblTxtEntrar).addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') this.iniciarChat();
+                });
+                document.getElementById(this.opciones.btnEntrar).addEventListener('click', () => this.iniciarChat());
+            }
+
+            crearChat() {
+                const chatDiv = document.createElement('div');
+                chatDiv.className = this.opciones.classChat;
+                chatDiv.innerHTML = `
+                    <div class="panel panel-${this.opciones.panelColor}">
+                        <div class="panel-heading"><span class="glyphicon glyphicon-comment"></span>${this.opciones.lblTitulChat} : ${this.opciones.Nombre}
+                            <div class="btn-group pull-right">
+                                <button type="button" onclick="alert('${this.opciones.textoAyuda}')" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-chevron-down"></span></button>
+                            </div>
+                        </div>
+                        <div class="panel-body"><ul class="chatpluginchat"></ul></div>
+                        <div class="panel-footer">
+                            <div class="input-group">
+                                <input id="${this.opciones.lblTxtSenden}" type="text" class="form-control input-sm inputyyy" value="" />
+                                <span class="input-group-btn"><button class="btn btn-warning btn-sm" id="${this.opciones.btnSenden}">${this.opciones.lblSenden}</button></span>
+                            </div>
+                        </div>
+                    </div>
+                    <li class="left clearfix itemtemplate" style="display:none">
+                        <div style="position: relative;">
+                            <span class="chat-img pull-left" id="Icon"></span>
+                            <div class="chat-body clearfix">
+                                <div class="header">
+                                    <strong class="primary-font" id="Nombre">Nombre</strong>
+                                    <small class="pull-right text-muted"><span class="glyphicon glyphicon-asterisk"></span><span id="Tiempo">12 mins ago</span></small>
+                                    <div class="message-actions">
+                                        <button class="import-btn">➕</button>
+                                        <button class="delete-btn">❌</button>
+                                    </div>
+                                </div>
+                                <p id="Contenido">Contenido</p>
+                            </div>
+                        </div>
+                    </li>`;
+                this.element.appendChild(chatDiv);
+                document.getElementById(this.opciones.lblTxtSenden).addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') this.sendenMessage();
+                });
+                document.getElementById(this.opciones.btnSenden).addEventListener('click', () => this.sendenMessage());
+            }
+
+            sendenMessage() {
+                const messageInput = document.getElementById(this.opciones.lblTxtSenden);
+                if (messageInput && this.ws) {
+                    const messageObj = {
+                        to: this.opciones.Room,
+                        Nombre: this.opciones.Nombre,
+                        Contenido: messageInput.value,
+                        MessageID: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+                    };
+                    this.ws.send(JSON.stringify(messageObj));
+                    this.agregarItem(messageObj); // Add sent message to chat
+                    messageInput.value = '';
+                    this.activeUsers.set(this.opciones.Nombre, {
+                        ...this.activeUsers.get(this.opciones.Nombre) || { iconIndex: 0 },
+                        Nombre: this.opciones.Nombre,
+                        lastSeen: Date.now()
+                    });
+                }
+            }
+
+            sendenMyMessage() {
+                const messageInput = document.getElementById(this.opciones.lblTxtSenden);
+                if (messageInput && this.ws) {
+                    const messageObj = {
+                        to: this.opciones.Room,
+                        Nombre: this.opciones.Nombre,
+                        Contenido: messageInput.value,
+                        MessageID: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+                    };
+                    this.ws.send(JSON.stringify(messageObj));
+                    this.agregarItem(messageObj); // Add sent message to chat
+                    messageInput.value = '';
+                    this.activeUsers.set(this.opciones.Nombre, {
+                        ...this.activeUsers.get(this.opciones.Nombre) || { iconIndex: 0 },
+                        Nombre: this.opciones.Nombre,
+                        lastSeen: Date.now()
+                    });
+                }
+            }
+
+            usuarioOnline() {
+                if (this.ws) {
+                    this.ws.send(JSON.stringify({
+                        to: this.opciones.Room,
+                        Nombre: this.opciones.Nombre
+                    }));
+                    this.activeUsers.set(this.opciones.Nombre, {
+                        ...this.activeUsers.get(this.opciones.Nombre) || { iconIndex: 0 },
+                        Nombre: this.opciones.Nombre,
+                        lastSeen: Date.now()
+                    });
+                }
+            }
+
+            agregarItem(obj, saveToLocalStorage = true) {
+                if (obj.Contenido && obj.Nombre) {
+                    const chatList = document.querySelector('.chatpluginchat');
+                    const template = document.querySelector('.itemtemplate');
+                    if (!template) {
+                        console.warn('Item template not found; chat interface not initialized');
+                        return;
+                    }
+                    const clonedTemplate = template.cloneNode(true);
+                    clonedTemplate.style.display = 'block';
+                    const user = this.activeUsers.get(obj.sID || obj.Nombre);
+                    const iconIndex = user ? user.iconIndex : this.activeUsers.size;
+                    clonedTemplate.querySelector('#Icon').textContent = myUrlImg(iconIndex);
+                    clonedTemplate.querySelector('#Icon').style.fontSize = '1.5em';
+                    clonedTemplate.querySelector('#Nombre').textContent = obj.Nombre;
+                    clonedTemplate.querySelector('#Contenido').textContent = obj.Contenido;
+                    const formattedDate = new Date(obj.Timestamp || Date.now());
+                    const d = formattedDate.getUTCDate();
+                    const m = formattedDate.getMonth() + 1;
+                    const y = formattedDate.getFullYear();
+                    const h = formattedDate.getHours();
+                    const min = formattedDate.getMinutes();
+                    const fecha = `${d}/${m}/${y} ${h}:${min}`;
+                    clonedTemplate.querySelector('#Tiempo').textContent = fecha;
+                    clonedTemplate.classList.remove('itemtemplate');
+                    const messageID = obj.MessageID || (Date.now().toString() + Math.random().toString(36).substr(2, 9));
+                    clonedTemplate.dataset.messageId = messageID;
+                    this.messageStore.set(messageID, {
+                        sID: obj.sID || obj.Nombre,
+                        Nombre: obj.Nombre,
+                        Contenido: obj.Contenido,
+                        Timestamp: obj.Timestamp || Date.now(),
+                        MessageID: messageID
+                    });
+                    // Add delete button event listener
+                    const deleteBtn = clonedTemplate.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', () => {
+                        clonedTemplate.remove();
+                        this.messageStore.delete(messageID);
+                        const storedMessages = JSON.parse(localStorage.getItem(`chatMessages_${this.opciones.Nombre}`) || '[]');
+                        const updatedMessages = storedMessages.filter(msg => msg.MessageID !== messageID);
+                        localStorage.setItem(`chatMessages_${this.opciones.Nombre}`, JSON.stringify(updatedMessages));
+                        alert('Message deleted');
+                    });
+
+                    const importBtn = clonedTemplate.querySelector('.import-btn');
+                    importBtn.addEventListener('click', () => {
+                        const messageContent = clonedTemplate.querySelector('#Contenido').textContent;
+                        const extractedIds = extractYouTubeIds(messageContent);
+                        if (extractedIds.length > 0) {
+                            window.parent.postMessage({ type: 'add-from-chat', ids: extractedIds }, '*');
+                            //alert('YouTube IDs sent to main playlist!');
+                        } else {
+                            alert('No YouTube IDs found in this message.');
+                        }
+                    });
+
+                    chatList.appendChild(clonedTemplate);
+                    this.activeUsers.set(obj.sID || obj.Nombre, {
+                        ...this.activeUsers.get(obj.sID || obj.Nombre) || { iconIndex: this.activeUsers.size },
+                        Nombre: obj.Nombre,
+                        lastSeen: Date.now()
+                    });
+                    // Save to localStorage if new message
+                    if (saveToLocalStorage) {
+                        const storedMessages = JSON.parse(localStorage.getItem(`chatMessages_${this.opciones.Nombre}`) || '[]');
+                        storedMessages.push(this.messageStore.get(messageID));
+                        localStorage.setItem(`chatMessages_${this.opciones.Nombre}`, JSON.stringify(storedMessages));
+                    }
+                }
+            }
+
+            getOnline() {
+                setInterval(() => this.usuarioOnline(), 5000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const storedName = localStorage.getItem('chatUserName');
+            const proptname = params.get('name') || storedName || prompt('finalname:', myName);
+            const chatElement = document.getElementById('Elchat');
+            if (chatElement) {
+                new ChatSocket(chatElement, { lblEntradaNombre: proptname });
+            }
+            const messageButton = document.getElementById('imessage');
+            const actionButton = document.getElementById('ibutton');
+
+            if (messageButton) {
+                messageButton.addEventListener('click', () => {
+                    const messageInput = document.getElementById('txtMessage');
+                    if (messageInput) {
+                        messageInput.value = 'Ich bin jetzt dabei';
+                    } else {
+                        console.warn('Message input field not found');
+                    }
+                });
+            }
+            if (actionButton) {
+                actionButton.addEventListener('click', () => {
+                    const messageButton = document.getElementById('imessage');
+                    const sendButton = document.getElementById('btnSenden');
+                    if (messageButton) messageButton.click();
+                    if (sendButton) sendButton.click();
+                    else console.warn('Send button not found');
+                    apiCall();
+                });
+            }
+        });
+
+        async function apiCall() {
+            try {
+                const resp = await fetch('https://script.google.com/macros/s/AKfycbyG_q2X_5K_UYP9nqPI7Lh0ZophIQK5v3bcnCkt4lges1vqcz4AdFQ3Ji8-SiarB9D7qA/exec?uri=zz11222');
+                const jobj = await resp.json();
+                console.log(jobj.data);
+            } catch (error) {
+                console.error('API call failed:', error);
+            }
+        }
+
+        function extractYouTubeIds(text) {
+            const videoIdRegex = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([a-zA-Z0-9_-]{11})|([a-zA-Z0-9_-]{11})(?:\s*,\s*([a-zA-Z0-9_-]{11}))*/g;
+            const playlistIdRegex = /(?:youtube\.com\/playlist\?list=|(PL[a-zA-Z0-9_-]+))(?:\s*,\s*(PL[a-zA-Z0-9_-]+))*/g;
+            
+            let ids = [];
+            let match;
+
+            // Extract video IDs
+            while ((match = videoIdRegex.exec(text)) !== null) {
+                if (match[1]) ids.push(match[1]);
+                if (match[2]) ids.push(match[2]);
+                if (match[3]) ids.push(match[3]);
+            }
+
+            // Extract playlist IDs
+            while ((match = playlistIdRegex.exec(text)) !== null) {
+                if (match[1]) ids.push(match[1]);
+                if (match[2]) ids.push(match[2]);
+            }
+            
+            return ids.filter(id => id && id.trim() !== '');
+        }
+
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 text-center"></div>
+        </div>
+        <div class="col-md-8">
+            <br/>
+            <div class="row alert alert-info">
+                <div class="col-lg-4">
+                    <div id="ListaOnline"></div>
+                </div>
+                <div class="col-lg-8">
+                    <div id="Elchat"></div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading"><h1>&nbsp;</h1></div>
+            </div>
+            <div></div>
+        </div>
+        <button id="imessage">Ich bin jetzt dabei</button>
+        <button id="ibutton">X</button>
+        <button onclick="apiCall()">y</button>
+        <div id="iende"></div>
+    </div>
+<script>
+//?ytid=xxxx
+//para for split: 
+quickParam("usrid"); //username
+//quickParam("usrmsg"); //usermessage
+function quickParam(qp) {
+   var link_now = new URL(window.location.href);
+    var r = link_now.searchParams.get(qp);
+// alert("https://www.youtube.com/watch?v="+r);
+
+if (r=="usrid") {alert("usrid")}
+else if (r=="usrmsg") {alert("usrmsg")}
+/*document.querySelector("#url-input").value="https://www.youtube.com/watch?v="+r;
+document.querySelector("#ytwidget-button").click();
+document.querySelector("#url-input").style.display="none";
+document.querySelector("#download-button").style.display="none";
+*/
+ 
+ };
+
+ 
+</script>
+</body>
+</html>

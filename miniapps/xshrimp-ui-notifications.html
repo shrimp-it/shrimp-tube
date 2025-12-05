@@ -1,0 +1,1546 @@
+ <!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shrimptube Toast & Confirm & CRUD & Iframe Demo</title>
+    <style>
+        /* Globale Styles */
+        body {
+            margin: 0;
+            padding: 5px;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; /* Für alle Elemente übernommen */
+        }
+
+        h1 {
+            color: #007bff;
+            margin: 4px;
+            text-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+            font-family: inherit;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .action-button {
+            padding: 12px 20px;
+            font-size: 1em;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            color: white;
+            background-color: #3f51b5; /* Standardblau für Aktionsbuttons */
+            font-weight: 500;
+            font-family: inherit;
+        }
+
+        .action-button:hover {
+            background-color: #303f9f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Toast Container und Wrapper */
+        #shrimptube-toast-container {
+            flex-direction: column;
+        }
+
+        #shrimptube-regular-toast-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            order: 0;
+            /* Neue Toasts erscheinen oben (visuell weiter unten im Container) */
+        }
+
+        #shrimptube-pinned-toast-wrapper {
+            display: flex;
+            flex-direction: column-reverse; /* Angepinnte Toasts stapeln sich von unten nach oben */
+            gap: 10px;
+            order: 1;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Basis für alle Toast-Elemente */
+        .shrimptube-toast,
+        .shrimptube-crud-toast { /* Standard-Toasts und CRUD-Toasts */
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transform: translateY(20px);
+            border-radius: 5px;
+            color: white;
+            background-color: #333; /* Standard-Hintergrund, wird oft überschrieben */
+            font-family: inherit;
+        }
+        .shrimptube-toast.shrimptube-visible,
+        .shrimptube-crud-toast.shrimptube-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+
+        /* Standard Toast (einfache Nachrichten) */
+        .shrimptube-toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            padding-left: 40px; /* Platz für Pin-Icon */
+            padding-right: 40px; /* Platz für Copy-Icon */
+            cursor: default;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            min-height: 40px;
+            box-sizing: border-box;
+        }
+
+        .shrimptube-toast-message {
+            flex-grow: 1;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        /* Icons allgemein */
+        .shrimptube-icon-button {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            transition: color 0.2s ease, transform 0.1s ease;
+            background: none;
+            border: none;
+            padding: 0;
+            flex-shrink: 0; /* Verhindert Schrumpfen in Flex-Containern */
+        }
+
+        .shrimptube-icon-button:hover {
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .shrimptube-toast-pin-icon { position: absolute; top: 8px; left: 8px; }
+        .shrimptube-toast-copy-icon { position: absolute; top: 8px; right: 8px; }
+        .shrimptube-toast-copy-icon.hidden { display: none; }
+
+        /* Toast-Typ-Hintergründe */
+        .shrimptube-toast-info { background-color: #007bff; }
+        .shrimptube-toast-success { background-color: #28a745; }
+        .shrimptube-toast-warning { background-color: #ffc107; color: #333; }
+        .shrimptube-toast-error { background-color: #dc3545; }
+
+
+        /* Confirm Modal - Unverändert */
+        #shrimptube-confirm-modal { /* JS setzt viele Inline-Styles */ }
+        .shrimptube-confirm-box {
+            background-color: #2c2c2c !important;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6) !important;
+            transform: scale(0.95);
+            transition: transform 0.3s ease-in-out;
+            font-family: inherit;
+        }
+        #shrimptube-confirm-modal[style*="opacity: 1"] .shrimptube-confirm-box { transform: scale(1); }
+        .shrimptube-confirm-message { color: #e0e0e0; font-size: 1.15em !important; font-family: inherit; }
+        .shrimptube-confirm-buttons { /* JS setzt inline */ }
+        .shrimptube-confirm-box button {
+            padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer;
+            font-size: 1em; transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); color: white; font-weight: 500; font-family: inherit;
+        }
+        .shrimptube-confirm-box button:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+        .shrimptube-confirm-box button:active { transform: translateY(0); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); }
+        .shrimptube-confirm-box button:nth-child(1) { background-color: #28a745; }
+        .shrimptube-confirm-box button:nth-child(1):hover { background-color: #218838; }
+        .shrimptube-confirm-box button:nth-child(2) { background-color: #dc3545; }
+        .shrimptube-confirm-box button:nth-child(2):hover { background-color: #c82333; }
+
+        /* Iframe Modal Toast */
+        .shrimptube-iframe-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 10002; /* Über Confirms */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translateY(0); /* Hier keine vertikale Transformation, da Fullscreen */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .shrimptube-iframe-modal.shrimptube-visible {
+            opacity: 1;
+        }
+
+        .shrimptube-iframe-box {
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            width: 90%;
+            height: 90%;
+            max-width: 900px; /* Max Breite für Desktop (Standard-Ansicht) */
+            max-height: 600px; /* Max Höhe für Desktop (Standard-Ansicht) */
+            transform: scale(0.9);
+            transition: transform 0.3s ease-in-out, width 0.3s ease-in-out, height 0.3s ease-in-out, max-width 0.3s ease-in-out, max-height 0.3s ease-in-out;
+        }
+        .shrimptube-iframe-modal.shrimptube-visible .shrimptube-iframe-box {
+            transform: scale(1);
+        }
+        /* Fullscreen-Modus */
+        .shrimptube-iframe-modal.shrimptube-fullscreen .shrimptube-iframe-box {
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            max-height: none;
+            border-radius: 0; /* Keine Rundungen im Fullscreen */
+            transform: scale(1); /* Sicherstellen, dass es immer 1 ist */
+        }
+        .shrimptube-iframe-modal.shrimptube-fullscreen {
+            z-index: 10003; /* Ganz oben */
+        }
+
+
+        .shrimptube-modal-header { /* Generalisiert für Iframe, CRUD-Table, CRUD-Form */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #3e3e3e;
+            border-bottom: 1px solid #4a4a4a;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            color: #f0f0f0;
+            font-weight: 600;
+            position: relative;
+            min-height: 40px;
+        }
+        .shrimptube-iframe-modal.shrimptube-fullscreen .shrimptube-modal-header {
+            border-radius: 0; /* Header-Rundungen im Fullscreen entfernen */
+        }
+
+        .shrimptube-modal-header h3 {
+            margin: 0;
+            flex-grow: 1;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 24px; /* Platz für Icons auf beiden Seiten */
+            font-family: inherit;
+            font-size: 1em;
+        }
+        /* Positionierung der Buttons im Header */
+        .shrimptube-modal-header .shrimptube-icon-button { position: absolute; top: 50%; transform: translateY(-50%); }
+        .shrimptube-modal-header .shrimptube-icon-button.toggle-min-max { left: 10px; }
+        .shrimptube-modal-header .shrimptube-icon-button.toggle-fullscreen { left: 40px; /* Rechts neben min/max */ }
+        .shrimptube-modal-header .shrimptube-icon-button.close-btn { right: 10px; }
+
+
+        .shrimptube-iframe-content {
+            flex-grow: 1;
+            border: none;
+            width: 100%;
+            height: 100%;
+            background-color: #fff; /* Falls src leer ist */
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+        .shrimptube-iframe-modal.shrimptube-fullscreen .shrimptube-iframe-content {
+            border-radius: 0; /* Content-Rundungen im Fullscreen entfernen */
+        }
+
+
+        /* Minimierte Repräsentationen (Iframe, CRUD-Table, CRUD-Form) */
+        .shrimptube-minimized-item {
+            background-color: #3e3e3e;
+            color: #f0f0f0;
+            padding: 8px 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            position: relative;
+            font-family: inherit;
+            max-width: 300px; /* Passend zur Toast-Container Breite */
+        }
+        .shrimptube-minimized-item:hover {
+            background-color: #4a4a4a;
+        }
+        .shrimptube-minimized-item .shrimptube-item-title {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9em;
+        }
+        /* Maximieren-Button für minimierte Elemente (jetzt links vom Text) */
+        .shrimptube-minimized-item .shrimptube-icon-button {
+            position: static; /* Nicht absolut, sondern im Flex-Fluss */
+            order: -1; /* Als erstes Element anzeigen */
+            margin-right: 5px; /* Abstand zum Titel */
+            width: 20px;
+            height: 20px;
+        }
+
+        /* CRUD Toasts (Table und Form) */
+        .shrimptube-crud-toast {
+            display: flex; /* Flexbox für Header und Content */
+            flex-direction: column;
+            height: auto;
+            background-color: #333;
+            box-sizing: border-box;
+            padding: 0; /* Padding wird im Content-Bereich geregelt */
+        }
+        .shrimptube-crud-toast .shrimptube-toast-content { /* Separater Content-Wrapper */
+            padding: 10px 15px; /* Internes Padding */
+            color: white;
+            font-size: 0.9em;
+            flex-grow: 1;
+            overflow-y: auto; /* Scrollbar, falls Inhalt zu lang */
+        }
+        .shrimptube-crud-toast .shrimptube-modal-header { /* Header-Rundungen für CRUD-Toasts */
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+
+        /* CRUD Table Toast spezifisch */
+        .shrimptube-crud-table-toast {
+            max-width: 600px; /* Breiter für Tabelle */
+        }
+        .shrimptube-crud-table-toast .shrimptube-toast-content h3 {
+            margin-bottom: 15px;
+        }
+        .shrimptube-crud-table-toast table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #3a3a3a;
+            color: white;
+            font-family: inherit;
+        }
+        .shrimptube-crud-table-toast th,
+        .shrimptube-crud-table-toast td {
+            border: 1px solid #555;
+            padding: 8px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        .shrimptube-crud-table-toast th {
+            background-color: #4a4a4a;
+            font-weight: 600;
+        }
+        .shrimptube-crud-table-toast .truncated-cell {
+            max-width: 100px; /* Beispiel-Breite für Kürzung */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+        .shrimptube-crud-table-toast .expanded-cell {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+        }
+        .shrimptube-crud-table-toast .crud-empty-message {
+            text-align: center;
+            padding: 20px;
+            color: #ccc;
+        }
+        /* Spezielle Stile für CRUD-Aktionszellen */
+        .crud-action-cell {
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+        .crud-action-cell:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .crud-action-cell.action-delrow {
+            background-color: #dc3545; /* Rot für Löschen */
+        }
+        .crud-action-cell.action-delrow:hover {
+            background-color: #c82333; /* Dunkleres Rot beim Hover */
+        }
+        .crud-action-cell.action-copyid {
+            background-color: #007bff; /* Blau für Kopieren */
+        }
+        .crud-action-cell.action-copyid:hover {
+            background-color: #0056b3; /* Dunkleres Blau beim Hover */
+        }
+
+        /* CRUD Form Toast spezifisch */
+        .shrimptube-crud-form-toast {
+            max-width: 350px;
+        }
+        .shrimptube-crud-form-toast form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            font-family: inherit;
+        }
+        .shrimptube-crud-form-toast .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .shrimptube-crud-form-toast label {
+            margin-bottom: 5px;
+            color: #eee;
+            font-weight: 500;
+        }
+        .shrimptube-crud-form-toast input[type="text"],
+        .shrimptube-crud-form-toast input[type="number"],
+        .shrimptube-crud-form-toast textarea {
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #3a3a3a;
+            color: white;
+            font-size: 0.9em;
+            font-family: inherit;
+        }
+        .shrimptube-crud-form-toast textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .shrimptube-crud-form-toast input:focus,
+        .shrimptube-crud-form-toast textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        .shrimptube-crud-form-toast button[type="submit"] {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+        .shrimptube-crud-form-toast button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>ShrimpUI Notifications</h1>
+
+    <div class="button-group">
+        <button class="action-button" onclick="ShrimptubeApp.ui.showToast('Nachricht wurde gespeichert!', 'success')">
+            Erfolgs-Toast
+        </button>
+        <button class="action-button" onclick="ShrimptubeApp.ui.showToast('Es ist ein Fehler aufgetreten.', 'error', 4000)">
+            Fehler-Toast (4s)
+        </button>
+        <button class="action-button" onclick="ShrimptubeApp.ui.showToast('Achtung: Möglicherweise alte Daten.', 'warning')">
+            Warn-Toast
+        </button>
+        <button class="action-button" onclick="ShrimptubeApp.ui.showToast('Neue Information verfügbar.', 'info')">
+            Info-Toast
+        </button>
+        <button class="action-button" onclick="ShrimptubeApp.ui.showToast('Eine sehr lange Nachricht, die sich über mehrere Zeilen erstrecken könnte, um zu sehen, wie sie reagiert. Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'info', 6000)">
+            Langer Info-Toast
+        </button>
+        <button class="action-button" onclick="ShrimptubeApp.ui.showConfirm('Möchten Sie wirklich fortfahren? Diese Aktion kann nicht rückgängig gemacht werden.', () => alert('Aktion bestätigt!'), () => alert('Aktion abgebrochen!'))">
+            Bestätigungsdialog
+        </button>
+        <button class="action-button" onclick="ShrimptubeApp.ui.showIframe('demo-page.html', 'Demo Seite')">
+            Iframe-Modal
+        </button>
+ <button class="action-button mini-app" onclick="ShrimptubeApp.ui.showIframe('https://shrimptube.web.app/shrimp-ai.html?keygemini=AIzaSyB1jt_X_15jeyF2_U7Bgh2v7Qf-w1AdSXc&lsuser=Mark&lsmainkey=chatc1005&setmodel=gemini-2.5-flash', 'shrimp-ai')">
+           🍤AI mini-app
+        </button>   
+        <button class="action-button mini-app" onclick="ShrimptubeApp.ui.showIframe('https://shrimptube.firebaseapp.com/index.html?name=dailyx2&apiKey=AIzaSyBBkQpYtY3_bMmYBH9CHycqUwF68LzJvyY&keygemini=AIzaSyC3_0ADKYP1xpZAZi5-a_C693fZ0Eu33EE&playlist=&activeVid=eht9xLs3Drg%2C53%2C956', 'shrimp-tube')">
+            🍤Tube mini-app
+        </button>
+
+        <button class="action-button helper-app" onclick="ShrimptubeApp.ui.showIframe('https://shrimptube.firebaseapp.com/miniapps/_x-helper-uuidapp.html', 'shrimp-tube')">
+            🍤neue Remote-ID
+        </button>
+        <button class="action-button" onclick="ShrimptubeApp.ui.showCrudTable()">
+            CRUD-Tabelle
+        </button>
+        <button class="action-button" onclick="ShrimptubeApp.ui.showCrudForm()">
+            CRUD-Formular
+        </button>
+    </div>
+
+    <!-- Ein einfaches Iframe für die Demo-Seite (demo-page.html) -->
+    <!-- Dieses Iframe wird vom JS geklont und im Toast verwendet, daher display:none -->
+    <iframe id="demo-iframe-content" style="display:none;" srcdoc='
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #2e2e2e; color: #f0f0f0; margin: 0; padding: 20px; text-align: center; }
+                h2 { color: #007bff; margin-bottom: 20px; }
+                p { line-height: 1.6; }
+                a { color: #28a745; text-decoration: none; }
+                a:hover { text-decoration: underline; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #3a3a3a; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+                button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; font-family: inherit; }
+                button:hover { background-color: #0056b3; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>Willkommen im Iframe</h2>
+                <p>Dies ist eine Beispielseite, die in einem Iframe geladen wird.</p>
+                <p>Sie können hier beliebige Web-Inhalte anzeigen lassen.</p>
+                <p>Die Funktionen Minimieren, Maximieren und Schließen werden vom übergeordneten Toast-System gesteuert.</p>
+                <p>Weitere Informationen finden Sie unter <a href="https://example.com" target="_blank">example.com</a>.</p>
+                <button onclick="alert(\'Hallo aus dem Iframe!\')">Klick mich!</button>
+            </div>
+        </body>
+        </html>
+    '></iframe>
+
+    <script>
+        // --- ShrimptubeApp.utils Fallback & Data Store ---
+        window.ShrimptubeApp = window.ShrimptubeApp || {};
+        window.ShrimptubeApp.utils = window.ShrimptubeApp.utils || {
+            logDebug: console.log,
+            logWarn: console.warn,
+            logError: console.error
+        };
+        // Globaler Daten-Store für CRUD
+        window.ShrimptubeApp.data = window.ShrimptubeApp.data || {
+            crudItems: [
+                { id: 1, name: "Alice Smith", userId: "ASmith", userInfo: "Team Lead für Frontend-Entwicklung. Verantwortlich für UI/UX-Richtlinien und Schulungen. Sehr erfahren in React und Vue.js. Arbeitet seit 5 Jahren im Unternehmen.", f1: "copyid", f2: "delrow" },
+                { id: 2, name: "Bob Johnson", userId: "BJohn", userInfo: "Backend-Spezialist mit Fokus auf Datenbanken und API-Entwicklung. Beherrscht Node.js und Python. Interessiert an Cloud-Infrastruktur.", f1: "copyid", f2: "" },
+                { id: 3, name: "Charlie Brown", userId: "CBrown", userInfo: "Praktikant im Marketing-Team. Hilft bei Social Media Kampagnen und Content-Erstellung. Lernt schnell und ist sehr motiviert.", f1: "", f2: "delrow" },
+                { id: 4, name: "Diana Prince", userId: "DP", userInfo: "Projektmanagerin für das 'Phoenix'-Projekt. Überwacht Fortschritt, Ressourcen und Kommunikation. Expertise in agilen Methoden.", f1: "copyid", f2: "delrow" }
+            ],
+            nextCrudId: 5
+        };
+
+        // --- Start des toast-notification.js Skripts mit Erweiterungen ---
+        (function() {
+            const logDebug = window.ShrimptubeApp?.utils?.logDebug || console.log;
+            const logWarn = window.ShrimptubeApp?.utils?.logWarn || console.warn;
+            const logError = window.ShrimptubeApp?.utils?.logError || console.error;
+
+            window.ShrimptubeApp = window.ShrimptubeApp || {};
+            window.ShrimptubeApp.ui = window.ShrimptubeApp.ui || {};
+
+            const TOAST_TIMEOUT = 3000;
+            const PINNED_ITEM_FADE_OUT_DURATION = 500;
+            const MAX_PINNED_ITEMS = 4; // Maximale Anzahl angepinnter Toasts/minimierter Elemente
+
+            let toastContainer;
+            let regularToastWrapper;
+            let pinnedToastWrapper;
+
+            // Map<itemId, {element: HTMLElement, type: string, restoreFn: Function, closeFn: Function, minimizedElement: HTMLElement|null, isMinimized: boolean, isFullScreen: boolean}>
+            const _activeItems = new Map();
+            const _pinnedItemsList = []; // Array von itemId der aktuell angepinnten/minimierten Elemente, um die Reihenfolge und Kapazität zu verwalten
+
+            // SVG Icons
+            const PIN_ICON_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16 12V4H17C17.55 4 18 3.55 18 3V2C18 1.45 17.55 1 17 1H7C6.45 1 6 1.45 6 2V3C6 3.55 6.45 4 7 4H8V12L6 14V16H11V22H13V16H18V14L16 12Z"/></svg>`;
+            const COPY_ICON_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>`;
+            const CLOSE_ICON_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/></svg>`;
+            const MINIMIZE_ICON_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M20 14H4V10H20V14Z"/></svg>`;
+            const MAXIMIZE_ICON_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M4 4H20V20H4V4ZM6 6V18H18V6H6Z"/></svg>`;
+            const FULLSCREEN_ICON_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M7 14H5V19H10V17H7V14ZM5 10H7V7H10V5H5V10ZM17 17H14V19H19V14H17V17ZM14 5V7H17V10H19V5H14Z"/></svg>`;
+
+            // Helper zur Generierung eindeutiger IDs
+            let _nextId = 0;
+            function _generateUniqueId(prefix = 'shrimptube-item-') {
+                return prefix + _nextId++;
+            }
+
+            // Initialisiert den Toast-Container und seine Wrapper
+            function _initToastContainer() {
+                if (!toastContainer) {
+                    toastContainer = document.createElement('div');
+                    toastContainer.id = 'shrimptube-toast-container';
+                    Object.assign(toastContainer.style, {
+                        position: 'fixed',
+                        bottom: '20px',
+                        right: '20px',
+                        zIndex: '10000',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                        maxWidth: '300px'
+                    });
+
+                    regularToastWrapper = document.createElement('div');
+                    regularToastWrapper.id = 'shrimptube-regular-toast-wrapper';
+                    toastContainer.appendChild(regularToastWrapper);
+
+                    pinnedToastWrapper = document.createElement('div');
+                    pinnedToastWrapper.id = 'shrimptube-pinned-toast-wrapper';
+                    toastContainer.appendChild(pinnedToastWrapper);
+
+                    document.body.appendChild(toastContainer);
+                    logDebug("Toast container initialized with wrappers.");
+                }
+            }
+
+            // Kopiert Text in die Zwischenablage
+            async function _copyToClipboard(text) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    logDebug("Text copied to clipboard!");
+                    showToast("Text kopiert!", "info", 1500);
+                } catch (err) {
+                    logError("Failed to copy text: ", err);
+                    showToast("Fehler beim Kopieren des Textes.", "error", 2000);
+                }
+            }
+
+            // Entfernt ein Element aus der _activeItems und _pinnedItemsList
+            function _removeItemFromTracking(itemId) {
+                const itemData = _activeItems.get(itemId);
+                if (itemData) {
+                    if (itemData.element && itemData.element.parentNode) itemData.element.remove();
+                    if (itemData.minimizedElement && itemData.minimizedElement.parentNode) itemData.minimizedElement.remove();
+                    _activeItems.delete(itemId);
+                    const idx = _pinnedItemsList.indexOf(itemId);
+                    if (idx > -1) _pinnedItemsList.splice(idx, 1);
+                }
+            }
+
+            // Verwaltet die maximale Anzahl angepinnter/minimierter Elemente
+            function _managePinnedItemCapacity() {
+                while (_pinnedItemsList.length > MAX_PINNED_ITEMS) {
+                    const oldestItemId = _pinnedItemsList.shift(); // Ältesten ID entfernen
+                    const itemData = _activeItems.get(oldestItemId);
+                    if (itemData && itemData.closeFn) {
+                        logDebug(`Removing oldest pinned item '${itemData.type}' due to capacity limit: ${oldestItemId}`);
+                        itemData.closeFn(); // Permanentes Schließen aufrufen
+                    }
+                }
+            }
+
+            /**
+             * Erstellt die Basisstruktur für einen Standard-Toast (Message, Pin, Copy).
+             * @param {string} message - Die anzuzeigende Nachricht.
+             * @param {string} type - Der Typ des Toasts.
+             * @param {boolean} hasPin - Ob der Toast einen Pin-Button hat.
+             * @param {boolean} hasCopy - Ob der Toast einen Copy-Button hat.
+             * @returns {HTMLElement} Das erstellte Toast-Element.
+             */
+            function _createStandardToastElement(message, type) {
+                const toast = document.createElement('div');
+                toast.classList.add('shrimptube-toast', `shrimptube-toast-${type}`);
+                toast._originalMessage = message;
+                toast._isPinned = false;
+                toast._timeoutId = null;
+
+                const pinIcon = document.createElement('button');
+                pinIcon.classList.add('shrimptube-icon-button', 'shrimptube-toast-pin-icon');
+                pinIcon.innerHTML = PIN_ICON_SVG;
+                pinIcon.setAttribute('aria-label', 'Nachricht anpinnen/entpinnen');
+                toast.appendChild(pinIcon);
+                toast._pinIcon = pinIcon;
+
+                const copyIcon = document.createElement('button');
+                copyIcon.classList.add('shrimptube-icon-button', 'shrimptube-toast-copy-icon', 'hidden');
+                copyIcon.innerHTML = COPY_ICON_SVG;
+                copyIcon.setAttribute('aria-label', 'Nachricht kopieren');
+                toast.appendChild(copyIcon);
+                toast._copyIcon = copyIcon;
+
+                const messageEl = document.createElement('div');
+                messageEl.classList.add('shrimptube-toast-message');
+                messageEl.textContent = message;
+                toast.appendChild(messageEl);
+
+                // Spezifische Typ-Styles
+                if (type === "success") toast.style.backgroundColor = '#28a745';
+                if (type === "error") toast.style.backgroundColor = '#dc3545';
+                if (type === "warning") {
+                    toast.style.backgroundColor = '#ffc107';
+                    toast.style.color = '#333';
+                }
+                if (type === "info") toast.style.backgroundColor = '#007bff';
+
+                return toast;
+            }
+
+            /**
+             * Zeigt eine nicht-blockierende Toast-Benachrichtigung an.
+             * @param {string} message - Die anzuzeigende Nachricht.
+             * @param {"info"|"success"|"warning"|"error"} [type="info"] - Der Typ der Nachricht für Styling.
+             * @param {number} [duration=TOAST_TIMEOUT] - Die Anzeigedauer in Millisekunden.
+             */
+            function showToast(message, type = "info", duration = TOAST_TIMEOUT) {
+                if (!toastContainer) _initToastContainer();
+
+                const itemId = _generateUniqueId('std-toast-');
+                const toast = _createStandardToastElement(message, type);
+                toast.setAttribute('data-item-id', itemId);
+
+                const pinIcon = toast._pinIcon;
+                const copyIcon = toast._copyIcon;
+
+                // Funktion zum permanenten Schließen
+                const closeToast = () => {
+                    logDebug(`Closing Standard Toast (ID: ${itemId})`);
+                    if (toast._timeoutId) clearTimeout(toast._timeoutId);
+                    toast.classList.remove('shrimptube-visible');
+                    toast.addEventListener('transitionend', function handler() {
+                        toast.removeEventListener('transitionend', handler);
+                        toast.remove();
+                        _removeItemFromTracking(itemId);
+                    });
+                };
+
+                // Funktion zum automatischen Ausblenden (wenn nicht angepinnt)
+                const autoHide = () => {
+                    if (toast._isPinned) return;
+                    closeToast();
+                };
+
+                const startAutoHide = (delay = duration) => {
+                    if (toast._timeoutId) clearTimeout(toast._timeoutId);
+                    toast._timeoutId = setTimeout(autoHide, delay);
+                };
+                startAutoHide();
+
+                // Funktion zum Anpinnen eines Toasts
+                const pinToast = () => {
+                    if (toast._isPinned) return;
+                    clearTimeout(toast._timeoutId);
+                    toast._isPinned = true;
+                    copyIcon?.classList.remove('hidden');
+                    pinIcon.style.color = 'white';
+
+                    pinnedToastWrapper.prepend(toast);
+                    _pinnedItemsList.push(itemId);
+                    _managePinnedItemCapacity();
+
+                    logDebug(`Standard Toast pinned: [${type}] ${message}`);
+                };
+
+                // Funktion zum Entpinnen eines Toasts
+                const unpinToast = () => {
+                    if (!toast._isPinned) return;
+                    toast._isPinned = false;
+                    copyIcon?.classList.add('hidden');
+                    pinIcon.style.color = 'rgba(255, 255, 255, 0.7)';
+
+                    const index = _pinnedItemsList.indexOf(itemId);
+                    if (index > -1) _pinnedItemsList.splice(index, 1);
+
+                    regularToastWrapper.prepend(toast);
+                    startAutoHide(PINNED_ITEM_FADE_OUT_DURATION);
+
+                    logDebug(`Standard Toast unpinned: [${type}] ${message}`);
+                };
+
+                pinIcon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (toast._isPinned) unpinToast();
+                    else pinToast();
+                });
+
+                copyIcon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    _copyToClipboard(toast._originalMessage);
+                });
+
+                toast.addEventListener('click', () => {
+                    if (!toast._isPinned) {
+                        closeToast();
+                    }
+                });
+
+                regularToastWrapper.prepend(toast);
+                setTimeout(() => toast.classList.add('shrimptube-visible'), 100);
+
+                _activeItems.set(itemId, {
+                    element: toast,
+                    type: 'toast',
+                    restoreFn: null, // Normale Toasts werden nicht "maximiert"
+                    closeFn: closeToast,
+                    minimizedElement: null,
+                    isMinimized: false,
+                    isFullScreen: false
+                });
+                logDebug(`Toast displayed: [${type}] ${message}`);
+                return toast;
+            }
+
+            /**
+             * Zeigt eine blockierende Bestätigungsanfrage an (unverändert).
+             */
+            function showConfirm(message, onConfirm, onCancel) {
+                const confirmModal = document.createElement('div');
+                confirmModal.id = 'shrimptube-confirm-modal';
+                Object.assign(confirmModal.style, {
+                    position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
+                    backgroundColor: 'rgba(0,0,0,0.6)', zIndex: '10001', display: 'flex',
+                    justifyContent: 'center', alignItems: 'center', opacity: '0',
+                    transition: 'opacity 0.3s ease-in-out'
+                });
+
+                const confirmBox = document.createElement('div');
+                confirmBox.classList.add('shrimptube-confirm-box');
+                Object.assign(confirmBox.style, {
+                    backgroundColor: '#333', color: 'white', padding: '25px', borderRadius: '8px',
+                    boxShadow: '0 5px 15px rgba(0,0,0,0.3)', textAlign: 'center', maxWidth: '400px', width: '90%'
+                });
+
+                const msgPara = document.createElement('p');
+                msgPara.classList.add('shrimptube-confirm-message');
+                msgPara.textContent = message;
+                Object.assign(msgPara.style, { marginBottom: '20px', fontSize: '1.1em', lineHeight: '1.4' });
+                confirmBox.appendChild(msgPara);
+
+                const buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('shrimptube-confirm-buttons');
+                Object.assign(buttonContainer.style, { display: 'flex', justifyContent: 'center', gap: '15px' });
+
+                const confirmBtn = document.createElement('button');
+                confirmBtn.textContent = 'Bestätigen';
+                Object.assign(confirmBtn.style, {
+                    padding: '10px 20px', borderRadius: '5px', border: 'none',
+                    backgroundColor: '#28a745', color: 'white', cursor: 'pointer', transition: 'background-color 0.2s ease'
+                });
+                confirmBtn.onclick = () => { onConfirm(); confirmModal.remove(); logDebug("Confirm dialog: Confirmed."); };
+                buttonContainer.appendChild(confirmBtn);
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'Abbrechen';
+                Object.assign(cancelBtn.style, {
+                    padding: '10px 20px', borderRadius: '5px', border: 'none',
+                    backgroundColor: '#dc3545', color: 'white', cursor: 'pointer', transition: 'background-color 0.2s ease'
+                });
+                cancelBtn.onclick = () => { if (onCancel) onCancel(); confirmModal.remove(); logDebug("Confirm dialog: Cancelled."); };
+                buttonContainer.appendChild(cancelBtn);
+
+                confirmBox.appendChild(buttonContainer);
+                confirmModal.appendChild(confirmBox);
+                document.body.appendChild(confirmModal);
+
+                setTimeout(() => { confirmModal.style.opacity = '1'; }, 50);
+
+                logDebug(`Confirm dialog displayed: ${message}`);
+            }
+
+            /**
+             * Zeigt ein Iframe-Modal-Toast an.
+             * @param {string} src - Die URL des Iframes.
+             * @param {string} title - Der Titel für den Iframe-Header.
+             */
+            function showIframe(src, title) {
+                if (!toastContainer) _initToastContainer();
+
+                const itemId = _generateUniqueId('iframe-');
+
+                // Prüfen, ob Iframe bereits existiert
+                let existingItemData = Array.from(_activeItems.values()).find(item =>
+                    item.type === 'iframe' && item.element.getAttribute('data-src') === src
+                );
+
+                if (existingItemData) {
+                    if (existingItemData.isMinimized) {
+                        logDebug(`Iframe was minimized, maximizing: ${title}`);
+                        existingItemData.restoreFn(); // Maximiert es
+                    } else if (existingItemData.isFullScreen) {
+                        logDebug(`Iframe already open in fullscreen: ${title}`);
+                    } else {
+                        logDebug(`Iframe already open: ${title}`);
+                    }
+                    return;
+                }
+
+                // Initialer Bau des Iframes
+                const iframeModal = document.createElement('div');
+                iframeModal.classList.add('shrimptube-iframe-modal');
+                iframeModal.setAttribute('data-item-id', itemId);
+                iframeModal.setAttribute('data-src', src);
+                iframeModal._isMinimized = false;
+                iframeModal._isFullScreen = false; // Neuer Zustand
+                iframeModal._originalTitle = title;
+                iframeModal._originalSrc = src;
+
+                const iframeBox = document.createElement('div');
+                iframeBox.classList.add('shrimptube-iframe-box');
+
+                const header = document.createElement('div');
+                header.classList.add('shrimptube-modal-header');
+
+                const toggleMinMaxBtn = document.createElement('button');
+                toggleMinMaxBtn.classList.add('shrimptube-icon-button', 'toggle-min-max');
+                toggleMinMaxBtn.innerHTML = MINIMIZE_ICON_SVG;
+                toggleMinMaxBtn.setAttribute('aria-label', 'Minimieren');
+                header.appendChild(toggleMinMaxBtn);
+
+                const toggleFullscreenBtn = document.createElement('button'); // Neuer Fullscreen Button
+                toggleFullscreenBtn.classList.add('shrimptube-icon-button', 'toggle-fullscreen');
+                toggleFullscreenBtn.innerHTML = FULLSCREEN_ICON_SVG;
+                toggleFullscreenBtn.setAttribute('aria-label', 'Vollbild');
+                header.appendChild(toggleFullscreenBtn);
+
+                const headerTitle = document.createElement('h3');
+                const filename = src.split('/').pop().split('?')[0];
+                headerTitle.textContent = filename || title;
+                header.appendChild(headerTitle);
+
+                const closeBtn = document.createElement('button');
+                closeBtn.classList.add('shrimptube-icon-button', 'close-btn');
+                closeBtn.innerHTML = CLOSE_ICON_SVG;
+                closeBtn.setAttribute('aria-label', 'Schließen');
+                header.appendChild(closeBtn);
+
+                const iframeContent = document.createElement('iframe');
+                iframeContent.classList.add('shrimptube-iframe-content');
+                iframeContent.src = src;
+                iframeContent.title = title;
+                iframeContent.setAttribute('frameborder', '0');
+                iframeContent.setAttribute('allowfullscreen', '');
+                // Zusätzliche API-Berechtigungen
+                iframeContent.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms');
+                iframeContent.setAttribute('allow', 'clipboard-read; clipboard-write; microphone; camera; geolocation; fullscreen; payment; xr-spatial-tracking;');
+
+
+                iframeBox.appendChild(header);
+                iframeBox.appendChild(iframeContent);
+                iframeModal.appendChild(iframeBox);
+                document.body.appendChild(iframeModal);
+
+                // Einblenden-Animation
+                setTimeout(() => iframeModal.classList.add('shrimptube-visible'), 50);
+
+                // Funktion zum permanenten Schließen
+                const closeIframe = () => {
+                    logDebug(`Closing Iframe '${title}' (ID: ${itemId})`);
+                    iframeModal.classList.remove('shrimptube-visible');
+                    iframeModal.addEventListener('transitionend', function handler() {
+                        iframeModal.removeEventListener('transitionend', handler);
+                        _removeItemFromTracking(itemId); // Entfernt das Element und minimierte Repräsentation
+                    });
+                };
+
+                // Funktion zum Minimieren des Iframes
+                const minimizeIframe = () => {
+                    if (iframeModal._isMinimized) return; // Bereits minimiert
+                    // Wenn im Fullscreen, zuerst zu Normal wechseln
+                    if (iframeModal._isFullScreen) {
+                        toggleFullscreen(); // Wechselt zu Normal
+                    }
+
+                    iframeModal._isMinimized = true;
+                    toggleMinMaxBtn.innerHTML = MAXIMIZE_ICON_SVG;
+                    toggleMinMaxBtn.setAttribute('aria-label', 'Maximieren');
+
+                    iframeModal.classList.remove('shrimptube-visible');
+                    iframeModal.addEventListener('transitionend', function handler() {
+                        iframeModal.removeEventListener('transitionend', handler);
+                        iframeModal.remove(); // Tatsächlich aus dem DOM entfernen
+                    });
+
+                    // Minimierte Repräsentation erstellen
+                    const minimizedRepresentation = document.createElement('div');
+                    minimizedRepresentation.classList.add('shrimptube-minimized-item');
+                    minimizedRepresentation.setAttribute('data-item-id', itemId);
+
+                    const maximizeBtn = document.createElement('button'); // Maximize-Button jetzt links
+                    maximizeBtn.classList.add('shrimptube-icon-button', 'maximize-btn');
+                    maximizeBtn.innerHTML = MAXIMIZE_ICON_SVG;
+                    maximizeBtn.setAttribute('aria-label', 'Maximieren');
+                    minimizedRepresentation.appendChild(maximizeBtn);
+
+                    const titleSpan = document.createElement('span');
+                    titleSpan.classList.add('shrimptube-item-title');
+                    titleSpan.textContent = title;
+                    minimizedRepresentation.appendChild(titleSpan);
+
+                    maximizeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        restoreIframe();
+                    });
+
+                    pinnedToastWrapper.prepend(minimizedRepresentation);
+                    _activeItems.get(itemId).minimizedElement = minimizedRepresentation;
+                    _activeItems.get(itemId).isMinimized = true;
+
+                    _pinnedItemsList.push(itemId);
+                    _managePinnedItemCapacity();
+
+                    logDebug(`Iframe minimized: ${title}`);
+                };
+
+                // Funktion zum Wiederherstellen (Maximieren) des Iframes
+                const restoreIframe = () => {
+                    if (!iframeModal._isMinimized) return; // Nicht minimiert, kann nicht wiederhergestellt werden
+                    logDebug(`Restoring Iframe: ${title}`);
+
+                    iframeModal._isMinimized = false;
+                    toggleMinMaxBtn.innerHTML = MINIMIZE_ICON_SVG;
+                    toggleMinMaxBtn.setAttribute('aria-label', 'Minimieren');
+
+                    const itemData = _activeItems.get(itemId);
+                    if (itemData && itemData.minimizedElement) {
+                        itemData.minimizedElement.remove(); // Minimierte Repräsentation entfernen
+                        itemData.minimizedElement = null;
+                        itemData.isMinimized = false;
+                        const idx = _pinnedItemsList.indexOf(itemId);
+                        if (idx > -1) _pinnedItemsList.splice(idx, 1); // Aus pinned-Liste entfernen
+                    }
+
+                    document.body.appendChild(iframeModal); // Originales Modal wieder einfügen
+                    setTimeout(() => iframeModal.classList.add('shrimptube-visible'), 50); // Wieder einblenden
+                };
+
+                // Funktion zum Umschalten Fullscreen-Modus
+                const toggleFullscreen = () => {
+                    if (iframeModal._isFullScreen) { // Wenn Fullscreen, zurück zu Standard
+                        iframeModal.classList.remove('shrimptube-fullscreen');
+                        iframeModal._isFullScreen = false;
+                        toggleFullscreenBtn.innerHTML = FULLSCREEN_ICON_SVG;
+                        toggleFullscreenBtn.setAttribute('aria-label', 'Vollbild');
+                        logDebug(`Iframe exited fullscreen: ${title}`);
+                    } else { // Wenn Standard, zu Fullscreen
+                        iframeModal.classList.add('shrimptube-fullscreen');
+                        iframeModal._isFullScreen = true;
+                        toggleFullscreenBtn.innerHTML = MAXIMIZE_ICON_SVG; // Maximize-Icon für "aus Fullscreen"
+                        toggleFullscreenBtn.setAttribute('aria-label', 'Fenstermodus');
+                        logDebug(`Iframe entered fullscreen: ${title}`);
+                    }
+                };
+
+                toggleMinMaxBtn.addEventListener('click', minimizeIframe); // Toggle-Button minimiert immer, Restore über Pinned-Liste
+
+                toggleFullscreenBtn.addEventListener('click', toggleFullscreen);
+
+                closeBtn.addEventListener('click', closeIframe);
+
+                _activeItems.set(itemId, {
+                    element: iframeModal,
+                    type: 'iframe',
+                    restoreFn: restoreIframe,
+                    closeFn: closeIframe,
+                    minimizedElement: null,
+                    isMinimized: false,
+                    isFullScreen: false
+                });
+
+                logDebug(`Iframe displayed: ${title}`);
+            }
+
+            /**
+             * Erstellt einen Header mit Min/Max- und Close-Button für CRUD-Toasts.
+             * @param {string} title - Der Titel des Toasts.
+             * @param {HTMLElement} parentElement - Das Toast-Element, dem der Header hinzugefügt wird.
+             * @param {Function} minimizeCallback - Funktion, die beim Minimieren aufgerufen wird.
+             * @param {Function} restoreCallback - Funktion, die beim Maximieren aufgerufen wird.
+             * @param {Function} closeCallback - Funktion, die beim Schließen aufgerufen wird.
+             * @returns {HTMLElement} Der Header des Toasts.
+             */
+            function _createCrudToastHeader(title, parentElement, minimizeCallback, restoreCallback, closeCallback) {
+                const header = document.createElement('div');
+                header.classList.add('shrimptube-modal-header');
+
+                const toggleMinMaxBtn = document.createElement('button');
+                toggleMinMaxBtn.classList.add('shrimptube-icon-button', 'toggle-min-max');
+                toggleMinMaxBtn.innerHTML = MINIMIZE_ICON_SVG;
+                toggleMinMaxBtn.setAttribute('aria-label', 'Minimieren');
+                header.appendChild(toggleMinMaxBtn);
+                parentElement._toggleMinMaxBtn = toggleMinMaxBtn; // Referenz speichern
+
+                const headerTitle = document.createElement('h3');
+                headerTitle.textContent = title;
+                header.appendChild(headerTitle);
+
+                const closeBtn = document.createElement('button');
+                closeBtn.classList.add('shrimptube-icon-button', 'close-btn');
+                closeBtn.innerHTML = CLOSE_ICON_SVG;
+                closeBtn.setAttribute('aria-label', 'Schließen');
+                header.appendChild(closeBtn);
+
+                toggleMinMaxBtn.addEventListener('click', () => {
+                    if (parentElement._isMinimized) restoreCallback();
+                    else minimizeCallback();
+                });
+
+                closeBtn.addEventListener('click', closeCallback);
+
+                return header;
+            }
+
+            // --- CRUD Aktionen ---
+            window.ShrimptubeApp.ui.crud = window.ShrimptubeApp.ui.crud || {};
+
+            ShrimptubeApp.ui.crud.copyId = async (id) => {
+                const item = ShrimptubeApp.data.crudItems.find(i => i.id === id);
+                if (item) {
+                    await _copyToClipboard(item.userId.toString()); // ID kann auch der User ID entsprechen oder ein anderer Wert sein
+                } else {
+                    showToast("ID nicht gefunden!", "error", 1500);
+                }
+            };
+
+            ShrimptubeApp.ui.crud.deleteRow = (id) => {
+                const initialLength = ShrimptubeApp.data.crudItems.length;
+                ShrimptubeApp.data.crudItems = ShrimptubeApp.data.crudItems.filter(item => item.id !== id);
+                if (ShrimptubeApp.data.crudItems.length < initialLength) {
+                    showToast(`Zeile mit ID ${id} gelöscht.`, "success", 1500);
+                    // Benachrichtige alle CRUD-Tabelle Toasts
+                    document.dispatchEvent(new CustomEvent('crudDataChanged'));
+                } else {
+                    showToast(`Zeile mit ID ${id} nicht gefunden.`, "error", 1500);
+                }
+            };
+
+
+            /**
+             * Zeigt einen Toast mit einer CRUD-Tabelle an.
+             */
+            function showCrudTable() {
+                if (!toastContainer) _initToastContainer();
+
+                const itemId = _generateUniqueId('crud-table-');
+                let existingItemData = _activeItems.get(itemId);
+
+                if (existingItemData) {
+                    if (existingItemData.isMinimized) {
+                        logDebug(`CRUD Table was minimized, maximizing.`);
+                        existingItemData.restoreFn();
+                    } else {
+                        logDebug("CRUD Table Toast already open.");
+                    }
+                    return;
+                }
+
+                const toast = document.createElement('div');
+                toast.classList.add('shrimptube-crud-toast', 'shrimptube-crud-table-toast');
+                toast.setAttribute('data-item-id', itemId);
+                toast._isMinimized = false;
+                toast._originalTitle = "Benutzerübersicht";
+
+                const closeCrudTable = () => {
+                    logDebug(`Closing CRUD Table (ID: ${itemId})`);
+                    toast.classList.remove('shrimptube-visible');
+                    toast.addEventListener('transitionend', function handler() {
+                        toast.removeEventListener('transitionend', handler);
+                        document.removeEventListener('crudDataChanged', updateTableHandler); // Event Listener entfernen
+                        _removeItemFromTracking(itemId);
+                    });
+                };
+
+                const minimizeCrudTable = () => {
+                    if (toast._isMinimized) return;
+                    toast._isMinimized = true;
+                    toast._toggleMinMaxBtn.innerHTML = MAXIMIZE_ICON_SVG;
+                    toast._toggleMinMaxBtn.setAttribute('aria-label', 'Maximieren');
+
+                    toast.classList.remove('shrimptube-visible');
+                    toast.addEventListener('transitionend', function handler() {
+                        toast.removeEventListener('transitionend', handler);
+                        toast.remove();
+                    });
+
+                    const minimizedRepresentation = document.createElement('div');
+                    minimizedRepresentation.classList.add('shrimptube-minimized-item');
+                    minimizedRepresentation.setAttribute('data-item-id', itemId);
+
+                    const maximizeBtn = document.createElement('button');
+                    maximizeBtn.classList.add('shrimptube-icon-button', 'maximize-btn');
+                    maximizeBtn.innerHTML = MAXIMIZE_ICON_SVG;
+                    maximizeBtn.setAttribute('aria-label', 'Maximieren');
+                    minimizedRepresentation.appendChild(maximizeBtn);
+
+                    const titleSpan = document.createElement('span');
+                    titleSpan.classList.add('shrimptube-item-title');
+                    titleSpan.textContent = toast._originalTitle;
+                    minimizedRepresentation.appendChild(titleSpan);
+
+                    maximizeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        restoreCrudTable();
+                    });
+
+                    pinnedToastWrapper.prepend(minimizedRepresentation);
+                    _activeItems.get(itemId).minimizedElement = minimizedRepresentation;
+                    _activeItems.get(itemId).isMinimized = true;
+
+                    _pinnedItemsList.push(itemId);
+                    _managePinnedItemCapacity();
+                    logDebug(`CRUD Table minimized.`);
+                };
+
+                const restoreCrudTable = () => {
+                    if (!toast._isMinimized) return;
+                    logDebug(`Restoring CRUD Table.`);
+                    toast._isMinimized = false;
+                    toast._toggleMinMaxBtn.innerHTML = MINIMIZE_ICON_SVG;
+                    toast._toggleMinMaxBtn.setAttribute('aria-label', 'Minimieren');
+
+                    const itemData = _activeItems.get(itemId);
+                    if (itemData && itemData.minimizedElement) {
+                        itemData.minimizedElement.remove();
+                        itemData.minimizedElement = null;
+                        itemData.isMinimized = false;
+                        const idx = _pinnedItemsList.indexOf(itemId);
+                        if (idx > -1) _pinnedItemsList.splice(idx, 1);
+                    }
+
+                    regularToastWrapper.prepend(toast);
+                    setTimeout(() => toast.classList.add('shrimptube-visible'), 50);
+                };
+
+                const header = _createCrudToastHeader(toast._originalTitle, toast, minimizeCrudTable, restoreCrudTable, closeCrudTable);
+                toast.appendChild(header);
+
+                const content = document.createElement('div');
+                content.classList.add('shrimptube-toast-content');
+                toast.appendChild(content);
+
+                const tableContainer = document.createElement('div');
+                content.appendChild(tableContainer);
+
+                // Funktion zum Rendern/Aktualisieren der Tabelle
+                const renderTable = () => {
+                    tableContainer.innerHTML = '';
+                    if (ShrimptubeApp.data.crudItems.length === 0) {
+                        const emptyMessage = document.createElement('p');
+                        emptyMessage.classList.add('crud-empty-message');
+                        emptyMessage.textContent = "Keine Benutzerdaten vorhanden.";
+                        tableContainer.appendChild(emptyMessage);
+                        return;
+                    }
+
+                    const table = document.createElement('table');
+                    const thead = document.createElement('thead');
+                    const tbody = document.createElement('tbody');
+
+                    thead.innerHTML = '<tr><th>Name</th><th>ID</th><th>Info</th><th>F1</th><th>F2</th></tr>'; // Neue Spalten
+                    table.appendChild(thead);
+
+                    ShrimptubeApp.data.crudItems.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.setAttribute('data-item-id', item.id); // Zeilen-ID für Aktionen
+
+                        const nameCell = document.createElement('td');
+                        const idCell = document.createElement('td');
+                        const infoCell = document.createElement('td');
+                        const f1Cell = document.createElement('td'); // Neue F1 Zelle
+                        const f2Cell = document.createElement('td'); // Neue F2 Zelle
+
+                        nameCell.textContent = item.name;
+                        idCell.textContent = item.userId;
+                        infoCell.textContent = item.userInfo;
+                        f1Cell.textContent = item.f1 || '';
+                        f2Cell.textContent = item.f2 || '';
+
+                        // Textkürzung und Expand-Funktion
+                        const truncateAndExpand = (cell) => {
+                            if (cell.textContent.length > 30) {
+                                cell.classList.add('truncated-cell');
+                                cell._fullText = cell.textContent;
+
+                                cell.addEventListener('click', () => {
+                                    if (cell.classList.contains('truncated-cell')) {
+                                        cell.classList.remove('truncated-cell');
+                                        cell.classList.add('expanded-cell');
+                                        cell.textContent = cell._fullText;
+                                    } else {
+                                        cell.classList.remove('expanded-cell');
+                                        cell.classList.add('truncated-cell');
+                                        cell.textContent = cell._fullText.substring(0, 27) + '...';
+                                    }
+                                });
+                                cell.textContent = cell._fullText.substring(0, 27) + '...';
+                            }
+                        };
+
+                        truncateAndExpand(infoCell);
+
+                        // Aktionen für F1 und F2
+                        const setupActionCell = (cell, actionText) => {
+                            if (actionText) {
+                                cell.classList.add('crud-action-cell');
+                                cell.setAttribute('data-action', actionText.toLowerCase());
+                                if (actionText.toLowerCase() === 'delrow') {
+                                    cell.classList.add('action-delrow');
+                                } else if (actionText.toLowerCase() === 'copyid') {
+                                    cell.classList.add('action-copyid');
+                                }
+                            }
+                        };
+                        setupActionCell(f1Cell, item.f1);
+                        setupActionCell(f2Cell, item.f2);
+
+                        row.appendChild(nameCell);
+                        row.appendChild(idCell);
+                        row.appendChild(infoCell);
+                        row.appendChild(f1Cell); // F1 Zelle hinzufügen
+                        row.appendChild(f2Cell); // F2 Zelle hinzufügen
+                        tbody.appendChild(row);
+                    });
+
+                    table.appendChild(tbody);
+                    tableContainer.appendChild(table);
+
+                    // Event Delegation für F1/F2 Aktionen
+                    tbody.addEventListener('click', (e) => {
+                        const targetCell = e.target.closest('td.crud-action-cell');
+                        if (targetCell) {
+                            const action = targetCell.getAttribute('data-action');
+                            const rowId = parseInt(targetCell.closest('tr').getAttribute('data-item-id'));
+
+                            if (action && ShrimptubeApp.ui.crud[action]) {
+                                ShrimptubeApp.ui.crud[action](rowId);
+                            } else {
+                                logWarn(`Unbekannte CRUD-Aktion oder Funktion nicht gefunden: ${action}`);
+                            }
+                        }
+                    });
+                };
+
+                renderTable();
+
+                const updateTableHandler = () => {
+                    logDebug("CRUD Table updated by event.");
+                    renderTable();
+                };
+                document.addEventListener('crudDataChanged', updateTableHandler);
+                toast._crudUpdateHandler = updateTableHandler; // Zum späteren Entfernen speichern
+
+                regularToastWrapper.prepend(toast);
+                setTimeout(() => toast.classList.add('shrimptube-visible'), 100);
+
+                _activeItems.set(itemId, {
+                    element: toast,
+                    type: 'crud-table',
+                    restoreFn: restoreCrudTable,
+                    closeFn: closeCrudTable,
+                    minimizedElement: null,
+                    isMinimized: false,
+                    isFullScreen: false
+                });
+
+                logDebug("CRUD Table Toast displayed.");
+                return toast;
+            }
+
+            /**
+             * Zeigt einen Toast mit einem CRUD-Eingabeformular an.
+             */
+            function showCrudForm() {
+                if (!toastContainer) _initToastContainer();
+
+                const itemId = _generateUniqueId('crud-form-');
+                let existingItemData = _activeItems.get(itemId);
+
+                if (existingItemData) {
+                    if (existingItemData.isMinimized) {
+                        logDebug(`CRUD Form was minimized, maximizing.`);
+                        existingItemData.restoreFn();
+                    } else {
+                        logDebug("CRUD Form Toast already open.");
+                    }
+                    return;
+                }
+
+                const toast = document.createElement('div');
+                toast.classList.add('shrimptube-crud-toast', 'shrimptube-crud-form-toast');
+                toast.setAttribute('data-item-id', itemId);
+                toast._isMinimized = false;
+                toast._originalTitle = "Neuer Benutzer";
+
+                const closeCrudForm = () => {
+                    logDebug(`Closing CRUD Form (ID: ${itemId})`);
+                    toast.classList.remove('shrimptube-visible');
+                    toast.addEventListener('transitionend', function handler() {
+                        toast.removeEventListener('transitionend', handler);
+                        _removeItemFromTracking(itemId);
+                    });
+                };
+
+                const minimizeCrudForm = () => {
+                    if (toast._isMinimized) return;
+                    toast._isMinimized = true;
+                    toast._toggleMinMaxBtn.innerHTML = MAXIMIZE_ICON_SVG;
+                    toast._toggleMinMaxBtn.setAttribute('aria-label', 'Maximieren');
+
+                    toast.classList.remove('shrimptube-visible');
+                    toast.addEventListener('transitionend', function handler() {
+                        toast.removeEventListener('transitionend', handler);
+                        toast.remove();
+                    });
+
+                    const minimizedRepresentation = document.createElement('div');
+                    minimizedRepresentation.classList.add('shrimptube-minimized-item');
+                    minimizedRepresentation.setAttribute('data-item-id', itemId);
+
+                    const maximizeBtn = document.createElement('button');
+                    maximizeBtn.classList.add('shrimptube-icon-button', 'maximize-btn');
+                    maximizeBtn.innerHTML = MAXIMIZE_ICON_SVG;
+                    maximizeBtn.setAttribute('aria-label', 'Maximieren');
+                    minimizedRepresentation.appendChild(maximizeBtn);
+
+                    const titleSpan = document.createElement('span');
+                    titleSpan.classList.add('shrimptube-item-title');
+                    titleSpan.textContent = toast._originalTitle;
+                    minimizedRepresentation.appendChild(titleSpan);
+
+                    maximizeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        restoreCrudForm();
+                    });
+
+                    pinnedToastWrapper.prepend(minimizedRepresentation);
+                    _activeItems.get(itemId).minimizedElement = minimizedRepresentation;
+                    _activeItems.get(itemId).isMinimized = true;
+
+                    _pinnedItemsList.push(itemId);
+                    _managePinnedItemCapacity();
+                    logDebug(`CRUD Form minimized.`);
+                };
+
+                const restoreCrudForm = () => {
+                    if (!toast._isMinimized) return;
+                    logDebug(`Restoring CRUD Form.`);
+                    toast._isMinimized = false;
+                    toast._toggleMinMaxBtn.innerHTML = MINIMIZE_ICON_SVG;
+                    toast._toggleMinMaxBtn.setAttribute('aria-label', 'Minimieren');
+
+                    const itemData = _activeItems.get(itemId);
+                    if (itemData && itemData.minimizedElement) {
+                        itemData.minimizedElement.remove();
+                        itemData.minimizedElement = null;
+                        itemData.isMinimized = false;
+                        const idx = _pinnedItemsList.indexOf(itemId);
+                        if (idx > -1) _pinnedItemsList.splice(idx, 1);
+                    }
+
+                    regularToastWrapper.prepend(toast);
+                    setTimeout(() => toast.classList.add('shrimptube-visible'), 50);
+                };
+
+                const header = _createCrudToastHeader(toast._originalTitle, toast, minimizeCrudForm, restoreCrudForm, closeCrudForm);
+                toast.appendChild(header);
+
+                const content = document.createElement('div');
+                content.classList.add('shrimptube-toast-content');
+                toast.appendChild(content);
+
+                const form = document.createElement('form');
+                form.innerHTML = `
+                    <div class="form-group">
+                        <label for="crudName">Name:</label>
+                        <input type="text" id="crudName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="crudUserId">User ID:</label>
+                        <input type="text" id="crudUserId" name="userId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="crudUserInfo">Info:</label>
+                        <textarea id="crudUserInfo" name="userInfo" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="crudF1">F1 (z.B. copyid):</label>
+                        <input type="text" id="crudF1" name="f1">
+                    </div>
+                    <div class="form-group">
+                        <label for="crudF2">F2 (z.B. delrow):</label>
+                        <input type="text" id="crudF2" name="f2">
+                    </div>
+                    <button type="submit">Hinzufügen</button>
+                `;
+                content.appendChild(form);
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const name = form.elements.name.value.trim();
+                    const userId = form.elements.userId.value.trim();
+                    const userInfo = form.elements.userInfo.value.trim();
+                    const f1 = form.elements.f1.value.trim();
+                    const f2 = form.elements.f2.value.trim();
+
+                    if (!name || !userId) {
+                        showToast("Name und User ID sind erforderlich!", "error", 2500);
+                        return;
+                    }
+
+                    const newItem = {
+                        id: ShrimptubeApp.data.nextCrudId++,
+                        name,
+                        userId,
+                        userInfo,
+                        f1,
+                        f2
+                    };
+                    ShrimptubeApp.data.crudItems.push(newItem);
+                    logDebug("New CRUD item added:", newItem);
+                    showToast("Benutzer erfolgreich hinzugefügt!", "success", 2000);
+
+                    document.dispatchEvent(new CustomEvent('crudDataChanged'));
+
+                    form.reset();
+                });
+
+                regularToastWrapper.prepend(toast);
+                setTimeout(() => toast.classList.add('shrimptube-visible'), 100);
+
+                _activeItems.set(itemId, {
+                    element: toast,
+                    type: 'crud-form',
+                    restoreFn: restoreCrudForm,
+                    closeFn: closeCrudForm,
+                    minimizedElement: null,
+                    isMinimized: false,
+                    isFullScreen: false
+                });
+
+                logDebug("CRUD Form Toast displayed.");
+                return toast;
+            }
+
+            // Exponieren der Funktionen über das globale ShrimptubeApp.ui Objekt
+            window.ShrimptubeApp.ui.showToast = showToast;
+            window.ShrimptubeApp.ui.showConfirm = showConfirm;
+            window.ShrimptubeApp.ui.showIframe = showIframe;
+            window.ShrimptubeApp.ui.showCrudTable = showCrudTable;
+            window.ShrimptubeApp.ui.showCrudForm = showCrudForm;
+
+
+            document.addEventListener('DOMContentLoaded', _initToastContainer);
+        })();
+    </script>
+</body>
+</html>

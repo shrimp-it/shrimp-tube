@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamische Medien-Playlist</title>
+<style>
+:root {
+--primary-color: #007bff;
+--secondary-color: #4d4f52ff;
+--success-color: #28a745;
+--danger-color: #dc3545;
+--light-bg: #f8f9fa;
+--dark-bg: #343a40;
+--text-color: #212529;
+--border-color: #dee2e6;
+--active-item-bg: #e2e6ea;
+--active-item-border: #0056b3;
+}
+
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+margin: 0;
+padding: 20px;
+background-color: var(--light-bg);
+color: var(--text-color);
+display: flex;
+justify-content: center;
+align-items: flex-start;
+min-height: 100vh;
+}
+
+.app-container {
+background-color: #fff;
+border-radius: 12px;
+box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+width: 100%;
+max-width: 1200px;
+display: flex;
+flex-direction: column;
+overflow: hidden;
+}
+
+h1, h2 {
+color: var(--dark-bg);
+margin-top: 0;
+}
+
+.input-section {
+padding: 25px;
+background-color: #f1f5f9;
+border-bottom: 1px solid var(--border-color);
+}
+
+.input-group {
+margin-bottom: 15px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.input-group label {
+min-width: 80px;
+font-weight: bold;
+}
+
+input[type="file"], input[type="text"] {
+flex-grow: 1;
+padding: 10px 15px;
+border: 1px solid var(--border-color);
+border-radius: 6px;
+font-size: 1em;
+background-color: #fff;
+transition: border-color 0.3s ease;
+}
+input[type="file"]:focus, input[type="text"]:focus {
+outline: none;
+border-color: var(--primary-color);
+box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+button {
+padding: 10px 20px;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+font-size: 1em;
+font-weight: bold;
+transition: background-color 0.3s ease, transform 0.1s ease;
+white-space: nowrap;
+}
+button.primary {
+background-color: var(--primary-color);
+color: white;
+}
+button.primary:hover {
+background-color: #0056b3;
+}
+button.danger {
+background-color: var(--danger-color);
+color: white;
+}
+button.danger:hover {
+background-color: #c82333;
+}
+
+.player-playlist-section {
+display: flex;
+flex-direction: column;
+gap: 20px;
+padding: 25px;
+}
+@media (min-width: 768px) {
+.player-playlist-section {
+flex-direction: row;
+}
+}
+
+.media-player-container {
+flex: 2;
+min-height: 250px; /* Für den Placeholder */
+background-color: var(--dark-bg);
+border-radius: 8px;
+overflow: hidden;
+display: flex;
+align-items: center;
+justify-content: center;
+position: relative;
+}
+
+.player-placeholder {
+color: #ccc;
+font-size: 1.2em;
+text-align: center;
+padding: 20px;
+}
+
+.media-player-element {
+width: 100%;
+height: 100%;
+display: block;
+object-fit: contain; /* Stellt sicher, dass das Video/Audio skaliert wird */
+}
+
+.playlist-section {
+flex: 1;
+background-color: var(--light-bg);
+border-radius: 8px;
+padding: 15px;
+box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+max-height: 500px; /* Max Höhe für Playlist-Container */
+display: flex;
+flex-direction: column;
+min-width: 280px;
+}
+.playlist-section h2 {
+margin-bottom: 10px;
+}
+.playlist-section button {
+margin-bottom: 15px;
+align-self: flex-end;
+}
+
+.playlist-container {
+flex-grow: 1;
+overflow-y: auto; /* Scrollbar für die Playlist */
+border-top: 1px solid var(--border-color);
+padding-top: 10px;
+}
+
+.playlist-item {
+display: flex;
+align-items: center;
+padding: 12px 10px;
+margin-bottom: 8px;
+background-color: #fff;
+border: 1px solid var(--border-color);
+border-radius: 8px;
+cursor: pointer;
+transition: background-color 0.2s ease, border-color 0.2s ease;
+position: relative;
+}
+.playlist-item:hover {
+background-color: var(--active-item-bg);
+border-color: #b3d7ff;
+}
+.playlist-item.active {
+background-color: var(--active-item-bg);
+border-color: var(--active-item-border);
+box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+font-weight: bold;
+}
+
+.playlist-thumbnail {
+width: 40px;
+height: 40px;
+margin-right: 12px;
+border-radius: 4px;
+object-fit: cover;
+background-color: #e9ecef;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2em;
+color: var(--secondary-color);
+flex-shrink: 0;
+}
+/* Generic icons for thumbnails */
+.playlist-thumbnail[alt="audio"]::before { content: '🎧'; }
+.playlist-thumbnail[alt="video"]::before { content: '🎬'; }
+.playlist-thumbnail[alt="placeholder"]::before { content: '📁'; }
+
+
+.playlist-item-info {
+flex-grow: 1;
+overflow: hidden;
+}
+.playlist-item-name {
+font-size: 0.95em;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+color: var(--text-color);
+}
+.playlist-item-details {
+font-size: 0.8em;
+color: var(--secondary-color);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.delete-item-btn {
+background-color: var(--danger-color);
+color: white;
+border-radius: 50%;
+width: 25px;
+height: 25px;
+font-size: 0.8em;
+padding: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+margin-left: 10px;
+opacity: 0.8;
+}
+.delete-item-btn:hover {
+background-color: #c82333;
+opacity: 1;
+}
+
+@media (max-width: 767px) {
+body {
+padding: 10px;
+}
+.app-container {
+border-radius: 8px;
+}
+.input-group {
+flex-direction: column;
+align-items: flex-start;
+gap: 5px;
+}
+.input-group label {
+width: 100%;
+min-width: unset;
+}
+.input-group input[type="file"], .input-group input[type="text"] {
+width: 100%;
+}
+.player-playlist-section {
+padding: 15px;
+gap: 15px;
+}
+.playlist-section {
+padding: 10px;
+min-width: unset;
+}
+}
+</style>
+</head>
+<body>
+<div class="app-container">
+<div class="input-section">
+<h1>Meine Dynamische Medien-Playlist</h1>
+
+<div class="input-group">
+<label for="fileInput">Dateien:</label>
+<input type="file" id="fileInput" accept="audio/*,video/*" multiple>
+<button class="primary" id="addFilesBtn">Dateien hinzufügen</button>
+</div>
+
+<div class="input-group">
+<label for="folderInput">Ordner:</label>
+<input type="file" id="folderInput" webkitdirectory directory>
+<button class="primary" id="addFolderBtn">Ordner hinzufügen</button>
+</div>
+
+<div class="input-group">
+<label for="urlInput">URL:</label>
+<input type="text" id="urlInput" placeholder="Medien-URL eingeben (z.B. .mp4, .mp3)">
+<button class="primary" id="addUrlBtn">URL hinzufügen</button>
+</div>
+</div>
+
+<div class="player-playlist-section">
+<div id="mediaPlayerContainer" class="media-player-container">
+<p class="player-placeholder">Wählen Sie ein Medium aus der Playlist oder fügen Sie neue hinzu.</p>
+</div>
+
+<div class="playlist-section">
+<h2>Ihre Playlist</h2>
+<button class="danger" id="clearPlaylistBtn">Playlist leeren</button>
+<div id="playlistContainer" class="playlist-container">
+<!-- Playlist-Items werden hier eingefügt -->
+<p class="empty-playlist-msg">Die Playlist ist leer.</p>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+// Hilfsfunktion zur Formatierung der Dauer
+function formatDuration(seconds) {
+if (isNaN(seconds) || seconds < 0) return 'N/A';
+const minutes = Math.floor(seconds / 60);
+const remainingSeconds = Math.floor(seconds % 60);
+return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+}
+
+// Hilfsfunktion zur Bestimmung des Medientyps
+function getMediaType(filenameOrUrl, mimeType = '') {
+const lowerCaseStr = (filenameOrUrl + mimeType).toLowerCase();
+if (lowerCaseStr.includes('.mp4') || lowerCaseStr.includes('.mov') || lowerCaseStr.includes('.webm') || lowerCaseStr.includes('.ogg') || mimeType.startsWith('video/')) {
+return 'video';
+}
+if (lowerCaseStr.includes('.mp3') || lowerCaseStr.includes('.wav') || lowerCaseStr.includes('.ogg') || lowerCaseStr.includes('.flac') || lowerCaseStr.includes('.m4a') || mimeType.startsWith('audio/')) {
+return 'audio';
+}
+return 'unknown';
+}
+
+// ----------- PlaylistItem Klasse -----------
+class PlaylistItem {
+constructor(source, name, type, duration = 'N/A', originalFile = null) {
+this.id = 'item-' + Date.now() + Math.random().toString(36).substring(2, 9); // Eindeutige ID
+this.source = source; // Blob URL oder externe URL
+this.name = name;
+this.type = type; // "audio", "video" oder "unknown"
+this.duration = duration; // Kann initial 'N/A' sein, wird geladen
+this.thumbnail = type; // Für den Draft: type als "icon" Indikator
+this.originalFile = originalFile; // Referenz zum File-Objekt für lokale Dateien (optional)
+}
+}
+
+// ----------- Playlist Klasse -----------
+class Playlist {
+constructor(playerContainerId, playlistContainerId) {
+this.items = [];
+this.currentIndex = -1;
+this.playerContainer = document.getElementById(playerContainerId);
+this.playlistContainer = document.getElementById(playlistContainerId);
+this.mediaElement = null; // Aktuelles <audio> oder <video> Element
+this.playNextBound = this.playNext.bind(this); // Für EventListener
+}
+
+// Fügt ein PlaylistItem zur Playlist hinzu
+addItem(item) {
+this.items.push(item);
+this._renderPlaylist();
+this._updateEmptyMessage();
+}
+
+// Leert die gesamte Playlist
+clearPlaylist() {
+// Revoke Blob URLs, wenn vorhanden (nicht vollständig implementiert im Draft)
+this.items.forEach(item => {
+if (item.source.startsWith('blob:')) {
+URL.revokeObjectURL(item.source);
+}
+});
+
+this.items = [];
+this.currentIndex = -1;
+this._renderPlaylist();
+this._clearPlayer();
+this._updateEmptyMessage();
+}
+
+// Löscht ein spezifisches PlaylistItem anhand seiner ID
+deletePlaylistItem(id) {
+const index = this.items.findIndex(item => item.id === id);
+if (index > -1) {
+const deletedItem = this.items.splice(index, 1)[0];
+
+// Blob URL freigeben, falls es eine lokale Datei war
+if (deletedItem.source.startsWith('blob:')) {
+URL.revokeObjectURL(deletedItem.source);
+}
+
+if (this.currentIndex === index) { // Gelöschtes Item war das aktuell gespielte
+this._clearPlayer();
+this.currentIndex = -1;
+} else if (this.currentIndex > index) { // Nachfolgende Items verschieben sich
+this.currentIndex--;
+}
+this._renderPlaylist();
+this._highlightCurrentItem(); // Aktualisiere Hervorhebung
+this._updateEmptyMessage();
+}
+}
+
+// Startet die Wiedergabe eines Items anhand seines Index
+playItem(index) {
+if (index < 0 || index >= this.items.length) {
+console.warn('Playlist-Index außerhalb des Bereichs.');
+this._clearPlayer();
+this.currentIndex = -1;
+this._highlightCurrentItem();
+return;
+}
+
+this.currentIndex = index;
+const item = this.items[index];
+
+this._clearPlayer(); // Alten Player entfernen und Ressourcen freigeben
+
+// Erstelle neues Medien-Element
+if (item.type === 'video') {
+this.mediaElement = document.createElement('video');
+} else if (item.type === 'audio') {
+this.mediaElement = document.createElement('audio');
+} else {
+console.error('Unbekannter Medientyp, kann nicht abgespielt werden:', item.type);
+this._clearPlayer();
+this.currentIndex = -1;
+this._highlightCurrentItem();
+return;
+}
+
+this.mediaElement.controls = true;
+this.mediaElement.autoplay = true;
+this.mediaElement.src = item.source;
+this.mediaElement.classList.add('media-player-element');
+
+// Event-Listener für "ended" hinzufügen, um den nächsten Track abzuspielen
+this.mediaElement.addEventListener('ended', this.playNextBound);
+
+// Event-Listener für "loadedmetadata" für die Dauer (falls noch nicht bekannt)
+if (item.duration === 'N/A') {
+this.mediaElement.addEventListener('loadedmetadata', () => {
+item.duration = formatDuration(this.mediaElement.duration);
+this._renderPlaylist(); // Playlist neu rendern, um Dauer anzuzeigen
+this._highlightCurrentItem(); // Hervorhebung nach Neurendern wiederherstellen
+}, { once: true });
+}
+
+// Fehlerbehandlung für Medien
+this.mediaElement.addEventListener('error', (e) => {
+console.error('Fehler beim Laden oder Abspielen von Medium:', item.name, e);
+alert(`Fehler beim Abspielen von "${item.name}". Möglicherweise eine ungültige URL oder ein Format, das nicht vom Browser unterstützt wird, oder CORS-Problem.`);
+this.playNext(); // Versuche das nächste Item
+});
+
+
+this.playerContainer.innerHTML = ''; // Placeholder entfernen
+this.playerContainer.appendChild(this.mediaElement);
+this._highlightCurrentItem();
+}
+
+// Spielt das nächste Item in der Playlist ab
+playNext() {
+if (this.currentIndex < this.items.length - 1) {
+this.playItem(this.currentIndex + 1);
+} else {
+// Ende der Playlist erreicht
+this._clearPlayer();
+this.currentIndex = -1;
+this._highlightCurrentItem(); // Alle Hervorhebungen entfernen
+this._showPlayerPlaceholder();
+}
+}
+
+// Entfernt den aktuellen Player und gibt Ressourcen frei
+_clearPlayer() {
+if (this.mediaElement) {
+this.mediaElement.pause();
+this.mediaElement.src = ''; // Wichtig, um Ressourcen freizugeben
+this.mediaElement.removeEventListener('ended', this.playNextBound);
+this.mediaElement.remove();
+this.mediaElement = null;
+}
+this._showPlayerPlaceholder();
+}
+
+// Zeigt den Placeholder im Player-Bereich
+_showPlayerPlaceholder() {
+this.playerContainer.innerHTML = '<p class="player-placeholder">Wählen Sie ein Medium aus der Playlist oder fügen Sie neue hinzu.</p>';
+}
+
+// Rendert die gesamte Playlist im DOM neu
+_renderPlaylist() {
+this.playlistContainer.innerHTML = ''; // Vorherige Einträge löschen
+
+this.items.forEach((item, index) => {
+const playlistItemEl = document.createElement('div');
+playlistItemEl.classList.add('playlist-item');
+playlistItemEl.dataset.index = index;
+playlistItemEl.dataset.id = item.id; // Für Löschfunktion
+
+// Thumbnail (Platzhalter / Icon)
+const img = document.createElement('div'); // Verwende div für Icons
+img.classList.add('playlist-thumbnail');
+img.setAttribute('alt', item.thumbnail); // 'audio', 'video'
+playlistItemEl.appendChild(img);
+
+const infoDiv = document.createElement('div');
+infoDiv.classList.add('playlist-item-info');
+
+const nameEl = document.createElement('div');
+nameEl.classList.add('playlist-item-name');
+nameEl.textContent = item.name;
+infoDiv.appendChild(nameEl);
+
+const detailsEl = document.createElement('div');
+detailsEl.classList.add('playlist-item-details');
+detailsEl.textContent = `${item.duration} | ${item.type.charAt(0).toUpperCase() + item.type.slice(1)}`;
+infoDiv.appendChild(detailsEl);
+
+playlistItemEl.appendChild(infoDiv);
+
+// Delete Button
+const deleteBtn = document.createElement('button');
+deleteBtn.classList.add('delete-item-btn');
+deleteBtn.textContent = 'X';
+deleteBtn.title = `"${item.name}" aus Playlist entfernen`;
+deleteBtn.onclick = (e) => {
+e.stopPropagation(); // Verhindert, dass playItem ausgelöst wird
+this.deletePlaylistItem(item.id);
+};
+playlistItemEl.appendChild(deleteBtn);
+
+playlistItemEl.addEventListener('click', () => this.playItem(index));
+this.playlistContainer.appendChild(playlistItemEl);
+});
+this._updateEmptyMessage();
+}
+
+// Hervorhebt das aktuell gespielte Item in der Playlist
+_highlightCurrentItem() {
+this.playlistContainer.querySelectorAll('.playlist-item').forEach(el => {
+el.classList.remove('active');
+});
+if (this.currentIndex > -1 && this.items[this.currentIndex]) {
+const activeItemEl = this.playlistContainer.querySelector(`.playlist-item[data-id="${this.items[this.currentIndex].id}"]`);
+if (activeItemEl) {
+activeItemEl.classList.add('active');
+activeItemEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+}
+}
+
+// Zeigt oder versteckt die "Playlist ist leer"-Nachricht
+_updateEmptyMessage() {
+const emptyMsg = this.playlistContainer.querySelector('.empty-playlist-msg');
+if (this.items.length === 0) {
+if (!emptyMsg) {
+const p = document.createElement('p');
+p.classList.add('empty-playlist-msg');
+p.textContent = 'Die Playlist ist leer.';
+this.playlistContainer.appendChild(p);
+}
+} else {
+if (emptyMsg) {
+emptyMsg.remove();
+}
+}
+}
+}
+
+// ----------- Hauptlogik der Anwendung -----------
+document.addEventListener('DOMContentLoaded', () => {
+const myPlaylist = new Playlist('mediaPlayerContainer', 'playlistContainer');
+
+const fileInput = document.getElementById('fileInput');
+const addFilesBtn = document.getElementById('addFilesBtn');
+const folderInput = document.getElementById('folderInput');
+const addFolderBtn = document.getElementById('addFolderBtn');
+const urlInput = document.getElementById('urlInput');
+const addUrlBtn = document.getElementById('addUrlBtn');
+const clearPlaylistBtn = document.getElementById('clearPlaylistBtn');
+
+// Funktion zum Hinzufügen von Dateien (lokal)
+const addLocalFiles = (files) => {
+if (files.length === 0) return;
+
+Array.from(files).forEach(file => {
+const mediaType = getMediaType(file.name, file.type);
+if (mediaType !== 'unknown') {
+const objectURL = URL.createObjectURL(file);
+const item = new PlaylistItem(objectURL, file.name, mediaType, 'N/A', file);
+myPlaylist.addItem(item);
+} else {
+console.warn(`Datei "${file.name}" hat einen unbekannten Medientyp und wird ignoriert.`);
+}
+});
+};
+
+addFilesBtn.addEventListener('click', () => {
+if (fileInput.files.length > 0) {
+addLocalFiles(fileInput.files);
+fileInput.value = ''; // Input zurücksetzen
+} else {
+alert('Bitte wählen Sie zuerst Dateien aus.');
+}
+});
+
+addFolderBtn.addEventListener('click', () => {
+if (folderInput.files.length > 0) {
+addLocalFiles(folderInput.files);
+folderInput.value = ''; // Input zurücksetzen
+} else {
+alert('Bitte wählen Sie zuerst einen Ordner aus.');
+}
+});
+
+
+addUrlBtn.addEventListener('click', () => {
+const url = urlInput.value.trim();
+if (url) {
+const mediaType = getMediaType(url);
+if (mediaType !== 'unknown') {
+const filename = url.substring(url.lastIndexOf('/') + 1);
+const item = new PlaylistItem(url, filename, mediaType);
+myPlaylist.addItem(item);
+urlInput.value = '';
+} else {
+alert('Die URL verweist auf einen unbekannten Medientyp (nicht .mp3, .mp4, .mov etc.).');
+}
+} else {
+alert('Bitte geben Sie eine Medien-URL ein.');
+}
+});
+
+clearPlaylistBtn.addEventListener('click', () => {
+if (confirm('Möchten Sie die gesamte Playlist wirklich leeren?')) {
+myPlaylist.clearPlaylist();
+}
+});
+});
+</script>
+</body>
+</html>
