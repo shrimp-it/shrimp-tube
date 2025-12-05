@@ -1,0 +1,70 @@
+# 🦐 Shrimp Chat — Snapshot mit Patch‑Snippet Beispiel
+
+## 📌 Name
+Shrimp Chat — Serverless E2E Gruppenchat
+
+## 📖 Beschreibung
+Shrimp Chat ist eine serverless Web‑App, die einen End‑to‑End verschlüsselten Gruppenchat mit der Ably Realtime API ermöglicht.  
+Alle Nachrichten werden clientseitig mit AES‑GCM verschlüsselt, sodass Ably nur Ciphertext transportiert.  
+Die App bietet eine intuitive Oberfläche mit Dark‑Theme, Export/Import von Credentials und Presence‑Management.
+
+## ✅ Anforderungen
+- Serverless Architektur: Keine eigene Backend‑Logik notwendig.
+- Realtime Chat: Nachrichtenübertragung via Ably Pub/Sub.
+- End‑to‑End Verschlüsselung: AES‑GCM mit PBKDF2‑Schlüsselableitung.
+- Presence Management: Anzeige aller aktiven User.
+- Export/Import: User‑ und Room‑Credentials als Textdateien.
+- UI/UX: Dark‑Theme, responsive Layout, klare Struktur.
+- Fehlerhandling: Robuste Log‑Ausgabe im UI.
+
+## ✨ Features
+- Serverless: Keine eigene Server‑Infrastruktur.
+- Realtime Chat: Sofortige Nachrichtenübertragung.
+- AES‑GCM Verschlüsselung: Sichere Ende‑zu‑Ende Verschlüsselung.
+- Presence: Anzeige aller aktiven User im Raum.
+- Export/Import: Speicherung und Wiederherstellung von User‑ und Room‑Credentials.
+- Responsive Design: Umschalten auf einspaltiges Layout bei schmalen Displays.
+- API‑Key Handling: Kein Hardcoding mehr, API‑Key wird lokal gespeichert und exportiert.
+
+## 📦 Code‑Status
+- index.html: Struktur mit Setup‑Panel, Chat‑Panel, responsive Layout, API‑Key Eingabe ohne Hardcoding.
+- schat.css: Dark‑Theme Styles, Media Queries für mobile Ansicht.
+- schat.js: Vollständige Logik für Chat, Verschlüsselung, Presence, Export/Import mit API‑Key Handling.
+
+## 🚀 Next Steps
+- UI‑Optimierung: Themes, bessere mobile Ansicht.
+- Feature‑Erweiterungen: Typing‑Indikatoren, Nachrichten‑Historie, File‑Sharing.
+- Security‑Verbesserungen: Schlüsselrotation, Passphrase‑Policies.
+- Deployment: Statische Web‑App auf Netlify/Vercel.
+- Dokumentation: Erweiterung mit Screenshots und Tutorials.
+
+## 📜 Changelog
+- Neu: API‑Key Handling ohne Hardcoding, Export/Import erweitert.
+- Neu: Responsive Layout mit Media Queries für mobile Ansicht.
+- Fix: Presence‑Fehler durch Array.isArray(members)‑Check.
+- Basis: Chat, Presence, Export/Import, Dark‑Theme.
+
+## ⚙️ KI‑Grundeinstellungen
+- Rolle: Copilot als technischer Projektpartner.
+- Antwortverhalten: Detailliert, strukturiert, vollständig. Mit klaren Abschnitten (Markdown, Tabellen, Listen).
+- Snapshots: Jeder Snapshot enthält: Name, Beschreibung, Anforderungen, Features, Code‑Status, Next Steps, KI‑Grundeinstellungen, 📜 Changelog.
+- Patch‑Snippet Handling:
+  - Alle zukünftigen Updates werden im Patch‑Snippet‑Format ausgegeben.
+  - Das Format entspricht der Support‑App „Patch‑Snippet Applier — Mini Web App“.
+  - Änderungen werden als Diff‑ähnliche Snippets mit + (hinzufügen) und − (entfernen) markiert.
+  - Du kannst die Snippets direkt in die Support‑App einfügen, die den Basis‑Code lädt und automatisch updated.
+  - Workflow: Basis‑File laden → Patch‑Snippet einfügen → Update generieren → Datei speichern.
+
+---
+
+## 🧪 Test‑Patch‑Snippet Beispiel
+
+Dieses Patch‑Snippet ändert den Button‑Text „Senden“ in deiner `index.html` Datei zu „Absenden“ und fügt eine kleine Log‑Ausgabe in `schat.js` hinzu.
+
+```diff
+-      <button id="sendBtn" class="primary" disabled>Senden</button>
++      <button id="sendBtn" class="primary" disabled>Absenden</button
+
+// --- Nachricht senden ---
+-  log("Nachricht gesendet: " + JSON.stringify(payload));
++  log("Nachricht gesendet (Test-Patch): " + JSON.stringify(payload));
