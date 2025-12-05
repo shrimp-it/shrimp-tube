@@ -1,0 +1,89 @@
+# 🦐 Shrimp Chat
+
+Shrimp Chat ist eine **serverless Web-App**, die einen **End-to-End verschlüsselten Gruppenchat** mit der [Ably Realtime API](https://ably.com/) ermöglicht.  
+Alle Nachrichten werden **clientseitig mit AES-GCM verschlüsselt**, sodass Ably nur Ciphertext transportiert.
+
+---
+
+## ✨ Features
+- **Serverless Architektur**: Keine eigene Backend-Logik notwendig.
+- **Realtime Chat**: Sofortige Nachrichtenübertragung via Ably Pub/Sub.
+- **End-to-End Verschlüsselung**: AES-GCM mit PBKDF2-Schlüsselableitung aus einer Raum-Passphrase.
+- **Presence Management**: Anzeige aller aktiven User im Raum.
+- **User- und Room-Credentials**:
+  - Export als Textdateien (`${username}-usr-credentials.txt`, `${chatroom}-room-credentials.txt`).
+  - Import über File-Dialog zur Wiederherstellung von Usern und Räumen.
+- **UI/UX**:
+  - Basis-Style mit Dark-Theme.
+  - Chatfenster mit Nachrichtenanzeige, Input-Feld und Presence-Badges.
+- **Fehlerhandling**:
+  - Robuste Log-Ausgabe im UI.
+  - Fix für Presence-Fehler (`Array.isArray(members)`-Check).
+
+---
+
+## 🚀 Installation & Nutzung
+1. **Download**: Lade die Datei `index.html` herunter oder klone das Projekt.
+2. **API Key**: Trage deinen Ably API Key in das Feld ein (ein Demo-Key ist bereits integriert).
+3. **Starten**: Öffne `index.html` im Browser.
+4. **User & Room**:
+   - Erstelle einen neuen User (Client ID).
+   - Erzeuge einen neuen Raum mit Passphrase.
+   - Alternativ: Importiere bestehende User- und Room-Credentials.
+5. **Chatten**: Nachrichten eingeben → werden verschlüsselt und in Echtzeit verteilt.
+
+---
+
+## 🔐 Sicherheit
+- Nachrichten werden **nur clientseitig verschlüsselt**.
+- Ably transportiert ausschließlich Ciphertext.
+- Die Passphrase ist entscheidend für die Entschlüsselung – sie sollte sicher gewählt und vertraulich behandelt werden.
+
+---
+
+## 📦 Export/Import
+- **Export**: Speichert User- und Room-Credentials als `.txt` Dateien.
+- **Import**: Lädt bestehende Credentials über File-Dialog wieder ein.
+
+---
+
+## 🛠 Development Process
+- **Aktueller Status**: Basis-Style, funktionierender Chat, Presence, Export/Import.
+- **Next Steps**:
+  - UI-Optimierung (Themes, responsive Layout).
+  - Feature-Erweiterungen (Typing-Indikatoren, Nachrichten-Historie, File-Sharing).
+  - Security-Verbesserungen (Schlüsselrotation, Passphrase-Policies).
+  - Dokumentation erweitern.
+  - Deployment als statische Web-App
+
+---
+
+## Deployment Process:
+- Deployment als statische Web-App to Netlify.
+- web app root URL:  https://shrimp-it.netlify.app/
+
+---
+
+## 📜 Changelog
+- Wird automatisch in jedem Snapshot erstellt und fortgeführt.
+- Enthält alle bisherigen Entwicklungsschritte und Hintergrundinfos.
+
+---
+
+## ⚙️ KI-Grundeinstellungen
+- **Rolle**: Copilot als technischer Projektpartner.
+- **Antwortverhalten**:
+  - Detailliert, strukturiert, vollständig.
+  - Mit klaren Abschnitten (Markdown, Tabellen, Listen).
+  - Freundlich, präzise, engagiert.
+- **Snapshots**:
+  - Jeder Snapshot enthält: Name, Beschreibung, Anforderungen, Features, Code-Status, Next Steps, Deployment Process, KI-Grundeinstellungen, 📜 Changelog.
+  - 📜 Changelog wird automatisch fortgeführt.
+  - Bei Start einer neuen Session: Snapshot + aktuelles `index.html` anhängen.
+  - Falls das File fehlt: KI fragt direkt nach („Bitte lade noch das file mit dem HTML, CSS und JS code hoch, oder gib ihn direkt in Deinen nächsten User-prompt ein. Dann können wir weiterarbeiten..“).
+
+---
+
+## 📎 Lizenz
+Dieses Projekt ist ein Demo-Projekt für Entwicklungs- und Lernzwecke.  
+Die Nutzung der Ably API unterliegt den Bedingungen von [ably.com](https://ably.com/).

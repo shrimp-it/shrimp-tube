@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shrimp Chat — End-to-End verschlüsselter Gruppenchat</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --muted: #6b7280;
+      --text: #e5e7eb;
+      --primary: #22d3ee;
+      --accent: #93c5fd;
+      --danger: #fca5a5;
+      --ok: #86efac;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.5;
+    }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background: #0b1221; border-bottom: 1px solid #1f2937;
+    }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: 0.3px; }
+    header .status { font-size: 12px; color: var(--muted); }
+    main {
+      display: grid; grid-template-columns: 280px 1fr; gap: 16px;
+      padding: 16px; max-width: 1200px; margin: 0 auto;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .card h2 { margin: 0; font-size: 16px; padding: 10px 12px; border-bottom: 1px solid #1f2937; color: var(--accent); }
+    .section { padding: 12px; }
+    .row { display: flex; gap: 8px; }
+    .row.wrap { flex-wrap: wrap; }
+    label { font-size: 12px; color: var(--muted); display:block; margin-bottom: 4px; }
+    input[type="text"], input[type="password"], input[type="file"], textarea, select {
+      width: 100%; padding: 8px 10px; font-size: 14px;
+      border: 1px solid #374151; border-radius: 8px; background: #0b1324; color: var(--text);
+    }
+    textarea { min-height: 64px; }
+    button {
+      padding: 8px 12px; font-size: 14px; border-radius: 8px; border: 1px solid #374151;
+      background: #0b1324; color: var(--text); cursor: pointer;
+    }
+    button.primary { border-color: #1e293b; background: #0b1930; color: var(--primary); }
+    button.danger { border-color: #3f1d1d; background: #1a0f0f; color: var(--danger); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .muted { color: var(--muted); }
+    .ok { color: var(--ok); }
+    .danger-text { color: var(--danger); }
+    .log { height: 120px; overflow: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; background: #0b1221; padding: 8px; border-radius: 8px; border: 1px solid #1f2937; }
+    .presence { display: flex; flex-wrap: wrap; gap: 6px; }
+    .badge {
+      padding: 4px 8px; border-radius: 999px; background: #0b1930; color: var(--accent); border: 1px solid #1e293b; font-size: 12px;
+    }
+    .chat {
+      display: grid; grid-template-rows: auto 1fr auto; height: 70vh;
+    }
+    .messages {
+      overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .msg {
+      max-width: 70%; padding: 8px 10px; border-radius: 10px; border: 1px solid #1f2937; background: #0b1324;
+    }
+    .msg.me { align-self: flex-end; background: #0b1930; border-color: #1e293b; }
+    .msg .meta { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .msg .text { word-wrap: break-word; }
+    .chat-input { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 12px; border-top: 1px solid #1f2937; }
+    .kv { font-size: 12px; word-break: break-all; }
+    footer { text-align: center; padding: 12px; font-size: 12px; color: var(--muted); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .sep { height: 8px; }
+    .small { font-size: 12px; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .panel-note { background: #0b1221; border: 1px dashed #1f2937; border-radius: 8px; padding: 8px; font-size: 12px; }
+  </style>
+  <!-- Ably JS SDK -->
+  <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+</head>
+<body>
+<header>
+  <h1>🦐 Shrimp Chat</h1>
+  <div class="status">
+    <span id="connStatus" class="muted">Nicht verbunden</span>
+  </div>
+</header>
+
+<main>
+  <!-- Left: Setup & Credentials -->
+  <div class="card">
+    <h2>Setup und Zugangsdaten</h2>
+    <div class="section">
+      <div class="panel-note">
+        Diese App ist serverless. Nachrichten werden clientseitig mit AES‑GCM verschlüsselt. Ably transportiert nur Ciphertext.
+      </div>
+      <div class="sep"></div>
+
+      <div class="grid2">
+        <div>
+          <label>API Key (Ably)</label>
+          <input id="apiKey" type="password" value="fmJVYg.1TqyQA:o5K81kuCMcxCNgPK7dqWF7CmopW31a5DPZ7D8X2Nvbo" />
+          <div class="hint">Wird nur lokal im Browser genutzt.</div>
+        </div>
+        <div>
+          <label>Client ID (Username)</label>
+          <input id="clientId" type="text" placeholder="z.B. shrimp-anna" />
+          <div class="row">
+            <button id="genClientId">Neu generieren</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+      <div class="grid2">
+        <div>
+          <label>Room Name</label>
+          <input id="roomName" type="text" placeholder="z.B. reef-lounge" />
+          <div class="hint">Wird als Channel-Name verwendet.</div>
+        </div>
+        <div>
+          <label>Room Secret (Passphrase)</label>
+          <input id="roomSecret" type="password" placeholder="mindestens 12 Zeichen" />
+          <div class="row">
+            <button id="genSecret">Generieren</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+      <div class="row">
+        <button id="connectBtn" class="primary">Verbinden & Raum beitreten</button>
+        <button id="leaveBtn" class="danger" disabled>Raum verlassen</button>
+      </div>
+
+      <div class="sep"></div>
+      <h3 class="small">Export/Import</h3>
+      <div class="grid2">
+        <div>
+          <label>Export User Credentials</label>
+          <div class="row">
+            <button id="exportUser">Als Datei exportieren</button>
+          </div>
+          <div class="hint">Speichert ${username}-usr-credentials.txt</div>
+        </div>
+        <div>
+          <label>Export Room Credentials</label>
+          <div class="row">
+            <button id="exportRoom">Als Datei exportieren</button>
+          </div>
+          <div class="hint">Speichert ${chatroom}-room-credentials.txt</div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+      <div class="grid2">
+        <div>
+          <label>Import User Credentials (.txt)</label>
+          <input id="importUserFile" type="file" accept=".txt,.json" />
+          <div class="row">
+            <button id="importUser">Importieren</button>
+          </div>
+        </div>
+        <div>
+          <label>Import Room Credentials (.txt)</label>
+          <input id="importRoomFile" type="file" accept=".txt,.json" />
+          <div class="row">
+            <button id="importRoom">Importieren</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+      <div>
+        <label>Log</label>
+        <div id="log" class="log"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Chat & Presence -->
+  <div class="card chat">
+    <h2>Chat & Presence</h2>
+    <div class="section">
+      <div class="row wrap">
+        <div><strong>Channel:</strong> <span id="channelName" class="mono">–</span></div>
+        <div><strong>Key-ID:</strong> <span id="keyInfo" class="mono">–</span></div>
+      </div>
+      <div class="sep"></div>
+      <div>
+        <label>Anwesend</label>
+        <div id="presence" class="presence"></div>
+      </div>
+    </div>
+    <div id="messages" class="messages"></div>
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Nachricht eingeben und Enter drücken…" disabled />
+      <button id="sendBtn" class="primary" disabled>Senden</button>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Shrimp Chat • Client‑seitige Ende‑zu‑Ende‑Verschlüsselung mit AES‑GCM • Demo
+</footer>
+
+<script>
+/*
+  Shrimp Chat — Serverless E2E Gruppenchat mit Ably
+  - Verschlüsselung: AES-GCM mit PBKDF2 (Passphrase -> Key)
+  - Ably: Realtime Channels (publish/subscribe), Presence
+  - Export/Import: User- und Room-Credentials via File System Access API (Fallback: Download)
+*/
+
+(() => {
+  // --- Simple UI helpers ---
+  const $ = (id) => document.getElementById(id);
+  const logEl = $('log');
+  const presenceEl = $('presence');
+  const messagesEl = $('messages');
+  const connStatusEl = $('connStatus');
+  const channelNameEl = $('channelName');
+  const keyInfoEl = $('keyInfo');
+
+  function log(line, type='info') {
+    const ts = new Date().toLocaleTimeString();
+    const prefix = type === 'error' ? '[ERR]' : type === 'warn' ? '[WARN]' : '[INFO]';
+    logEl.textContent += `${ts} ${prefix} ${line}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function badge(text) {
+    const span = document.createElement('span');
+    span.className = 'badge';
+    span.textContent = text;
+    return span;
+  }
+
+  function addMessage({ author, text, mine=false, time=new Date() }) {
+    const item = document.createElement('div');
+    item.className = 'msg' + (mine ? ' me' : '');
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = `${author} • ${time.toLocaleTimeString()}`;
+    const body = document.createElement('div');
+    body.className = 'text';
+    body.textContent = text;
+    item.appendChild(meta);
+    item.appendChild(body);
+    messagesEl.appendChild(item);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  // --- Crypto helpers (Web Crypto API) ---
+  // Derive AES-GCM key from passphrase + roomName salt using PBKDF2
+  async function deriveAesKey(passphrase, roomName, iterations=150000) {
+    const enc = new TextEncoder();
+    const salt = enc.encode(`shrimp-room:${roomName}`);
+    const baseKey = await crypto.subtle.importKey(
+      'raw', enc.encode(passphrase), { name: 'PBKDF2' }, false, ['deriveKey']
+    );
+    const key = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+      baseKey,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+    return key;
+  }
+
+  // Encrypt a UTF-8 string to { iv, ciphertext } (base64)
+  async function encryptString(aesKey, plaintext) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const enc = new TextEncoder().encode(plaintext);
+    const ctBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, enc);
+    return {
+      iv: b64encode(iv),
+      ciphertext: b64encode(new Uint8Array(ctBuf)),
+    };
+  }
+
+  // Decrypt { iv, ciphertext } (base64) to UTF-8 string
+  async function decryptToString(aesKey, payload) {
+    const iv = b64decode(payload.iv);
+    const ct = b64decode(payload.ciphertext);
+    const ptBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, aesKey, ct);
+    return new TextDecoder().decode(ptBuf);
+  }
+
+  function b64encode(uint8) {
+    let binary = '';
+    uint8.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary);
+  }
+
+  function b64decode(str) {
+    const binary = atob(str);
+    const len = binary.length;
+    const buf = new Uint8Array(len);
+    for (let i=0; i<len; i++) buf[i] = binary.charCodeAt(i);
+    return buf;
+  }
+
+  // --- State ---
+  let ably = null;
+  let channel = null;
+  let aesKey = null;
+  let joined = false;
+
+  // --- UI elements ---
+  const apiKeyInput = $('apiKey');
+  const clientIdInput = $('clientId');
+  const roomNameInput = $('roomName');
+  const roomSecretInput = $('roomSecret');
+
+  const genClientIdBtn = $('genClientId');
+  const genSecretBtn = $('genSecret');
+  const connectBtn = $('connectBtn');
+  const leaveBtn = $('leaveBtn');
+
+  const exportUserBtn = $('exportUser');
+  const exportRoomBtn = $('exportRoom');
+  const importUserFile = $('importUserFile');
+  const importUserBtn = $('importUser');
+  const importRoomFile = $('importRoomFile');
+  const importRoomBtn = $('importRoom');
+
+  const chatInput = $('chatInput');
+  const sendBtn = $('sendBtn');
+
+  // --- Generators ---
+  function randomName() {
+    const animals = ['shrimp','seahorse','coral','anemone','clam','krill','manta','orca','dolphin','eel','turtle','ray'];
+    const adj = ['brisk','calm','bright','quiet','nimble','bold','gentle','swift','brave','lucky','chill','witty'];
+    const n = animals[Math.floor(Math.random()*animals.length)];
+    const a = adj[Math.floor(Math.random()*adj.length)];
+    const num = Math.floor(Math.random()*1000).toString().padStart(3,'0');
+    return `${n}-${a}-${num}`;
+  }
+  function randomSecret(length=20) {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=[]{}';
+    let out = '';
+    for (let i=0;i<length;i++) out += chars[Math.floor(Math.random()*chars.length)];
+    return out;
+  }
+
+  genClientIdBtn.addEventListener('click', () => {
+    clientIdInput.value = randomName();
+  });
+  genSecretBtn.addEventListener('click', () => {
+    roomSecretInput.value = randomSecret(24);
+  });
+
+  // --- Connect & Join Room ---
+  connectBtn.addEventListener('click', async () => {
+    const apiKey = apiKeyInput.value.trim();
+    const clientId = clientIdInput.value.trim() || randomName();
+    const roomName = roomNameInput.value.trim();
+    const roomSecret = roomSecretInput.value;
+
+    if (!apiKey) return alert('Bitte API Key eintragen.');
+    if (!roomName) return alert('Bitte Room Name eintragen.');
+    if (!roomSecret || roomSecret.length < 12) return alert('Room Secret ist zu kurz (mind. 12 Zeichen).');
+
+    try {
+      connStatusEl.textContent = 'Verbinde…';
+      log('Initialisiere Ably…');
+
+      ably = new Ably.Realtime({
+        key: apiKey,
+        clientId,
+        echoMessages: true, // client sieht eigene Nachrichten (nützlich für Demo)
+        autoConnect: true,
+      });
+
+      ably.connection.on('connected', () => {
+        connStatusEl.textContent = 'Verbunden';
+        log(`Verbunden als ${clientId}`);
+      });
+      ably.connection.on('failed', (err) => {
+        connStatusEl.textContent = 'Fehlgeschlagen';
+        log(`Verbindung fehlgeschlagen: ${err && err.message}`, 'error');
+      });
+
+      // Derive room AES key
+      aesKey = await deriveAesKey(roomSecret, roomName);
+      keyInfoEl.textContent = `AES-GCM 256 • PBKDF2(salt=shrimp-room:${roomName})`;
+
+      // Subscribe channel
+      channelNameEl.textContent = roomName;
+      channel = ably.channels.get(roomName);
+
+      // Presence: enter
+      await channel.presence.enter({ user: clientId, at: Date.now() });
+      joined = true;
+      leaveBtn.disabled = false;
+      chatInput.disabled = false;
+      sendBtn.disabled = false;
+
+      // Presence list refresh
+      async function refreshPresence() {
+        try {
+          const members = await channel.presence.get();
+          presenceEl.innerHTML = '';
+             if (Array.isArray(members)) {
+      members.forEach(m => {
+        presenceEl.appendChild(badge(m.clientId || m.data?.user || 'unbekannt'));
+      });
+    } else {
+      log('Keine Presence-Mitglieder verfügbar.');
+    }
+        } catch (e) {
+          log('Presence Abruf fehlgeschlagen: ' + e.message, 'warn');
+        }
+      }
+      await refreshPresence();
+
+      // Presence subscriptions
+      channel.presence.subscribe('enter', refreshPresence);
+      channel.presence.subscribe('update', refreshPresence);
+      channel.presence.subscribe('leave', refreshPresence);
+
+      // Message subscription (ciphertext -> decrypt)
+      channel.subscribe('message', async (msg) => {
+        try {
+          const payload = msg.data;
+          // Payload schema: { v: 1, iv, ciphertext, meta: { author } }
+          if (!payload || !payload.ciphertext || !payload.iv) {
+            log('Ungültige Nachricht empfangen (kein Ciphertext).', 'warn');
+            return;
+          }
+          const plaintext = await decryptToString(aesKey, payload);
+          addMessage({
+            author: payload.meta?.author || msg.clientId || 'unbekannt',
+            text: plaintext,
+            mine: (msg.clientId === clientId),
+            time: new Date(msg.timestamp || Date.now()),
+          });
+        } catch (e) {
+          log('Entschlüsselung fehlgeschlagen: ' + e.message, 'error');
+        }
+      });
+
+      log(`Channel "${roomName}" abonniert, Presence beigetreten.`);
+    } catch (e) {
+      log('Fehler beim Verbinden: ' + e.message, 'error');
+      alert('Verbindung fehlgeschlagen. Details im Log.');
+    }
+  });
+
+  // --- Leave Room ---
+  leaveBtn.addEventListener('click', async () => {
+    try {
+      if (channel && joined) {
+        await channel.presence.leave();
+        joined = false;
+      }
+      if (ably) {
+        ably.close();
+        ably = null;
+      }
+      channel = null;
+      aesKey = null;
+      connStatusEl.textContent = 'Nicht verbunden';
+      leaveBtn.disabled = true;
+      chatInput.disabled = true;
+      sendBtn.disabled = true;
+      presenceEl.innerHTML = '';
+      log('Verbindung geschlossen, Raum verlassen.');
+    } catch (e) {
+      log('Fehler beim Verlassen: ' + e.message, 'error');
+    }
+  });
+
+  // --- Send message (encrypt then publish) ---
+  async function publishMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    if (!channel || !aesKey) {
+      return alert('Nicht verbunden oder Schlüssel fehlt.');
+    }
+    try {
+      const encPayload = await encryptString(aesKey, text);
+      const clientId = clientIdInput.value.trim();
+      const payload = {
+        v: 1,
+        iv: encPayload.iv,
+        ciphertext: encPayload.ciphertext,
+        meta: { author: clientId }
+      };
+      await channel.publish('message', payload);
+      chatInput.value = '';
+    } catch (e) {
+      log('Senden fehlgeschlagen: ' + e.message, 'error');
+    }
+  }
+
+  chatInput.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' && !ev.shiftKey) {
+      ev.preventDefault();
+      publishMessage();
+    }
+  });
+  sendBtn.addEventListener('click', publishMessage);
+
+  // --- Export/Import helpers ---
+  function buildUserCredentials() {
+    const data = {
+      type: 'shrimp-user',
+      version: 1,
+      clientId: clientIdInput.value.trim(),
+      note: 'User-Credentials für Shrimp Chat'
+    };
+    return data;
+  }
+
+  function buildRoomCredentials() {
+    const data = {
+      type: 'shrimp-room',
+      version: 1,
+      roomName: roomNameInput.value.trim(),
+      roomSecret: roomSecretInput.value,
+      note: 'Room-Credentials für Shrimp Chat (Passphrase enthalten!)'
+    };
+    return data;
+  }
+
+  async function saveTextFileSuggested(filename, text) {
+    // Try File System Access API
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await showSaveFilePicker({
+          suggestedName: filename,
+          types: [{ description: 'Text', accept: { 'text/plain': ['.txt'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(text);
+        await writable.close();
+        return true;
+      } catch (e) {
+        log('Speichern abgebrochen/fehlgeschlagen: ' + e.message, 'warn');
+        // Fallback to download
+      }
+    }
+    // Fallback: trigger download
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    a.remove(); URL.revokeObjectURL(url);
+    return true;
+  }
+
+  exportUserBtn.addEventListener('click', async () => {
+    const cred = buildUserCredentials();
+    const username = cred.clientId || 'user';
+    const filename = `${username}-usr-credentials.txt`;
+    await saveTextFileSuggested(filename, JSON.stringify(cred, null, 2));
+    log(`User-Credentials exportiert: ${filename}`);
+  });
+
+  exportRoomBtn.addEventListener('click', async () => {
+    const cred = buildRoomCredentials();
+    const room = cred.roomName || 'room';
+    const filename = `${room}-room-credentials.txt`;
+    await saveTextFileSuggested(filename, JSON.stringify(cred, null, 2));
+    log(`Room-Credentials exportiert: ${filename}`);
+  });
+
+  importUserBtn.addEventListener('click', async () => {
+    const file = importUserFile.files[0];
+    if (!file) return alert('Bitte User-Credentials-Datei auswählen.');
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (data.type !== 'shrimp-user') throw new Error('Ungültiger Typ');
+      clientIdInput.value = data.clientId || '';
+      log('User-Credentials importiert.');
+    } catch (e) {
+      log('Import User fehlgeschlagen: ' + e.message, 'error');
+      alert('Import fehlgeschlagen. Details im Log.');
+    }
+  });
+
+  importRoomBtn.addEventListener('click', async () => {
+    const file = importRoomFile.files[0];
+    if (!file) return alert('Bitte Room-Credentials-Datei auswählen.');
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (data.type !== 'shrimp-room') throw new Error('Ungültiger Typ');
+      roomNameInput.value = data.roomName || '';
+      roomSecretInput.value = data.roomSecret || '';
+      log('Room-Credentials importiert.');
+    } catch (e) {
+      log('Import Room fehlgeschlagen: ' + e.message, 'error');
+      alert('Import fehlgeschlagen. Details im Log.');
+    }
+  });
+
+  // --- Initial defaults ---
+  clientIdInput.value = randomName();
+
+})();
+</script>
+</body>

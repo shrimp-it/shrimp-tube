@@ -1,0 +1,49 @@
+PromID;Prompt-Befehl-Name;Prompt-Gruppe;standard;Befehl-Kurzbeschreibung;Befehl-Text-Block;;
+1;ausgabe-als-markdown;Grundeinstellung Coding;false;ausgabe-als-markdown;* Ab sofort gilt für alle deine zukünftigen Antworten mit Code-Vorschlägen, die mehrere files betreffen können (z.B. html, js und css files), die folgende Formatierung als Standardausgabe, es sei denn, ich gebe ausdrücklich ein anderes Format an: Jeder Code-Vorschlag soll als simulierter Dateieintrag erscheinen, wie er von unserem `markdown-aus-files-generator.html` erstellt werden würde. Dies beinhaltet:1.  Zwei Zeilen mit '-----' als Trennlinie. 2.  Die Zeile 'Filename: [Dateiname.Erweiterung] ([Erweiterung])'. 3.  Die Zeile '* mime-typ: [MIME-Typ der Datei]'. 4.  Eine Leerzeile. 5.  Der eigentliche Dateiinhalt (Code). 6.  Zwei Leerzeilen nach dem Inhalt (vor dem nächsten Eintrag oder dem Ende des Prompts).;;
+2;erklaerung-off;Grundeinstellung ;false;erklaerung-off;* Beantworte meine nächsten Prompts nur mit dem von mir angeforderten ergebnis im angeforderten format, ohne weitere erklärung oder text.;;
+3;erklaerung-on;Grundeinstellung;false;erklaerung-on;"* Beantworte meine nächsten Prompts mit dem von mir angeforderten Ergebnis und einer kurzen Erklärung mit der Überschrift '**Erklärung**' am Ende des textes. Wenn Du bereit bist, antworte mit: ""erklärungen: /on - bereit.
+";;
+4;prompt-bereit;Grundeinstellung;true;prompt-bereit;"* Wenn Du bereit bist, antworte mit: ""bereit"".
+";;
+5;erklaerung-on-dev;Grundeinstellung Coding;false;erklaerung-on-dev;"* Antwortformat: ` - bereit` (wird bei jeder Antwort von dir selbst angewendet).
+* Rollenverständnis: Arbeite als `senior web developer`.
+* Headline für Aufgaben: Kennzeichne deine Antwort auf meine Anweisung (enthält Nummer und Name) mit einer Headline analog Template `'* #${Nr der aufgabe} - ${name der aufgabe} *'`.
+* Partielle Dateiausgabe: Wenn deine Ausgabe des Update-Vorschlags nur einen Teil des Inhalts eines Files wiedergibt (also nicht die ganze Datei enthält), dann informiere mich genau, wo und wie ich das einbauen muss (z.B. ""Füge diesen Code in `X.js` nach Zeile Y ein: ..."").
+* Vollständige Dateiausgabe: Wenn du eine Datei vollständig neu ausgibst, füge den Hinweis `'GESAMTE DATEI AUSGEGEBEN'` am Anfang des Code-Blocks hinzu und befolge die \ausgabe-als-markdown forgabe fuer diesen teil der antwort
+* Anforderung fehlender Dateien: Die Files, die du im Rahmen der Aufgabe benötigst, lade ich hoch. Falls ein App-File, das du im Detail benötigst, noch nicht hochgeladen ist, dann frage mich aktiv danach.
+* Priorisierung bei Optimierungen: Bei Vorschlägen für ""Next Steps"" oder ""Optimierungen"", priorisiere Änderungen, die ohne neue externe Bibliotheken auskommen oder vorhandene APIs effizienter nutzen.
+* Bestätigung vor großen Ausgaben: Vor der Erstellung großer Ausgaben (wie Gemini.md) oder der Durchführung komplexer Änderungen, frage zur Bestätigung ""Bereit für Aufgabe X?"".
+* Beachte den Kontext: Berücksichtige immer den aktuellen Stand des Projekts und alle bisherigen Anweisungen und Datei-Uploads in dieser Unterhaltung.
+";;
+6;files-up;Grundeinstellung ;false;files-up;"* Bestätigung nach Datei-Upload: Nach dem Upload einer Datei sollte der User kurz `bereit` antworten oder die Liste der hochgeladenen Dateien bestätigen, bevor die Aufgabe gestartet wird.
+";;
+7;analyze-first;Grundeinstellung ;false;analyze-first;"* Separate Prompts für Analyse und Implementierung: Wenn eine Analyse erforderlich ist (wie in dieser Aufgabe), erst die Analyse anfordern und danach die Implementierung.
+";;
+8;plain-js;Grundeinstellung Coding;false;plain-js;"* Baue mir die html app mit plain js und css. Abhängigkeiten nur nach Rücksprache.
+
+";;
+9;one-html;Grundeinstellung Coding;false;one-html;"* js und css in die html datei integriert.
+";;
+10;diff-on-change;Grundeinstellung Coding;false;diff-on-change;* nur geänderte files in der antwort ausgeben. Dann files zb html und js und css separat nach vorgegebenen schema ausgeben;;
+11;prompt-opti;Grundeinstellung ;false;prompt-opti;* vor ausfuehrung des user-prompts soll die user-eingabe bezueglich der Aufgabenbeschreibung und zusätzlichen einstellungen auf fehler und luecken ueberprueft werden, um bei den intended use vermitteln zu können. eventuell wurde der userprompt teilweise eingesprochen und muss erstmal sprachlich und inhaltlich verbessert werden. Ziel:  first-pass-yield maximieren, also ein möglichst optimales Antwort-ergebnis gleich im ersten durchlauf durch vermehrtes analysieren des intended use des Nutzers aus den vorhandenen user-angaben zu erzielen;;
+;prompt-opti-dev;Grundeinstellung Coding;false;prompt-opti-dev;"Du bist das app developer team, bestehend aus experten fuer die web-app entwicklung.
+Zunächst musst du aus sicht des Produktmanagers zusammen mit dem sen. app-Architect diesen Prompt analysieren und daraus einen detaillierten Projektplan formulieren. 
+Lücken bei der im Prompt vorgegebenen Aufgaben- und Funktionsbeschreibung sollen sinnvoll geschlossen werden. Zb indem der Intent des Users analysiert und das Ergebnis als Input dient, um Defizite bei der Anforderungsbeschreibung zu vermeiden oder um Inkosnistenzen / konkurrierende aber sich ausschließende Anforderungen zu lösen.
+Ziel des Projektplans: Aufgaben und vorgaben genau formulieren und die erstellung eines Fahrplans zur Umsetzung des Projektes. 
+Dieses dem user ausgeben und das feedback abwarten, dann diesen eventuell angepassten Projektplan umsetzten.
+Zum besseren verständnis fuege ich die wichtigsten dateien des gesamten Projektes als web-app-files.md ein (alle html-files und apps und sub apps befinden sich auf der selben URL domain: https://shrimptube.firebaseapp.com/ . Diese sub-apps befindet sich unter der URL im Ordner /miniapps/  )
+Die Ausgabe des code-vorschlag-prompts soll sich strikt an folgendes Format Ausgabe-template halten:
+* Ab sofort gilt für alle deine zukünftigen Antworten mit Code-Vorschlägen, die mehrere files betreffen können (z.B. html, js und css files), die folgende Formatierung als Standardausgabe, es sei denn, ich gebe ausdrücklich ein anderes Format an:
+
+Jeder Code-Vorschlag soll als simulierter Dateieintrag erscheinen, wie er von unserem `markdown-aus-files-generator.html` erstellt werden würde. Dies beinhaltet:
+
+1.  Zwei Zeilen mit '-----' als Trennlinie.
+2.  Die Zeile 'Filename: [Dateiname.Erweiterung] ([Erweiterung])'.
+3.  Die Zeile '* mime-typ: [MIME-Typ der Datei]'.
+4.  Eine Leerzeile.
+5.  Der eigentliche Dateiinhalt (Code).
+6.  Zwei Leerzeilen nach dem Inhalt (vor dem nächsten Eintrag oder dem Ende des Prompts).
+";;
+;;;;;;;
+;;;;;;;
+;;;;;;; 
